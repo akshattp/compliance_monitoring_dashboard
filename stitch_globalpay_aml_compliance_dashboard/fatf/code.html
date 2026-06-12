@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GlobalPay AML - FATF Monitoring</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .risk-border-left {
+            border-left: 4px solid #EF553B;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #d1d1d1;
+            border-radius: 10px;
+        }
+        /* Micro-interactions */
+        .hover-lift {
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .hover-lift:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#444748",
+                        "tertiary-fixed": "#e3e2e2",
+                        "on-primary-fixed": "#1c1b1b",
+                        "on-tertiary-container": "#848484",
+                        "muted": "#999999",
+                        "on-tertiary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "border-base": "#E5E5E5",
+                        "surface-variant": "#e2e2e2",
+                        "surface-container-high": "#e8e8e8",
+                        "on-primary": "#ffffff",
+                        "surface-container": "#eeeeee",
+                        "inverse-primary": "#c8c6c5",
+                        "grid-line": "#EEEEEE",
+                        "primary-fixed": "#e5e2e1",
+                        "on-error": "#ffffff",
+                        "tertiary": "#000000",
+                        "secondary-container": "#e4e2e2",
+                        "surface-tint": "#5f5e5e",
+                        "secondary-fixed-dim": "#c8c6c6",
+                        "on-background": "#1a1c1c",
+                        "kpi-label": "#64748B",
+                        "surface": "#f9f9f9",
+                        "on-surface": "#1a1c1c",
+                        "secondary-fixed": "#e4e2e2",
+                        "inverse-surface": "#2f3131",
+                        "primary": "#000000",
+                        "primary-fixed-dim": "#c8c6c5",
+                        "on-tertiary-fixed-variant": "#464747",
+                        "risk-unknown": "#636363",
+                        "tertiary-fixed-dim": "#c7c6c6",
+                        "secondary": "#5f5e5e",
+                        "error": "#ba1a1a",
+                        "primary-container": "#1c1b1b",
+                        "on-primary-container": "#858383",
+                        "on-primary-fixed-variant": "#474646",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "surface-dim": "#dadada",
+                        "risk-low": "#00CC96",
+                        "outline-variant": "#c4c7c7",
+                        "risk-high": "#EF553B",
+                        "surface-container-highest": "#e2e2e2",
+                        "on-tertiary-fixed": "#1b1c1c",
+                        "error-container": "#ffdad6",
+                        "surface-bright": "#f9f9f9",
+                        "on-secondary": "#ffffff",
+                        "light-ui": "#BBBBBB",
+                        "risk-medium": "#FFA15A",
+                        "on-secondary-fixed-variant": "#474747",
+                        "background": "#f9f9f9",
+                        "kpi-value": "#0F172A",
+                        "surface-container-low": "#f3f3f3",
+                        "outline": "#747878",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-container": "#656464",
+                        "tertiary-container": "#1b1c1c",
+                        "inverse-on-surface": "#f1f1f1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "8px",
+                        "sidebar-width": "280px",
+                        "md": "16px",
+                        "gutter": "16px",
+                        "xl": "24px",
+                        "sm": "12px",
+                        "lg": "20px",
+                        "base": "4px",
+                        "card-padding": "20px"
+                    },
+                    "fontFamily": {
+                        "body-main": ["Inter"],
+                        "kpi-value": ["Inter"],
+                        "nav-pill": ["Inter"],
+                        "kpi-label": ["Inter"],
+                        "table-data": ["Inter"],
+                        "section-heading": ["Inter"],
+                        "page-title": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-main": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "kpi-value": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                        "nav-pill": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                        "kpi-label": ["13px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "table-data": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "section-heading": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "page-title": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-main antialiased overflow-x-hidden">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 bg-surface dark:bg-background shadow-sm dark:shadow-none">
+<nav class="flex justify-between items-center max-w-[1440px] mx-auto px-lg py-sm">
+<div class="flex items-center gap-xl">
+<span class="font-page-title text-page-title text-primary dark:text-on-primary-fixed cursor-pointer">GlobalPay AML</span>
+<div class="hidden md:flex gap-xs">
+<a class="px-md py-xs font-nav-pill text-nav-pill text-secondary dark:text-secondary-fixed hover:bg-surface-container-low transition-all rounded-full" href="#">HOME PAGE</a>
+<a class="px-md py-xs font-nav-pill text-nav-pill text-secondary dark:text-secondary-fixed hover:bg-surface-container-low transition-all rounded-full" href="#">TRANSACTION SUMMARY</a>
+<a class="px-md py-xs font-nav-pill text-nav-pill text-secondary dark:text-secondary-fixed hover:bg-surface-container-low transition-all rounded-full" href="#">TOUR OPERATOR</a>
+<a class="px-md py-xs font-nav-pill text-nav-pill text-secondary dark:text-secondary-fixed hover:bg-surface-container-low transition-all rounded-full" href="#">RETAIL HIGH VALUE TXN</a>
+<a class="px-md py-xs font-nav-pill text-nav-pill text-secondary dark:text-secondary-fixed hover:bg-surface-container-low transition-all rounded-full" href="#">HIGH RISK CORPORATE</a>
+<a class="px-md py-xs font-nav-pill text-nav-pill bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed rounded-full shadow-md" href="#">FATF</a>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<div class="relative hidden lg:block">
+<span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-muted">search</span>
+<input class="pl-xl pr-md py-xs bg-surface-container-low border border-border-base rounded-lg text-body-main focus:outline-none focus:ring-1 focus:ring-primary w-64" placeholder="Search data..." type="text"/>
+</div>
+<button class="px-lg py-xs bg-primary text-on-primary font-nav-pill text-nav-pill rounded-full hover:bg-opacity-90 transition-all flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                    DOWNLOAD CSV
+                </button>
+</div>
+</nav>
+</header>
+<div class="flex min-h-screen pt-16">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-sidebar-width bg-surface-container-low dark:bg-surface-container border-r border-border-base dark:border-outline-variant flex flex-col py-xl px-md z-40">
+<div class="mb-xl">
+<h3 class="font-section-heading text-section-heading font-bold text-tertiary">Global Filters</h3>
+<p class="text-xs text-secondary mt-base uppercase tracking-wider">Regulatory Oversight</p>
+</div>
+<div class="flex-1 space-y-md">
+<div class="group flex items-center gap-md px-sm py-xs cursor-pointer duration-200 transition-colors hover:bg-surface-container-highest rounded-lg text-secondary">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="font-body-main text-body-main">Date Range</span>
+</div>
+<div class="group flex items-center gap-md px-sm py-xs cursor-pointer duration-200 transition-colors text-primary font-bold border-l-4 border-primary bg-surface-container-highest">
+<span class="material-symbols-outlined">verified_user</span>
+<span class="font-body-main text-body-main">FATF/OFAC Status</span>
+</div>
+<div class="group flex items-center gap-md px-sm py-xs cursor-pointer duration-200 transition-colors hover:bg-surface-container-highest rounded-lg text-secondary">
+<span class="material-symbols-outlined">filter_list</span>
+<span class="font-body-main text-body-main">Dynamic Filters</span>
+</div>
+</div>
+<button class="mt-xl w-full py-sm bg-primary-container text-on-primary-container text-nav-pill font-nav-pill rounded-lg hover:bg-primary hover:text-on-primary transition-all shadow-sm">
+                Apply All Filters
+            </button>
+<div class="mt-auto border-t border-border-base pt-md space-y-sm">
+<div class="flex items-center gap-md px-sm py-xs cursor-pointer hover:text-primary transition-colors text-secondary">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</div>
+<div class="flex items-center gap-md px-sm py-xs cursor-pointer hover:text-primary transition-colors text-secondary">
+<span class="material-symbols-outlined">help</span>
+<span>Support</span>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="ml-sidebar-width flex-1 px-xl py-xl bg-background max-w-[1440px]">
+<!-- Page Header -->
+<div class="flex justify-between items-end mb-xl">
+<div>
+<h1 class="font-page-title text-page-title text-primary mb-base">FATF</h1>
+<p class="text-secondary max-w-2xl">Monitoring transactions involving High-Risk and Non-Cooperative jurisdictions based on latest FATF/OFAC listings.</p>
+</div>
+<button class="px-lg py-sm border border-primary text-primary font-nav-pill text-nav-pill rounded-lg hover:bg-primary hover:text-on-primary transition-all flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">cloud_download</span>
+                    DOWNLOAD CSV
+                </button>
+</div>
+<!-- Reference Data Upload Panel -->
+<div class="mb-xl p-lg bg-surface-container-lowest border border-border-base rounded-xl shadow-sm flex items-center justify-between">
+<div class="flex items-center gap-lg">
+<div class="p-sm bg-surface-container rounded-lg">
+<span class="material-symbols-outlined text-primary text-[28px]">description</span>
+</div>
+<div>
+<p class="font-bold text-primary">Reference Data: OFAC_FATF COUNTRY UPDATED.xlsx</p>
+<p class="text-sm text-secondary">Using system default reference list. Upload new file to override.</p>
+</div>
+</div>
+<button class="px-lg py-sm bg-surface-container-high text-primary font-nav-pill text-nav-pill rounded-lg hover:bg-primary hover:text-on-primary transition-all border border-border-base">
+                    Update Reference List
+                </button>
+</div>
+<!-- KPI Cards Row -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-xl mb-xl">
+<!-- KPI 1 -->
+<div class="bg-surface-container-lowest p-card-padding rounded-xl border border-border-base shadow-sm hover-lift">
+<div class="flex justify-between items-start mb-sm">
+<span class="font-kpi-label text-kpi-label uppercase">Flagged Transactions</span>
+<span class="material-symbols-outlined text-risk-high text-[20px]">flag</span>
+</div>
+<p class="font-kpi-value text-kpi-value text-primary">1,284</p>
+<div class="mt-base flex items-center gap-xs text-sm text-risk-high">
+<span class="material-symbols-outlined text-xs">trending_up</span>
+<span>12% vs last month</span>
+</div>
+</div>
+<!-- KPI 2 -->
+<div class="bg-surface-container-lowest p-card-padding rounded-xl border border-border-base shadow-sm hover-lift">
+<div class="flex justify-between items-start mb-sm">
+<span class="font-kpi-label text-kpi-label uppercase">Flagged Amount</span>
+<span class="material-symbols-outlined text-risk-high text-[20px]">payments</span>
+</div>
+<p class="font-kpi-value text-kpi-value text-primary">₹42.85Cr</p>
+<div class="mt-base flex items-center gap-xs text-sm text-risk-medium">
+<span class="material-symbols-outlined text-xs">remove</span>
+<span>Stable</span>
+</div>
+</div>
+<!-- KPI 3 -->
+<div class="bg-surface-container-lowest p-card-padding rounded-xl border border-border-base shadow-sm hover-lift">
+<div class="flex justify-between items-start mb-sm">
+<span class="font-kpi-label text-kpi-label uppercase">Contribution %</span>
+<span class="material-symbols-outlined text-muted text-[20px]">pie_chart</span>
+</div>
+<p class="font-kpi-value text-kpi-value text-primary">4.2%</p>
+<div class="mt-base flex items-center gap-xs text-sm text-risk-low">
+<span class="material-symbols-outlined text-xs">trending_down</span>
+<span>0.8% decrease</span>
+</div>
+</div>
+<!-- KPI 4 -->
+<div class="bg-surface-container-lowest p-card-padding rounded-xl border border-border-base shadow-sm hover-lift">
+<div class="flex justify-between items-start mb-sm">
+<span class="font-kpi-label text-kpi-label uppercase">Contribution Amount %</span>
+<span class="material-symbols-outlined text-muted text-[20px]">analytics</span>
+</div>
+<p class="font-kpi-value text-kpi-value text-primary">18.5%</p>
+<div class="mt-base flex items-center gap-xs text-sm text-risk-high">
+<span class="material-symbols-outlined text-xs">trending_up</span>
+<span>High value concentration</span>
+</div>
+</div>
+</div>
+<!-- Charts Section -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-xl mb-xl">
+<!-- Chart 1 -->
+<div class="bg-surface-container-lowest p-lg rounded-xl border border-border-base shadow-sm">
+<h3 class="font-section-heading text-section-heading mb-xl text-primary">Branch vs Segments</h3>
+<div class="h-[300px] flex items-end gap-md px-md pb-xl relative">
+<!-- Simulated Bar Chart -->
+<div class="absolute inset-x-0 bottom-0 flex justify-between px-md items-end h-[240px]">
+<div class="w-12 group relative">
+<div class="bg-primary w-full h-[180px] rounded-t-sm"></div>
+<div class="bg-secondary w-full h-[60px] rounded-t-sm opacity-50"></div>
+<p class="text-xs text-muted absolute -bottom-6 left-0 right-0 text-center truncate">Mumbai</p>
+</div>
+<div class="w-12 group relative">
+<div class="bg-primary w-full h-[140px] rounded-t-sm"></div>
+<div class="bg-secondary w-full h-[90px] rounded-t-sm opacity-50"></div>
+<p class="text-xs text-muted absolute -bottom-6 left-0 right-0 text-center truncate">Delhi</p>
+</div>
+<div class="w-12 group relative">
+<div class="bg-primary w-full h-[210px] rounded-t-sm"></div>
+<div class="bg-secondary w-full h-[40px] rounded-t-sm opacity-50"></div>
+<p class="text-xs text-muted absolute -bottom-6 left-0 right-0 text-center truncate">Bengaluru</p>
+</div>
+<div class="w-12 group relative">
+<div class="bg-primary w-full h-[90px] rounded-t-sm"></div>
+<div class="bg-secondary w-full h-[110px] rounded-t-sm opacity-50"></div>
+<p class="text-xs text-muted absolute -bottom-6 left-0 right-0 text-center truncate">Chennai</p>
+</div>
+</div>
+<div class="absolute inset-x-0 border-b border-grid-line bottom-[64px]"></div>
+<div class="absolute inset-x-0 border-b border-grid-line bottom-[128px]"></div>
+<div class="absolute inset-x-0 border-b border-grid-line bottom-[192px]"></div>
+</div>
+</div>
+<!-- Chart 2 -->
+<div class="bg-surface-container-lowest p-lg rounded-xl border border-border-base shadow-sm">
+<h3 class="font-section-heading text-section-heading mb-xl text-primary">Visiting Country vs Segments</h3>
+<div class="h-[300px] flex items-end gap-md px-md pb-xl relative">
+<!-- Simulated Bar Chart -->
+<div class="absolute inset-x-0 bottom-0 flex justify-between px-md items-end h-[240px]">
+<div class="w-12 group relative">
+<div class="bg-risk-high w-full h-[200px] rounded-t-sm"></div>
+<p class="text-xs text-muted absolute -bottom-6 left-0 right-0 text-center truncate">UAE</p>
+</div>
+<div class="w-12 group relative">
+<div class="bg-risk-high w-full h-[120px] rounded-t-sm"></div>
+<p class="text-xs text-muted absolute -bottom-6 left-0 right-0 text-center truncate">Cayman</p>
+</div>
+<div class="w-12 group relative">
+<div class="bg-risk-high w-full h-[80px] rounded-t-sm"></div>
+<p class="text-xs text-muted absolute -bottom-6 left-0 right-0 text-center truncate">Panama</p>
+</div>
+<div class="w-12 group relative">
+<div class="bg-risk-high w-full h-[150px] rounded-t-sm"></div>
+<p class="text-xs text-muted absolute -bottom-6 left-0 right-0 text-center truncate">Nigeria</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Chart 3 -->
+<div class="bg-surface-container-lowest p-lg rounded-xl border border-border-base shadow-sm">
+<h3 class="font-section-heading text-section-heading mb-xl text-primary">Purpose-wise Flagged Count</h3>
+<div class="h-[300px] space-y-md">
+<div class="flex items-center gap-md">
+<span class="text-xs w-24 text-muted truncate">Consultancy</span>
+<div class="flex-1 bg-surface-container rounded-full h-4 overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 85%"></div>
+</div>
+<span class="text-xs font-bold w-12">412</span>
+</div>
+<div class="flex items-center gap-md">
+<span class="text-xs w-24 text-muted truncate">Travel</span>
+<div class="flex-1 bg-surface-container rounded-full h-4 overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 65%"></div>
+</div>
+<span class="text-xs font-bold w-12">320</span>
+</div>
+<div class="flex items-center gap-md">
+<span class="text-xs w-24 text-muted truncate">Gift</span>
+<div class="flex-1 bg-surface-container rounded-full h-4 overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 45%"></div>
+</div>
+<span class="text-xs font-bold w-12">185</span>
+</div>
+<div class="flex items-center gap-md">
+<span class="text-xs w-24 text-muted truncate">Medical</span>
+<div class="flex-1 bg-surface-container rounded-full h-4 overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 25%"></div>
+</div>
+<span class="text-xs font-bold w-12">98</span>
+</div>
+</div>
+</div>
+<!-- Chart 4 -->
+<div class="bg-surface-container-lowest p-lg rounded-xl border border-border-base shadow-sm">
+<h3 class="font-section-heading text-section-heading mb-xl text-primary">Flagged Transaction Trend</h3>
+<div class="h-[300px] relative">
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 400 200">
+<path d="M0 180 Q 50 120 100 150 T 200 80 T 300 100 T 400 30" fill="none" stroke="#111111" stroke-width="2"></path>
+<path d="M0 180 Q 50 120 100 150 T 200 80 T 300 100 T 400 30 V 200 H 0 Z" fill="url(#grad)" opacity="0.1"></path>
+<defs>
+<lineargradient id="grad" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" style="stop-color:#111111;stop-opacity:1"></stop>
+<stop offset="100%" style="stop-color:#111111;stop-opacity:0"></stop>
+</lineargradient>
+</defs>
+</svg>
+<div class="absolute bottom-0 w-full flex justify-between text-[10px] text-muted px-2">
+<span>01 Oct</span><span>10 Oct</span><span>20 Oct</span><span>30 Oct</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Table Section -->
+<section class="bg-surface-container-lowest rounded-xl border border-border-base shadow-sm overflow-hidden mb-xl">
+<div class="px-lg py-md border-b border-border-base flex justify-between items-center bg-surface-bright">
+<h3 class="font-section-heading text-section-heading text-primary">Flagged Transactions</h3>
+<div class="flex gap-sm">
+<button class="p-xs hover:bg-surface-container rounded-lg transition-colors">
+<span class="material-symbols-outlined text-muted">filter_alt</span>
+</button>
+<button class="p-xs hover:bg-surface-container rounded-lg transition-colors">
+<span class="material-symbols-outlined text-muted">view_column</span>
+</button>
+</div>
+</div>
+<div class="overflow-x-auto custom-scrollbar">
+<table class="w-full text-left border-collapse min-w-[1200px]">
+<thead>
+<tr class="bg-surface-container border-b border-border-base">
+<th class="px-lg py-sm font-kpi-label text-kpi-label uppercase text-[12px]">Date</th>
+<th class="px-lg py-sm font-kpi-label text-kpi-label uppercase text-[12px]">Branch Name</th>
+<th class="px-lg py-sm font-kpi-label text-kpi-label uppercase text-[12px]">Visiting Country</th>
+<th class="px-lg py-sm font-kpi-label text-kpi-label uppercase text-[12px]">Corporate</th>
+<th class="px-lg py-sm font-kpi-label text-kpi-label uppercase text-[12px]">Purpose</th>
+<th class="px-lg py-sm font-kpi-label text-kpi-label uppercase text-[12px]">Currency</th>
+<th class="px-lg py-sm font-kpi-label text-kpi-label uppercase text-[12px]">Net Amt</th>
+<th class="px-lg py-sm font-kpi-label text-kpi-label uppercase text-[12px]">OFAC_FATF Segment</th>
+</tr>
+</thead>
+<tbody class="font-table-data text-table-data divide-y divide-grid-line">
+<tr class="hover:bg-surface-container-low transition-colors risk-border-left">
+<td class="px-lg py-md">2023-10-24</td>
+<td class="px-lg py-md">Mumbai Corporate</td>
+<td class="px-lg py-md font-bold">United Arab Emirates</td>
+<td class="px-lg py-md">Falcon Exports Ltd</td>
+<td class="px-lg py-md">Consultancy</td>
+<td class="px-lg py-md">USD</td>
+<td class="px-lg py-md font-bold">₹1.2Cr</td>
+<td class="px-lg py-md"><span class="px-xs py-base bg-error-container text-risk-high rounded-full font-bold text-[11px]">FATF CALL FOR ACTION</span></td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors risk-border-left">
+<td class="px-lg py-md">2023-10-23</td>
+<td class="px-lg py-md">Delhi Main</td>
+<td class="px-lg py-md font-bold">North Korea</td>
+<td class="px-lg py-md">Apex Global Solutions</td>
+<td class="px-lg py-md">IT Services</td>
+<td class="px-lg py-md">EUR</td>
+<td class="px-lg py-md font-bold">₹84.50L</td>
+<td class="px-lg py-md"><span class="px-xs py-base bg-error-container text-risk-high rounded-full font-bold text-[11px]">NON-COOPERATIVE</span></td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-lg py-md">2023-10-22</td>
+<td class="px-lg py-md">Bengaluru IT Hub</td>
+<td class="px-lg py-md font-bold">Panama</td>
+<td class="px-lg py-md">Private Individual</td>
+<td class="px-lg py-md">Personal Remittance</td>
+<td class="px-lg py-md">USD</td>
+<td class="px-lg py-md font-bold">₹22.15L</td>
+<td class="px-lg py-md"><span class="px-xs py-base bg-surface-container-highest text-secondary rounded-full font-bold text-[11px]">ENHANCED MONITORING</span></td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors risk-border-left">
+<td class="px-lg py-md">2023-10-21</td>
+<td class="px-lg py-md">Mumbai West</td>
+<td class="px-lg py-md font-bold">Iran</td>
+<td class="px-lg py-md">Zenith Logistics</td>
+<td class="px-lg py-md">Trade Payment</td>
+<td class="px-lg py-md">USD</td>
+<td class="px-lg py-md font-bold">₹3.4Cr</td>
+<td class="px-lg py-md"><span class="px-xs py-base bg-error-container text-risk-high rounded-full font-bold text-[11px]">OFAC SANCTIONED</span></td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-lg py-md">2023-10-20</td>
+<td class="px-lg py-md">Chennai Port</td>
+<td class="px-lg py-md font-bold">Cayman Islands</td>
+<td class="px-lg py-md">Offshore Assets Corp</td>
+<td class="px-lg py-md">Capital Transfer</td>
+<td class="px-lg py-md">USD</td>
+<td class="px-lg py-md font-bold">₹15.80Cr</td>
+<td class="px-lg py-md"><span class="px-xs py-base bg-surface-container-highest text-secondary rounded-full font-bold text-[11px]">HIGH RISK JURISDICTION</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="px-lg py-sm bg-surface-container border-t border-border-base flex justify-between items-center text-sm text-muted">
+<span>Showing 1-5 of 1,284 flagged records</span>
+<div class="flex gap-md">
+<button class="flex items-center hover:text-primary"><span class="material-symbols-outlined">chevron_left</span> Previous</button>
+<button class="flex items-center hover:text-primary">Next <span class="material-symbols-outlined">chevron_right</span></button>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- Micro-interaction Script -->
+<script>
+        document.querySelectorAll('.hover-lift').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.boxShadow = '0 12px 24px rgba(0,0,0,0.06)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.boxShadow = '0 4px 6px rgba(0,0,0,0.04)';
+            });
+        });
+    </script>
+</body></html>

@@ -1,0 +1,203 @@
+<div class="page-container" *ngIf="agentData() && agentData().kpis">
+  <div class="section-header">
+    <div>
+      <h3>AGENT ANALYSIS</h3>
+      <p style="margin: 4px 0 0 0; font-size: 14px; color: #555;">Analyze performance and compliance risk of Agents and their network.</p>
+    </div>
+  </div>
+
+  <div class="kpi-row" style="grid-template-columns: repeat(3, 1fr); display: grid; margin-bottom: 24px;">
+    <div class="kpi-card">
+      <div class="kpi-title">Total Active Agents</div>
+      <div class="kpi-value">{{ agentData().kpis.total_agents | number }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-title">Agent Network Volume</div>
+      <div class="kpi-value">{{ agentData().kpis.total_net_amt_agent | humanReadableAmount }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-title">% of Total Remittance</div>
+      <div class="kpi-value">{{ agentData().kpis.contrib_pct | number:'1.0-2' }}%</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Agent Summary Statistics</h4>
+    </div>
+    <div class="kpi-row" style="grid-template-columns: repeat(5, 1fr); display: grid; margin-bottom: 24px;">
+      <div class="kpi-card" style="padding: 12px; background: #fafafa;">
+        <div style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;">Top Segment</div>
+        <div style="font-size: 14px; font-weight: 600; color: #0f172a; margin-top: 4px;">{{ agentData().kpis.seg[0] }}</div>
+        <div style="font-size: 12px; color: #475569; margin-top: 2px;">{{ agentData().kpis.seg[2] | number:'1.0-1' }}% of Agents</div>
+      </div>
+      <div class="kpi-card" style="padding: 12px; background: #fafafa;">
+        <div style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;">Top Product</div>
+        <div style="font-size: 14px; font-weight: 600; color: #0f172a; margin-top: 4px;">{{ agentData().kpis.product[0] }}</div>
+        <div style="font-size: 12px; color: #475569; margin-top: 2px;">{{ agentData().kpis.product[2] | number:'1.0-1' }}% of Agents</div>
+      </div>
+      <div class="kpi-card" style="padding: 12px; background: #fafafa;">
+        <div style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;">Top Purpose</div>
+        <div style="font-size: 14px; font-weight: 600; color: #0f172a; margin-top: 4px;">{{ agentData().kpis.purpose[0] }}</div>
+        <div style="font-size: 12px; color: #475569; margin-top: 2px;">{{ agentData().kpis.purpose[2] | number:'1.0-1' }}% of Agents</div>
+      </div>
+      <div class="kpi-card" style="padding: 12px; background: #fafafa;">
+        <div style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;">Top Branch</div>
+        <div style="font-size: 14px; font-weight: 600; color: #0f172a; margin-top: 4px;">{{ agentData().kpis.branch[0] }}</div>
+        <div style="font-size: 12px; color: #475569; margin-top: 2px;">{{ agentData().kpis.branch[2] | number:'1.0-1' }}% of Agents</div>
+      </div>
+      <div class="kpi-card" style="padding: 12px; background: #fafafa;">
+        <div style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;">Top Country</div>
+        <div style="font-size: 14px; font-weight: 600; color: #0f172a; margin-top: 4px;">{{ agentData().kpis.country[0] }}</div>
+        <div style="font-size: 12px; color: #475569; margin-top: 2px;">{{ agentData().kpis.country[2] | number:'1.0-1' }}% of Agents</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
+    <!-- Frequency -->
+    <div class="section">
+      <div class="section-header">
+        <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Agent Volume Contribution</h4>
+        <button (click)="downloadCSV(agentData().frequency_table, 'agent_frequency.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
+      </div>
+      <div class="table-container" style="max-height: 350px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Agent ID</th>
+              <th style="text-align: right">Txn Count</th>
+              <th style="text-align: right">Net Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of agentData().frequency_table">
+              <td style="font-weight: 600">{{ row['Category'] }}</td>
+              <td style="text-align: right">{{ row['Count'] | number }}</td>
+              <td style="text-align: right">{{ row['Net Amount'] | humanReadableAmount }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Trend -->
+    <div class="section">
+      <div class="section-header">
+        <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Agent Activity Trend</h4>
+        <button (click)="downloadCSV(agentData().trend_table, 'agent_trend.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
+      </div>
+      <div class="table-container" style="max-height: 350px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Period</th>
+              <th style="text-align: right">Txn Count</th>
+              <th style="text-align: right">Net Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of agentData().trend_table">
+              <td style="font-weight: 600">{{ row['Category'] }}</td>
+              <td style="text-align: right">{{ row['Count'] | number }}</td>
+              <td style="text-align: right">{{ row['Net Amount'] | humanReadableAmount }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section-header">
+    <div>
+      <h3>Suspicious Agent Activities</h3>
+      <p style="margin: 4px 0 0 0; font-size: 14px; color: #555;">Agents flagged for unusual complexity or relationships.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <h4 style="margin: 0; font-size: 16px; font-weight: 600;">1. Agents linked to >5 Distinct Remitters (Corporates)</h4>
+      <button (click)="downloadCSV(agentData().suspicious_complex, 'suspicious_complex.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
+    </div>
+    <div class="table-container" style="max-height: 300px;">
+      <table>
+        <thead>
+          <tr>
+            <th>Agent ID</th>
+            <th style="text-align: right">Distinct Remitters</th>
+            <th style="text-align: right">Transactions</th>
+            <th style="text-align: right">Total Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of agentData().suspicious_complex">
+            <td style="font-weight: 600">{{ row['Agent'] }}</td>
+            <td style="text-align: right">{{ row['unique_targets'] | number }}</td>
+            <td style="text-align: right">{{ row['txn_count'] | number }}</td>
+            <td style="text-align: right">{{ row['total_amt'] | humanReadableAmount }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <h4 style="margin: 0; font-size: 16px; font-weight: 600;">2. Agents linked to >5 Distinct Beneficiaries</h4>
+      <button (click)="downloadCSV(agentData().suspicious_many, 'suspicious_many.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
+    </div>
+    <div class="table-container" style="max-height: 300px;">
+      <table>
+        <thead>
+          <tr>
+            <th>Agent ID</th>
+            <th>Beneficiary</th>
+            <th style="text-align: right">Transactions</th>
+            <th style="text-align: right">Net Amount</th>
+            <th style="text-align: right">Relationship Freq</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of agentData().suspicious_many">
+            <td style="font-weight: 600">{{ row['Agent'] }}</td>
+            <td>{{ row['Beneficiary'] }}</td>
+            <td style="text-align: right">{{ row['Transaction Count'] | number }}</td>
+            <td style="text-align: right">{{ row['Net Amount'] | humanReadableAmount }}</td>
+            <td style="text-align: right">{{ row['Relationship Frequency'] }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <h4 style="margin: 0; font-size: 16px; font-weight: 600;">3. Agents directing >5 Remittances to a Single Beneficiary</h4>
+      <button (click)="downloadCSV(agentData().suspicious_one, 'suspicious_one.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
+    </div>
+    <div class="table-container" style="max-height: 300px;">
+      <table>
+        <thead>
+          <tr>
+            <th>Agent ID</th>
+            <th>Beneficiary</th>
+            <th style="text-align: right">Transactions</th>
+            <th style="text-align: right">Net Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of agentData().suspicious_one">
+            <td style="font-weight: 600">{{ row['Agent'] }}</td>
+            <td>{{ row['Beneficiary'] }}</td>
+            <td style="text-align: right">{{ row['Transaction Count'] | number }}</td>
+            <td style="text-align: right">{{ row['Net Amount'] | humanReadableAmount }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GlobalPay AML | Agent Analysis</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-variant": "#e2e2e2",
+                        "surface-tint": "#5f5e5e",
+                        "primary-fixed": "#e5e2e1",
+                        "primary": "#000000",
+                        "tertiary": "#000000",
+                        "error": "#ba1a1a",
+                        "secondary-container": "#e4e2e2",
+                        "on-surface-variant": "#444748",
+                        "on-primary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "primary-fixed-dim": "#c8c6c5",
+                        "on-error-container": "#93000a",
+                        "background": "#f9f9f9",
+                        "secondary": "#5f5e5e",
+                        "inverse-on-surface": "#f1f1f1",
+                        "risk-high": "#EF553B",
+                        "tertiary-container": "#1b1c1c",
+                        "on-tertiary-container": "#848484",
+                        "surface-container-low": "#f3f3f3",
+                        "on-tertiary-fixed": "#1b1c1c",
+                        "kpi-value": "#0F172A",
+                        "on-primary-fixed": "#1c1b1b",
+                        "error-container": "#ffdad6",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "surface-container-highest": "#e2e2e2",
+                        "on-tertiary": "#ffffff",
+                        "border-base": "#E5E5E5",
+                        "surface-dim": "#dadada",
+                        "light-ui": "#BBBBBB",
+                        "primary-container": "#1c1b1b",
+                        "tertiary-fixed": "#e3e2e2",
+                        "surface": "#f9f9f9",
+                        "surface-container-high": "#e8e8e8",
+                        "grid-line": "#EEEEEE",
+                        "on-primary-container": "#858383",
+                        "inverse-surface": "#2f3131",
+                        "inverse-primary": "#c8c6c5",
+                        "on-secondary-container": "#656464",
+                        "risk-unknown": "#636363",
+                        "on-primary-fixed-variant": "#474646",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-fixed-variant": "#464747",
+                        "secondary-fixed-dim": "#c8c6c6",
+                        "tertiary-fixed-dim": "#c7c6c6",
+                        "on-surface": "#1a1c1c",
+                        "risk-low": "#00CC96",
+                        "outline-variant": "#c4c7c7",
+                        "risk-medium": "#FFA15A",
+                        "surface-container": "#eeeeee",
+                        "outline": "#747878",
+                        "on-background": "#1a1c1c",
+                        "on-secondary": "#ffffff",
+                        "surface-bright": "#f9f9f9",
+                        "on-secondary-fixed-variant": "#474747",
+                        "kpi-label": "#64748B",
+                        "secondary-fixed": "#e4e2e2",
+                        "muted": "#999999"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "12px",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "8px",
+                        "card-padding": "20px",
+                        "base": "4px",
+                        "xl": "24px",
+                        "md": "16px",
+                        "gutter": "16px",
+                        "sidebar-width": "280px",
+                        "lg": "20px",
+                        "sm": "12px"
+                    },
+                    "fontFamily": {
+                        "nav-pill": ["Inter"],
+                        "table-data": ["Inter"],
+                        "kpi-value": ["Inter"],
+                        "page-title": ["Inter"],
+                        "kpi-label": ["Inter"],
+                        "kpi-value-mobile": ["Inter"],
+                        "section-heading": ["Inter"],
+                        "body-main": ["Inter"]
+                    },
+                    "fontSize": {
+                        "nav-pill": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                        "table-data": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "kpi-value": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                        "page-title": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "kpi-label": ["13px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "kpi-value-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "section-heading": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "body-main": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .ag-header-cell { background-color: #F8F8F8; }
+        .risk-border-high { border-left: 4px solid #EF553B; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: #e5e5e5; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-background text-on-background">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 w-full z-50 bg-surface dark:bg-background shadow-sm dark:shadow-none transition-all duration-300 ease-in-out cursor-pointer">
+<div class="flex justify-between items-center max-w-[1440px] mx-auto px-lg py-sm">
+<div class="flex items-center gap-md">
+<span class="font-page-title text-page-title text-primary dark:text-on-primary-fixed">GlobalPay AML</span>
+</div>
+<nav class="hidden md:flex items-center gap-xs">
+<a class="px-md py-base font-nav-pill text-nav-pill text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-container-high transition-all" href="#">HOME PAGE</a>
+<a class="px-md py-base font-nav-pill text-nav-pill text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-container-high transition-all" href="#">TRANSACTION SUMMARY</a>
+<a class="px-md py-base font-nav-pill text-nav-pill text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-container-high transition-all" href="#">TOUR OPERATOR</a>
+<a class="px-md py-base font-nav-pill text-nav-pill text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-container-high transition-all" href="#">RETAIL HIGH VALUE TXN</a>
+<a class="px-md py-base font-nav-pill text-nav-pill bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed rounded-full shadow-md" href="#">HIGH RISK CORPORATE</a>
+<a class="px-md py-base font-nav-pill text-nav-pill text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-container-high transition-all" href="#">FATF</a>
+</nav>
+<div class="flex items-center gap-md">
+<div class="relative group">
+<input class="pl-10 pr-4 py-base bg-surface-container-low border border-border-base rounded-lg text-body-main focus:outline-none focus:ring-1 focus:ring-primary w-64" placeholder="Search suspicious patterns..." type="text"/>
+<span class="material-symbols-outlined absolute left-2 top-1.5 text-secondary text-[20px]">search</span>
+</div>
+<button class="bg-primary text-on-primary px-md py-base rounded-full font-nav-pill text-[12px] hover:opacity-90 transition-opacity">
+                    DOWNLOAD CSV
+                </button>
+</div>
+</div>
+</header>
+<!-- Side Navigation Bar -->
+<aside class="fixed left-0 top-0 h-full w-sidebar-width bg-surface-container-low dark:bg-surface-container border-r border-border-base dark:border-outline-variant flex flex-col pt-[72px] py-xl px-md z-40">
+<div class="mb-xl px-xs">
+<h2 class="font-section-heading text-section-heading font-bold text-tertiary mb-base">Global Filters</h2>
+<p class="text-[12px] text-secondary">Regulatory Oversight</p>
+</div>
+<nav class="flex-1 space-y-md">
+<div class="space-y-xs">
+<button class="w-full flex items-center gap-sm px-sm py-xs text-primary dark:text-on-primary-fixed font-bold border-l-4 border-primary bg-surface-container-highest/20 transition-colors">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span class="font-body-main text-body-main">Date Range</span>
+</button>
+<button class="w-full flex items-center gap-sm px-sm py-xs text-secondary dark:text-secondary-fixed-dim hover:text-primary hover:bg-surface-container-highest duration-200 transition-colors">
+<span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+<span class="font-body-main text-body-main">FATF/OFAC Status</span>
+</button>
+<button class="w-full flex items-center gap-sm px-sm py-xs text-secondary dark:text-secondary-fixed-dim hover:text-primary hover:bg-surface-container-highest duration-200 transition-colors">
+<span class="material-symbols-outlined" data-icon="filter_list">filter_list</span>
+<span class="font-body-main text-body-main">Dynamic Filters</span>
+</button>
+</div>
+<div class="pt-lg border-t border-border-base">
+<button class="w-full bg-primary text-on-primary py-sm rounded-lg font-nav-pill hover:opacity-90 transition-opacity">
+                    Apply All Filters
+                </button>
+</div>
+</nav>
+<div class="mt-auto space-y-xs pb-lg">
+<button class="w-full flex items-center gap-sm px-sm py-xs text-secondary dark:text-secondary-fixed-dim hover:text-primary duration-200 transition-colors">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body-main text-body-main">Settings</span>
+</button>
+<button class="w-full flex items-center gap-sm px-sm py-xs text-secondary dark:text-secondary-fixed-dim hover:text-primary duration-200 transition-colors">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="font-body-main text-body-main">Support</span>
+</button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-sidebar-width pt-[88px] px-xl pb-xl max-w-[1440px] mx-auto min-h-screen">
+<!-- Page Header -->
+<header class="mb-xl">
+<h1 class="font-page-title text-page-title text-primary uppercase">AGENT ANALYSIS</h1>
+<p class="font-body-main text-body-main text-secondary max-w-2xl">Detailed surveillance of agent activities and suspicious relationship patterns. Monitor anomalies across global operations.</p>
+</header>
+<!-- KPI Cards Row -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter mb-xl">
+<div class="bg-surface-container-lowest p-card-padding rounded-lg border border-border-base shadow-sm relative overflow-hidden">
+<div class="flex justify-between items-start mb-sm">
+<span class="font-kpi-label text-kpi-label text-kpi-label uppercase tracking-widest">Total Agents</span>
+<span class="px-xs py-0.5 rounded-full bg-surface-container text-[10px] border border-border-base font-bold text-primary">TOP: AG-0922</span>
+</div>
+<div class="font-kpi-value text-kpi-value">1,248</div>
+<div class="mt-xs flex items-center gap-1 text-risk-low">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+<span class="text-[12px] font-bold">+12% vs LY</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-card-padding rounded-lg border border-border-base shadow-sm relative overflow-hidden">
+<div class="flex justify-between items-start mb-sm">
+<span class="font-kpi-label text-kpi-label text-kpi-label uppercase tracking-widest text-secondary">Total Agent Transactions</span>
+<span class="px-xs py-0.5 rounded-full bg-error-container text-[10px] border border-error/20 font-bold text-error">+4.2%</span>
+</div>
+<div class="font-kpi-value text-kpi-value">84,520</div>
+<div class="mt-xs text-secondary text-[12px]">Avg: 67/agent</div>
+</div>
+<div class="bg-surface-container-lowest p-card-padding rounded-lg border border-border-base shadow-sm relative overflow-hidden">
+<div class="flex justify-between items-start mb-sm">
+<span class="font-kpi-label text-kpi-label text-kpi-label uppercase tracking-widest text-secondary">Total Agent Amount</span>
+<span class="px-xs py-0.5 rounded-full bg-surface-container text-[10px] border border-border-base font-bold text-primary">32% SHARE</span>
+</div>
+<div class="font-kpi-value text-kpi-value">$14.2M</div>
+<div class="mt-xs text-secondary text-[12px]">Domestic &amp; International</div>
+</div>
+<div class="bg-surface-container-lowest p-card-padding rounded-lg border border-border-base shadow-sm relative overflow-hidden">
+<div class="flex justify-between items-start mb-sm">
+<span class="font-kpi-label text-kpi-label text-kpi-label uppercase tracking-widest text-secondary">Contribution %</span>
+<span class="px-xs py-0.5 rounded-full bg-surface-container text-[10px] border border-border-base font-bold text-risk-high uppercase">High Risk</span>
+</div>
+<div class="font-kpi-value text-kpi-value">28.4%</div>
+<div class="mt-xs flex items-center gap-1 text-risk-high">
+<span class="material-symbols-outlined text-[16px]">warning</span>
+<span class="text-[12px] font-bold">Above Threshold</span>
+</div>
+</div>
+</section>
+<!-- Charts Row -->
+<section class="grid grid-cols-1 lg:grid-cols-2 gap-gutter mb-xl">
+<div class="bg-surface-container-lowest p-card-padding rounded-lg border border-border-base shadow-sm">
+<div class="flex justify-between items-center mb-lg">
+<h3 class="font-section-heading text-section-heading">Agent Frequency Table</h3>
+<span class="material-symbols-outlined text-secondary cursor-pointer">more_vert</span>
+</div>
+<div class="h-[300px] flex items-end justify-between gap-base px-base pb-xl border-b border-grid-line">
+<!-- Fake Bar Chart -->
+<div class="flex flex-col items-center gap-xs w-full">
+<div class="w-full bg-primary rounded-t-sm transition-all hover:bg-primary-container" style="height: 90%;"></div>
+<span class="text-[10px] text-secondary rotate-45 mt-xs origin-top-left">AG-101</span>
+</div>
+<div class="flex flex-col items-center gap-xs w-full">
+<div class="w-full bg-primary rounded-t-sm transition-all hover:bg-primary-container" style="height: 75%;"></div>
+<span class="text-[10px] text-secondary rotate-45 mt-xs origin-top-left">AG-422</span>
+</div>
+<div class="flex flex-col items-center gap-xs w-full">
+<div class="w-full bg-primary rounded-t-sm transition-all hover:bg-primary-container" style="height: 60%;"></div>
+<span class="text-[10px] text-secondary rotate-45 mt-xs origin-top-left">AG-092</span>
+</div>
+<div class="flex flex-col items-center gap-xs w-full">
+<div class="w-full bg-primary rounded-t-sm transition-all hover:bg-primary-container" style="height: 55%;"></div>
+<span class="text-[10px] text-secondary rotate-45 mt-xs origin-top-left">AG-881</span>
+</div>
+<div class="flex flex-col items-center gap-xs w-full">
+<div class="w-full bg-primary rounded-t-sm transition-all hover:bg-primary-container" style="height: 40%;"></div>
+<span class="text-[10px] text-secondary rotate-45 mt-xs origin-top-left">AG-302</span>
+</div>
+</div>
+<p class="mt-md text-[12px] text-secondary italic">Top agents by daily transaction count volume.</p>
+</div>
+<div class="bg-surface-container-lowest p-card-padding rounded-lg border border-border-base shadow-sm overflow-hidden relative">
+<div class="flex justify-between items-center mb-lg">
+<h3 class="font-section-heading text-section-heading">Agent Trend</h3>
+<div class="flex gap-xs">
+<button class="text-[11px] font-bold px-sm py-1 bg-surface-container rounded">DAILY</button>
+<button class="text-[11px] font-bold px-sm py-1 bg-primary text-on-primary rounded shadow-sm">WEEKLY</button>
+</div>
+</div>
+<!-- Interactive Graph Area (Placeholder Simulation) -->
+<div class="h-[300px] flex items-center justify-center bg-surface-container-low/30 rounded-lg relative overflow-hidden">
+<svg class="w-full h-full" viewbox="0 0 400 150">
+<path d="M0,100 Q50,80 100,110 T200,60 T300,90 T400,20" fill="none" stroke="#000000" stroke-width="3"></path>
+<circle cx="100" cy="110" fill="#000000" r="4"></circle>
+<circle cx="200" cy="60" fill="#000000" r="4"></circle>
+<circle cx="300" cy="90" fill="#000000" r="4"></circle>
+<circle cx="400" cy="20" fill="#EF553B" r="4"></circle>
+</svg>
+<div class="absolute bottom-4 left-4 bg-white/80 backdrop-blur border border-border-base p-xs rounded text-[11px] shadow-sm">
+<span class="font-bold">May 14:</span> 12.4k Txns
+                    </div>
+</div>
+</div>
+</section>
+<!-- Suspicious Agent Panels -->
+<section class="mb-xl">
+<div class="flex items-center gap-md mb-lg">
+<h2 class="font-section-heading text-section-heading">Suspicious Agent Panels</h2>
+<div class="h-[1px] flex-1 bg-border-base"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest border border-border-base rounded-lg p-card-padding hover:border-primary transition-all">
+<div class="flex items-center gap-sm mb-md">
+<div class="p-xs bg-surface-container-high rounded-full">
+<span class="material-symbols-outlined text-primary text-[20px]">hub</span>
+</div>
+<h4 class="font-body-main font-bold">Agents with Many Relationships</h4>
+</div>
+<p class="text-table-data text-secondary mb-lg leading-relaxed">Agents exhibiting complex many-to-many links between disparate geographic entities. Potential shell layering detected.</p>
+<div class="space-y-sm">
+<div class="flex justify-between items-center text-[12px] p-xs bg-surface-container rounded">
+<span>AG-9022 (London)</span>
+<span class="font-bold">42 Links</span>
+</div>
+<div class="flex justify-between items-center text-[12px] p-xs bg-surface-container rounded">
+<span>AG-8811 (Panama)</span>
+<span class="font-bold">38 Links</span>
+</div>
+</div>
+<button class="w-full mt-lg text-[12px] font-bold text-primary hover:underline uppercase tracking-tight">Investigate Clusters</button>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest border border-border-base rounded-lg p-card-padding hover:border-primary transition-all risk-border-high">
+<div class="flex items-center gap-sm mb-md">
+<div class="p-xs bg-error-container rounded-full">
+<span class="material-symbols-outlined text-error text-[20px]">group</span>
+</div>
+<h4 class="font-body-main font-bold">Agent -&gt; Many Beneficiaries</h4>
+</div>
+<p class="text-table-data text-secondary mb-lg leading-relaxed">Agents serving an unusually high number of distinct Party Codes within 24hr window. Smurfing signature likely.</p>
+<div class="space-y-sm">
+<div class="flex justify-between items-center text-[12px] p-xs bg-surface-container rounded">
+<span>AG-4410 (New York)</span>
+<span class="font-bold text-error">112 Parties</span>
+</div>
+<div class="flex justify-between items-center text-[12px] p-xs bg-surface-container rounded">
+<span>AG-1102 (Unknown)</span>
+<span class="font-bold text-error">89 Parties</span>
+</div>
+</div>
+<button class="w-full mt-lg text-[12px] font-bold text-primary hover:underline uppercase tracking-tight">View Node Map</button>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-lowest border border-border-base rounded-lg p-card-padding hover:border-primary transition-all">
+<div class="flex items-center gap-sm mb-md">
+<div class="p-xs bg-surface-container-high rounded-full">
+<span class="material-symbols-outlined text-primary text-[20px]">arrow_forward</span>
+</div>
+<h4 class="font-body-main font-bold">Agent -&gt; 1 Beneficiary</h4>
+</div>
+<p class="text-table-data text-secondary mb-lg leading-relaxed">High frequency structural patterns where bulk funds funnel to a single beneficiary entity. Cuckoo smurfing signal.</p>
+<div class="space-y-sm">
+<div class="flex justify-between items-center text-[12px] p-xs bg-surface-container rounded">
+<span>AG-0021 -&gt; CO-99</span>
+<span class="font-bold">$1.2M Total</span>
+</div>
+<div class="flex justify-between items-center text-[12px] p-xs bg-surface-container rounded">
+<span>AG-5431 -&gt; PV-22</span>
+<span class="font-bold">$840k Total</span>
+</div>
+</div>
+<button class="w-full mt-lg text-[12px] font-bold text-primary hover:underline uppercase tracking-tight">Check Source of Funds</button>
+</div>
+</div>
+</section>
+<!-- Tables Section -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- Left Table -->
+<div class="lg:col-span-4 bg-surface-container-lowest border border-border-base rounded-lg overflow-hidden flex flex-col">
+<div class="p-md border-b border-border-base bg-surface-container-low">
+<h3 class="font-section-heading text-section-heading">Agent Frequency Summary</h3>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left font-table-data text-table-data">
+<thead class="bg-surface text-secondary uppercase text-[11px] font-bold border-b border-grid-line">
+<tr>
+<th class="px-md py-sm">Agent Name</th>
+<th class="px-md py-sm">Count</th>
+<th class="px-md py-sm">Net Amt</th>
+<th class="px-md py-sm">% Share</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-grid-line">
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-md py-md font-bold">AG-LONDON-44</td>
+<td class="px-md py-md">1,402</td>
+<td class="px-md py-md">$4.2M</td>
+<td class="px-md py-md">12.4%</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-md py-md font-bold">AG-BERLIN-02</td>
+<td class="px-md py-md">982</td>
+<td class="px-md py-md">$2.8M</td>
+<td class="px-md py-md">8.1%</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-md py-md font-bold">AG-TOKYO-91</td>
+<td class="px-md py-md">754</td>
+<td class="px-md py-md">$1.5M</td>
+<td class="px-md py-md">5.2%</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-md py-md font-bold">AG-NYC-10</td>
+<td class="px-md py-md">620</td>
+<td class="px-md py-md">$1.1M</td>
+<td class="px-md py-md">4.0%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Right Large Detail Table -->
+<div class="lg:col-span-8 bg-surface-container-lowest border border-border-base rounded-lg overflow-hidden flex flex-col shadow-sm">
+<div class="p-md border-b border-border-base bg-surface-container-low flex justify-between items-center">
+<h3 class="font-section-heading text-section-heading">Suspicious Agents Detail</h3>
+<div class="flex gap-sm">
+<button class="flex items-center gap-xs px-sm py-1 bg-surface-container-high rounded text-[12px] font-bold">
+<span class="material-symbols-outlined text-[16px]">filter_alt</span> FILTER
+                        </button>
+<button class="flex items-center gap-xs px-sm py-1 bg-surface-container-high rounded text-[12px] font-bold">
+<span class="material-symbols-outlined text-[16px]">ios_share</span> EXPORT
+                        </button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left font-table-data text-table-data">
+<thead class="bg-surface text-on-surface-variant font-bold border-b border-grid-line">
+<tr>
+<th class="px-md py-sm">Alert ID</th>
+<th class="px-md py-sm">Agent Code</th>
+<th class="px-md py-sm">Flag Reason</th>
+<th class="px-md py-sm">Risk Score</th>
+<th class="px-md py-sm">Last Activity</th>
+<th class="px-md py-sm">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-grid-line">
+<tr class="hover:bg-surface-container-low risk-border-high">
+<td class="px-md py-md">#AL-99201</td>
+<td class="px-md py-md">AG-PAN-8811</td>
+<td class="px-md py-md">
+<span class="px-xs py-0.5 bg-error-container text-error rounded text-[11px] font-bold">MANY_TO_MANY_FLOW</span>
+</td>
+<td class="px-md py-md">
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+<div class="bg-risk-high h-full" style="width: 92%"></div>
+</div>
+</td>
+<td class="px-md py-md text-secondary">2023-11-20 14:22</td>
+<td class="px-md py-md">
+<button class="text-primary font-bold hover:underline">REVIW</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-md py-md">#AL-99188</td>
+<td class="px-md py-md">AG-LDN-0022</td>
+<td class="px-md py-md">
+<span class="px-xs py-0.5 bg-surface-container-high text-primary rounded text-[11px] font-bold">VELOCITY_OUTLIER</span>
+</td>
+<td class="px-md py-md">
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+<div class="bg-risk-medium h-full" style="width: 74%"></div>
+</div>
+</td>
+<td class="px-md py-md text-secondary">2023-11-20 12:45</td>
+<td class="px-md py-md">
+<button class="text-primary font-bold hover:underline">REVIEW</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-md py-md">#AL-99152</td>
+<td class="px-md py-md">AG-NYC-4410</td>
+<td class="px-md py-md">
+<span class="px-xs py-0.5 bg-error-container text-error rounded text-[11px] font-bold">KYC_DISCREPANCY</span>
+</td>
+<td class="px-md py-md">
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+<div class="bg-risk-high h-full" style="width: 88%"></div>
+</div>
+</td>
+<td class="px-md py-md text-secondary">2023-11-19 18:10</td>
+<td class="px-md py-md">
+<button class="text-primary font-bold hover:underline">REVIEW</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-md py-md">#AL-99144</td>
+<td class="px-md py-md">AG-TK-9022</td>
+<td class="px-md py-md">
+<span class="px-xs py-0.5 bg-surface-container-high text-primary rounded text-[11px] font-bold">GEO_JUMP</span>
+</td>
+<td class="px-md py-md">
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+<div class="bg-risk-low h-full" style="width: 41%"></div>
+</div>
+</td>
+<td class="px-md py-md text-secondary">2023-11-19 15:30</td>
+<td class="px-md py-md">
+<button class="text-primary font-bold hover:underline">REVIEW</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-md bg-surface border-t border-grid-line flex justify-between items-center">
+<span class="text-[12px] text-secondary">Showing 1-4 of 1,248 Agents</span>
+<div class="flex gap-xs">
+<button class="px-sm py-1 border border-border-base rounded hover:bg-surface-container-low">Prev</button>
+<button class="px-sm py-1 border border-border-base rounded bg-primary text-on-primary">1</button>
+<button class="px-sm py-1 border border-border-base rounded hover:bg-surface-container-low">2</button>
+<button class="px-sm py-1 border border-border-base rounded hover:bg-surface-container-low">Next</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- FAB for New Analysis Task (Suppressed on Details per rules, but shown here as this is a Dashboard-like Summary Analysis Page) -->
+<div class="fixed bottom-xl right-xl">
+<button class="flex items-center gap-sm bg-primary text-on-primary px-xl py-md rounded-full shadow-lg hover:scale-105 transition-transform">
+<span class="material-symbols-outlined" data-weight="fill">add</span>
+<span class="font-nav-pill">NEW REPORT</span>
+</button>
+</div>
+<script>
+        // Micro-interactions for KPI Cards
+        document.querySelectorAll('section > div').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.classList.add('shadow-md');
+                card.style.transform = 'translateY(-2px)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.classList.remove('shadow-md');
+                card.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Simple SideNav Toggle Simulation for Responsive
+        window.addEventListener('resize', () => {
+            const sidebar = document.querySelector('aside');
+            if (window.innerWidth < 1200) {
+                // Potential collapse logic here
+            }
+        });
+    </script>
+</body></html>

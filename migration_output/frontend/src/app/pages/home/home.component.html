@@ -1,0 +1,221 @@
+<div class="page-content" *ngIf="kpis(); else noDataTpl">
+<!-- Page Header -->
+<header class="flex justify-between items-end mb-xl">
+<div>
+<h1 class="font-page-title text-page-title">HOME PAGE</h1>
+<p class="text-secondary text-body-main">Comprehensive AML Transaction Monitoring Overview</p>
+</div>
+<div class="flex items-center gap-md">
+<div class="bg-surface-container rounded-lg px-md py-xs text-xs font-bold text-secondary">
+          DATASET UPLOADED
+        </div>
+</div>
+</header>
+<!-- KPI Row 1: Primary Metrics -->
+<section class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-md mb-xl">
+<div class="kpi-card bg-white p-card-padding rounded-xl">
+<span class="font-kpi-label text-kpi-label uppercase block mb-xs">Total Transactions Recorded</span>
+<div class="font-kpi-value text-kpi-value">{{ kpis()?.total_transactions | number }}</div>
+
+</div>
+<div class="kpi-card bg-white p-card-padding rounded-xl">
+<span class="font-kpi-label text-kpi-label uppercase block mb-xs">Total Transaction Amount</span>
+<div class="font-kpi-value text-kpi-value">{{ formatAmt(kpis()?.total_net_amt!) }}</div>
+
+</div>
+<div class="kpi-card bg-white p-card-padding rounded-xl">
+<span class="font-kpi-label text-kpi-label uppercase block mb-xs">Average Transaction Value</span>
+<div class="font-kpi-value text-kpi-value">{{ formatAmt(kpis()?.average_transaction!) }}</div>
+
+</div>
+<div class="kpi-card bg-white p-card-padding rounded-xl border-l-4 border-l-risk-high">
+<span class="font-kpi-label text-kpi-label uppercase block mb-xs">Highest Single Txn</span>
+<div class="font-kpi-value text-kpi-value">{{ formatAmt(kpis()?.highest_transaction!) }}</div>
+<div class="flex items-center gap-xs mt-xs text-xs text-muted">{{ kpis()?.highest_pct | number:'1.2-2' }}% of Total Amount</div>
+</div>
+<div class="kpi-card bg-white p-card-padding rounded-xl">
+<span class="font-kpi-label text-kpi-label uppercase block mb-xs">Lowest Single Txn</span>
+<div class="font-kpi-value text-kpi-value">{{ formatAmt(kpis()?.lowest_transaction!) }}</div>
+<div class="flex items-center gap-xs mt-xs text-xs text-muted">-{{ kpis()?.lowest_pct | number:'1.2-2' }}% of Total Amount</div>
+</div>
+</section>
+<!-- KPI Row 2 & 3: PS/PB & Contextual -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-xl mb-xl">
+<!-- Row 2 Mix: PS / PB Count -->
+<div class="lg:col-span-8 grid grid-cols-2 md:grid-cols-4 gap-md">
+<div class="kpi-card bg-white p-card-padding rounded-xl">
+<span class="font-kpi-label text-kpi-label uppercase block mb-xs">PS Count</span>
+<div class="font-kpi-value text-kpi-value">{{ kpis()?.ps_count | number }}</div>
+<div class="text-xs text-muted mt-1">{{ kpis()?.ps_count_pct | number:'1.1-1' }}%</div>
+</div>
+<div class="kpi-card bg-white p-card-padding rounded-xl">
+<span class="font-kpi-label text-kpi-label uppercase block mb-xs">Total PS Amount</span>
+<div class="font-kpi-value text-kpi-value">{{ formatAmt(kpis()?.ps_amount!) }}</div>
+<div class="text-xs text-muted mt-1">{{ kpis()?.ps_amt_pct | number:'1.1-1' }}%</div>
+</div>
+<div class="kpi-card bg-white p-card-padding rounded-xl">
+<span class="font-kpi-label text-kpi-label uppercase block mb-xs">PB Count</span>
+<div class="font-kpi-value text-kpi-value">{{ kpis()?.pb_count | number }}</div>
+<div class="text-xs text-muted mt-1">{{ kpis()?.pb_count_pct | number:'1.1-1' }}%</div>
+</div>
+<div class="kpi-card bg-white p-card-padding rounded-xl">
+<span class="font-kpi-label text-kpi-label uppercase block mb-xs">Total PB Amount</span>
+<div class="font-kpi-value text-kpi-value">{{ formatAmt(kpis()?.pb_amount!) }}</div>
+<div class="text-xs text-muted mt-1">{{ kpis()?.pb_amt_pct | number:'1.1-1' }}%</div>
+</div>
+</div>
+<!-- Row 3 Mix: Dates & Best segments -->
+<div class="lg:col-span-4 grid grid-cols-1 gap-md">
+<div class="kpi-card bg-white p-md rounded-xl flex items-center justify-between border-l-4 border-l-primary">
+<div>
+<span class="font-kpi-label text-kpi-label uppercase text-[11px]">Best Segment</span>
+<div class="font-bold text-[16px]">{{ kpis()?.best_segment_name }}</div>
+</div>
+<div class="text-right">
+<div class="font-bold text-risk-low text-right">{{ formatAmt(kpis()?.best_segment_amt!) }}<br><span class="text-xs">{{ kpis()?.best_segment_pct | number:'1.1-1' }}% SHARE</span></div>
+</div>
+</div>
+<div class="kpi-card bg-white p-md rounded-xl flex items-center justify-between border-l-4 border-l-primary">
+<div>
+<span class="font-kpi-label text-kpi-label uppercase text-[11px]">Best Branch</span>
+<div class="font-bold text-[16px]">{{ kpis()?.best_branch_name }}</div>
+</div>
+<div class="text-right">
+<div class="font-bold text-risk-low text-right">{{ formatAmt(kpis()?.best_branch_amt!) }}<br><span class="text-xs">{{ kpis()?.best_branch_pct | number:'1.1-1' }}% SHARE</span></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Trend Highlights Section -->
+<section class="bg-white border border-border-base rounded-xl mb-xl overflow-hidden">
+<div class="px-xl py-lg border-b border-border-base flex justify-between items-center bg-surface-container-lowest">
+<h2 class="font-section-heading text-section-heading uppercase tracking-tight">Trend Highlights</h2>
+<div class="flex bg-surface-container rounded-lg p-1">
+<button (click)="breakdownAgg.set('NET AMOUNT')" [ngClass]="breakdownAgg() === 'NET AMOUNT' ? 'px-md py-xs text-xs font-bold rounded-md bg-white shadow-sm' : 'px-md py-xs text-xs font-bold rounded-md text-secondary hover:text-primary transition-colors'">NET AMOUNT</button>
+<button (click)="breakdownAgg.set('COUNT')" [ngClass]="breakdownAgg() === 'COUNT' ? 'px-md py-xs text-xs font-bold rounded-md bg-white shadow-sm' : 'px-md py-xs text-xs font-bold rounded-md text-secondary hover:text-primary transition-colors'">COUNT</button>
+</div>
+</div>
+<div class="p-xl grid grid-cols-1 lg:grid-cols-12 gap-xl">
+<div class="lg:col-span-8 space-y-xl">
+<div class="h-64 relative bg-surface-container-lowest rounded-lg border border-grid-line p-0 overflow-hidden" *ngIf="trendAmountChart()">
+<plotly-plot [data]="trendAmountChart().data" [layout]="trendAmountChart().layout" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
+</div>
+<div class="h-64 relative bg-surface-container-lowest rounded-lg border border-grid-line p-0 overflow-hidden mt-4" *ngIf="trendCountChart()">
+<plotly-plot [data]="trendCountChart().data" [layout]="trendCountChart().layout" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
+</div>
+<!-- Placeholder for Line Chart Visual -->
+<div class="w-full h-full flex items-end justify-between gap-base pt-12">
+<div class="flex-1 bg-primary/10 rounded-t h-[40%] transition-all hover:bg-primary"></div>
+<div class="flex-1 bg-primary/20 rounded-t h-[60%] transition-all hover:bg-primary"></div>
+<div class="flex-1 bg-primary/15 rounded-t h-[35%] transition-all hover:bg-primary"></div>
+<div class="flex-1 bg-primary/40 rounded-t h-[80%] transition-all hover:bg-primary"></div>
+<div class="flex-1 bg-primary/30 rounded-t h-[55%] transition-all hover:bg-primary"></div>
+<div class="flex-1 bg-primary/25 rounded-t h-[45%] transition-all hover:bg-primary"></div>
+<div class="flex-1 bg-primary/60 rounded-t h-[95%] transition-all hover:bg-primary"></div>
+</div>
+<div class="flex justify-between mt-xs text-[10px] text-muted font-bold">
+<span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span>
+</div>
+</div>
+
+<div class="lg:col-span-4 flex flex-col gap-md" *ngIf="trends()">
+<div class="flex-1 p-lg bg-surface-container-low rounded-xl border border-border-base">
+<span class="font-kpi-label text-kpi-label uppercase block mb-xs">Highest Amount {{ trendAgg() === 'DAILY' ? 'Day' : 'Week' }}</span>
+<div class="text-2xl font-bold">{{ trends()?.highest_amount_time?.Time || 'N/A' }}</div>
+<div class="text-primary font-bold text-lg mt-base">{{ formatAmt(trends()?.highest_amount_time?.Transaction_Amount!) }}</div>
+</div>
+<div class="flex-1 p-lg bg-surface-container-low rounded-xl border border-border-base">
+<span class="font-kpi-label text-kpi-label uppercase block mb-xs">Lowest Amount {{ trendAgg() === 'DAILY' ? 'Day' : 'Week' }}</span>
+<div class="text-2xl font-bold">{{ trends()?.lowest_amount_time?.Time || 'N/A' }}</div>
+<div class="text-muted font-bold text-lg mt-base">{{ formatAmt(trends()?.lowest_amount_time?.Transaction_Amount!) }}</div>
+</div>
+<div class="flex-1 p-lg bg-surface-container-low rounded-xl border border-border-base">
+<span class="font-kpi-label text-kpi-label uppercase block mb-xs">Peak Vol Count {{ trendAgg() === 'DAILY' ? 'Day' : 'Week' }}</span>
+<div class="text-2xl font-bold">{{ trends()?.highest_count_time?.Time || 'N/A' }}</div>
+<div class="text-primary font-bold text-lg mt-base">{{ trends()?.highest_count_time?.Transaction_Count | number }} TXNS</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Breakdowns Section -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-xl mb-xl">
+<!-- Control & Charts -->
+<div class="lg:col-span-12 flex justify-between items-center mb-base">
+<div class="flex items-center gap-xl">
+<div class="flex bg-surface-container rounded-lg p-1">
+<button class="px-md py-xs text-xs font-bold rounded-md bg-white shadow-sm">NET AMOUNT</button>
+<button class="px-md py-xs text-xs font-bold rounded-md text-secondary hover:text-primary transition-colors">COUNT</button>
+</div>
+<div class="flex items-center gap-md">
+<span class="text-xs font-bold text-secondary uppercase">Threshold:</span>
+<input class="border border-border-base rounded px-md py-xs text-xs w-24 font-bold" type="number" [ngModel]="purposeThreshold()" (ngModelChange)="purposeThreshold.set($event)" step="0.5" min="0" max="100"/>
+</div>
+</div>
+</div>
+<!-- Donut Charts -->
+<div class="lg:col-span-6 bg-white p-xl rounded-xl border border-border-base">
+<h3 class="font-section-heading text-section-heading uppercase mb-xl border-b border-grid-line pb-xs">Purpose-wise Share</h3>
+<div class="w-full h-80" *ngIf="purposePieChart()">
+<plotly-plot [data]="purposePieChart().data" [layout]="purposePieChart().layout" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
+</div>
+<div class="mt-4 flex justify-end">
+<button (click)="downloadCSV(breakdowns()?.purpose_summary_table || [], 'purpose_breakdown.csv')" class="text-xs text-primary font-bold underline">Download Data</button>
+</div>
+</div>
+
+<!-- Horizontal Bar Charts -->
+<div class="lg:col-span-6 bg-white p-xl rounded-xl border border-border-base">
+<h3 class="font-section-heading text-section-heading uppercase mb-xl border-b border-grid-line pb-xs">Branch-wise Distribution</h3>
+<div class="w-full h-80" *ngIf="branchBarChart()">
+<plotly-plot [data]="branchBarChart().data" [layout]="branchBarChart().layout" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
+</div>
+<div class="mt-4 flex justify-end">
+<button (click)="downloadCSV(breakdowns()?.branch_df || [], 'branch_breakdown.csv')" class="text-xs text-primary font-bold underline">Download Data</button>
+</div>
+</div>
+</section>
+<!-- Bottom: AG-Grid Table -->
+<section class="bg-white border border-border-base rounded-xl overflow-hidden shadow-sm">
+<div class="px-xl py-lg border-b border-border-base bg-surface-container-lowest flex justify-between items-center">
+<div class="flex items-center gap-md">
+<h2 class="font-section-heading text-section-heading uppercase">Top Transactions</h2>
+<span class="bg-risk-high/10 text-risk-high text-[10px] font-extrabold px-xs py-[2px] rounded uppercase">Critical Monitoring</span>
+</div>
+<div class="flex gap-md">
+<input type="text" placeholder="Search records..." [ngModel]="tableSearchQuery()" (ngModelChange)="tableSearchQuery.set($event)" class="border border-border-base rounded px-md py-xs text-xs font-bold" />
+<button (click)="downloadCSV(filteredTransactions(), 'top_transactions.csv')" [disabled]="filteredTableCount() === 0" class="p-xs bg-surface-container hover:bg-surface-container-high transition-colors rounded text-xs font-bold">
+CSV
+</button>
+</div>
+</div>
+<div class="overflow-x-auto" style="max-height: 400px;" (scroll)="onTableScroll($event)">
+<table class="w-full text-left relative">
+<thead class="bg-surface text-xs font-bold text-secondary uppercase border-b border-border-base sticky top-0 z-10 shadow-sm">
+<tr>
+<th *ngFor="let header of tableHeaders()" class="px-xl py-md">{{ header }}</th>
+</tr>
+</thead>
+<tbody class="text-table-data">
+<tr *ngFor="let row of scrollableTransactions; let i = index" class="border-b border-grid-line hover:bg-surface-container-low transition-colors" [ngClass]="{'border-l-4 border-l-risk-high': i%3===0, 'border-l-4 border-l-risk-medium': i%3===1}">
+<td *ngFor="let header of tableHeaders()" class="px-xl py-md whitespace-nowrap overflow-hidden text-ellipsis max-w-[200px]">
+  {{ header === 'Net Amt' ? formatAmt(row[header]) : row[header] }}
+</td>
+</tr>
+<tr *ngIf="filteredTableCount() === 0">
+  <td [attr.colspan]="tableHeaders().length" class="text-center py-xl text-secondary">No records found.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="px-xl py-md bg-surface-container-low border-t border-border-base flex justify-between items-center">
+<span class="text-xs text-secondary font-bold">TOTAL RECORDS: {{ filteredTableCount() | number }}</span>
+</div>
+</section>
+</div>
+
+<ng-template #noDataTpl>
+  <div style="padding: 40px; text-align: center; color: #64748b; background: #f8fafc; border-radius: 12px; border: 1px dashed #cbd5e1;">
+    <h3 style="margin-top: 0;">No data loaded</h3>
+    <p>Please upload an Excel file using the sidebar to see the dashboard.</p>
+  </div>
+</ng-template>

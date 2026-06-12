@@ -1,0 +1,142 @@
+<div class="page-container" *ngIf="fatfData()">
+  <div class="section-header" style="display: flex; justify-content: space-between; align-items: flex-end;">
+    <div>
+      <h3>FATF & OFAC EXPOSURE</h3>
+      <p style="margin: 4px 0 0 0; font-size: 14px; color: #555;">Identify transactions matching known High Risk jurisdictions or entities.</p>
+    </div>
+    <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+      <label style="font-size: 13px; font-weight: 600; color: #334155; margin-right: 8px; display: block; margin-bottom: 4px;">Upload Master FATF/OFAC List:</label>
+      <input type="file" accept=".xlsx,.xls" (change)="onOfacFileSelected($event)" style="font-size: 13px;">
+    </div>
+  </div>
+
+  <div class="kpi-row" style="grid-template-columns: repeat(4, 1fr); display: grid; margin-bottom: 24px;">
+    <div class="kpi-card">
+      <div class="kpi-title">Flagged Transaction Count</div>
+      <div class="kpi-value">{{ fatfData().kpis.flagged_count | number }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-title">Total Exposure</div>
+      <div class="kpi-value">{{ fatfData().kpis.flagged_amount | humanReadableAmount }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-title">Affected Branches</div>
+      <div class="kpi-value">{{ fatfData().kpis.affected_branches | number }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-title">Affected Countries</div>
+      <div class="kpi-value">{{ fatfData().kpis.affected_countries | number }}</div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Flagged Transactions Detailed</h4>
+    <button (click)="downloadCSV(fatfData().flagged_transactions, 'fatf_transactions.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
+  </div>
+  <div class="table-container" style="max-height: 400px; margin-bottom: 32px;">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Corporate</th>
+          <th>Visiting Country</th>
+          <th>Segment</th>
+          <th>OFAC / FATF</th>
+          <th style="text-align: right">Net Amt</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of fatfData().flagged_transactions">
+          <td>{{ r['Date'] | date:'mediumDate' }}</td>
+          <td>{{ r['Corporate'] }}</td>
+          <td>{{ r['Visiting Country'] }}</td>
+          <td>{{ r['Segments'] }}</td>
+          <td>
+            <span style="background: #fee2e2; color: #b91c1c; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">{{ r['OFAC _ FATF'] }}</span>
+          </td>
+          <td style="text-align: right">{{ formatAmt(r['Net Amt']) }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
+    <!-- Branch Wise exposure -->
+    <div class="section">
+      <div class="section-header">
+        <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Branch Wise Flagged Exposure</h4>
+        <button (click)="downloadCSV(fatfData().branch_seg_summary, 'fatf_branch.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
+      </div>
+      <div class="table-container" style="max-height: 300px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Branch Name</th>
+              <th style="text-align: right">Txn Count</th>
+              <th style="text-align: right">Exposure Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of fatfData().branch_seg_summary">
+              <td>{{ row['Branch Name'] }}</td>
+              <td style="text-align: right">{{ row['Count'] | number }}</td>
+              <td style="text-align: right">{{ row['Net_Amount'] | humanReadableAmount }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Country Wise exposure -->
+    <div class="section">
+      <div class="section-header">
+        <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Country Wise Flagged Exposure</h4>
+        <button (click)="downloadCSV(fatfData().country_seg_summary, 'fatf_country.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
+      </div>
+      <div class="table-container" style="max-height: 300px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Visiting Country</th>
+              <th style="text-align: right">Txn Count</th>
+              <th style="text-align: right">Exposure Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of fatfData().country_seg_summary">
+              <td>{{ row['Visiting Country'] }}</td>
+              <td style="text-align: right">{{ row['Count'] | number }}</td>
+              <td style="text-align: right">{{ row['Net_Amount'] | humanReadableAmount }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Purpose Breakdown</h4>
+      <button (click)="downloadCSV(fatfData().purpose_counts, 'fatf_purpose.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Purpose</th>
+            <th style="text-align: right">Count</th>
+            <th style="text-align: right">Net Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of fatfData().purpose_counts">
+            <td>{{ row['Purpose'] }}</td>
+            <td style="text-align: right">{{ row['Count'] | number }}</td>
+            <td style="text-align: right">{{ row['Net_Amount'] | humanReadableAmount }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

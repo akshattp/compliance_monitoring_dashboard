@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GlobalPay AML - HIGH RISK CORPORATE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "border-base": "#E5E5E5",
+                    "surface-container-high": "#e8e8e8",
+                    "on-primary-fixed-variant": "#474646",
+                    "on-background": "#1a1c1c",
+                    "primary-fixed": "#e5e2e1",
+                    "outline-variant": "#c4c7c7",
+                    "muted": "#999999",
+                    "error": "#ba1a1a",
+                    "secondary-container": "#e4e2e2",
+                    "on-secondary": "#ffffff",
+                    "inverse-on-surface": "#f1f1f1",
+                    "secondary-fixed-dim": "#c8c6c6",
+                    "tertiary": "#000000",
+                    "on-secondary-fixed": "#1b1c1c",
+                    "error-container": "#ffdad6",
+                    "surface-container-low": "#f3f3f3",
+                    "risk-low": "#00CC96",
+                    "surface-bright": "#f9f9f9",
+                    "on-primary": "#ffffff",
+                    "surface": "#f9f9f9",
+                    "inverse-primary": "#c8c6c5",
+                    "secondary": "#5f5e5e",
+                    "outline": "#747878",
+                    "risk-medium": "#FFA15A",
+                    "surface-container-highest": "#e2e2e2",
+                    "grid-line": "#EEEEEE",
+                    "on-tertiary": "#ffffff",
+                    "on-tertiary-container": "#848484",
+                    "primary-fixed-dim": "#c8c6c5",
+                    "primary": "#000000",
+                    "on-error": "#ffffff",
+                    "on-primary-fixed": "#1c1b1b",
+                    "primary-container": "#1c1b1b",
+                    "on-error-container": "#93000a",
+                    "risk-high": "#EF553B",
+                    "secondary-fixed": "#e4e2e2",
+                    "inverse-surface": "#2f3131",
+                    "risk-unknown": "#636363",
+                    "surface-container": "#eeeeee",
+                    "on-tertiary-fixed": "#1b1c1c",
+                    "on-secondary-fixed-variant": "#474747",
+                    "tertiary-container": "#1b1c1c",
+                    "surface-tint": "#5f5e5e",
+                    "surface-variant": "#e2e2e2",
+                    "kpi-label": "#64748B",
+                    "on-surface-variant": "#444748",
+                    "kpi-value": "#0F172A",
+                    "on-secondary-container": "#656464",
+                    "light-ui": "#BBBBBB",
+                    "tertiary-fixed-dim": "#c7c6c6",
+                    "background": "#f9f9f9",
+                    "on-surface": "#1a1c1c",
+                    "on-primary-container": "#858383",
+                    "tertiary-fixed": "#e3e2e2",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-fixed-variant": "#464747",
+                    "surface-dim": "#dadada"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "card-padding": "20px",
+                    "base": "4px",
+                    "lg": "20px",
+                    "sidebar-width": "280px",
+                    "sm": "12px",
+                    "xs": "8px",
+                    "gutter": "16px",
+                    "xl": "24px",
+                    "md": "16px"
+            },
+            "fontFamily": {
+                    "section-heading": ["Inter"],
+                    "kpi-label": ["Inter"],
+                    "kpi-value": ["Inter"],
+                    "kpi-value-mobile": ["Inter"],
+                    "nav-pill": ["Inter"],
+                    "page-title": ["Inter"],
+                    "body-main": ["Inter"],
+                    "table-data": ["Inter"]
+            },
+            "fontSize": {
+                    "section-heading": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "kpi-label": ["13px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "kpi-value": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "kpi-value-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "nav-pill": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                    "page-title": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-main": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "table-data": ["13px", {"lineHeight": "18px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+        .high-risk-border { border-left: 4px solid #EF553B; }
+    </style>
+</head>
+<body class="bg-background text-on-background antialiased">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 bg-surface dark:bg-background shadow-sm dark:shadow-none">
+<div class="flex justify-between items-center max-w-[1440px] mx-auto px-lg py-sm">
+<div class="font-page-title text-page-title text-primary dark:text-on-primary-fixed">GlobalPay AML</div>
+<nav class="hidden md:flex items-center gap-base">
+<a class="px-md py-xs font-nav-pill text-nav-pill text-secondary dark:text-secondary-fixed hover:bg-surface-container-low transition-all" href="#">HOME PAGE</a>
+<a class="px-md py-xs font-nav-pill text-nav-pill text-secondary dark:text-secondary-fixed hover:bg-surface-container-low transition-all" href="#">TRANSACTION SUMMARY</a>
+<a class="px-md py-xs font-nav-pill text-nav-pill text-secondary dark:text-secondary-fixed hover:bg-surface-container-low transition-all" href="#">TOUR OPERATOR</a>
+<a class="px-md py-xs font-nav-pill text-nav-pill text-secondary dark:text-secondary-fixed hover:bg-surface-container-low transition-all" href="#">RETAIL HIGH VALUE TXN</a>
+<a class="px-md py-xs font-nav-pill text-nav-pill bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed rounded-full shadow-md" href="#">HIGH RISK CORPORATE</a>
+<a class="px-md py-xs font-nav-pill text-nav-pill text-secondary dark:text-secondary-fixed hover:bg-surface-container-low transition-all" href="#">FATF</a>
+</nav>
+<div class="flex items-center gap-md">
+<button class="bg-primary text-on-primary px-md py-xs rounded-full font-nav-pill text-nav-pill transition-all duration-300 ease-in-out cursor-pointer hover:bg-opacity-90">
+                    DOWNLOAD CSV
+                </button>
+</div>
+</div>
+</header>
+<!-- SideNavBar (Filters) -->
+<aside class="fixed left-0 top-0 h-full w-sidebar-width bg-surface-container-low dark:bg-surface-container border-r border-border-base dark:border-outline-variant flex flex-col h-full py-xl px-md mt-16">
+<div class="mb-xl">
+<h2 class="font-section-heading text-section-heading font-bold text-tertiary">Global Filters</h2>
+<p class="font-body-main text-[12px] text-secondary">Regulatory Oversight</p>
+</div>
+<div class="flex-grow space-y-lg overflow-y-auto custom-scrollbar">
+<!-- Filter Section 1 -->
+<div class="space-y-sm">
+<div class="flex items-center gap-xs text-primary dark:text-on-primary-fixed font-bold border-l-4 border-primary pl-xs">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span class="font-body-main text-body-main">Date Range</span>
+</div>
+<div class="px-sm py-xs bg-surface-container-lowest border border-border-base rounded-lg text-body-main cursor-pointer flex justify-between items-center">
+<span>Last 30 Days</span>
+<span class="material-symbols-outlined text-[18px]">expand_more</span>
+</div>
+</div>
+<!-- Filter Section 2 -->
+<div class="space-y-sm">
+<div class="flex items-center gap-xs text-secondary dark:text-secondary-fixed-dim hover:text-primary pl-xs transition-colors cursor-pointer">
+<span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+<span class="font-body-main text-body-main">FATF/OFAC Status</span>
+</div>
+<div class="space-y-xs pl-md">
+<label class="flex items-center gap-xs text-body-main cursor-pointer">
+<input checked="" class="rounded border-border-base text-primary focus:ring-0" type="checkbox"/>
+<span>High Risk Only</span>
+</label>
+</div>
+</div>
+<!-- Filter Section 3 -->
+<div class="space-y-sm">
+<div class="flex items-center gap-xs text-secondary dark:text-secondary-fixed-dim hover:text-primary pl-xs transition-colors cursor-pointer">
+<span class="material-symbols-outlined" data-icon="filter_list">filter_list</span>
+<span class="font-body-main text-body-main">Dynamic Filters</span>
+</div>
+<div class="px-sm py-xs bg-surface-container-lowest border border-border-base rounded-lg text-body-main">
+<span class="text-secondary text-[12px]">Risk Category</span>
+<div class="flex flex-wrap gap-xs mt-base">
+<span class="bg-primary text-on-primary px-xs py-1 rounded text-[11px] font-bold">HIGH</span>
+</div>
+</div>
+</div>
+<!-- Upload Area -->
+<div class="mt-xl p-md border-2 border-dashed border-border-base rounded-xl bg-surface hover:bg-surface-container transition-colors">
+<div class="text-center">
+<span class="material-symbols-outlined text-muted text-[32px]">upload_file</span>
+<p class="text-body-main font-bold mt-xs">Secondary Upload</p>
+<p class="text-[11px] text-muted">Party Master New report.csv</p>
+</div>
+</div>
+</div>
+<button class="w-full bg-primary text-on-primary py-sm rounded-lg font-nav-pill text-nav-pill shadow-md mt-xl hover:opacity-90 transition-all">
+            Apply All Filters
+        </button>
+<div class="mt-auto border-t border-border-base pt-md space-y-md">
+<div class="flex items-center gap-xs text-secondary hover:text-primary cursor-pointer transition-colors">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-body-main">Settings</span>
+</div>
+<div class="flex items-center gap-xs text-secondary hover:text-primary cursor-pointer transition-colors">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="text-body-main">Support</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-sidebar-width pt-24 px-xl pb-xl max-w-[1440px]">
+<!-- Page Title -->
+<div class="mb-xl flex items-center justify-between">
+<div>
+<h1 class="font-page-title text-page-title text-primary">High Risk Corporate Surveillance</h1>
+<p class="text-secondary text-body-main">Detailed analysis and monitoring of corporate entities with elevated risk profiles.</p>
+</div>
+<div class="flex items-center gap-sm">
+<span class="px-md py-1 bg-risk-high bg-opacity-10 text-risk-high rounded-full font-bold text-[12px] border border-risk-high border-opacity-20">ALERT: 14 New Flags</span>
+</div>
+</div>
+<!-- KPI Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-gutter mb-xl">
+<!-- KPI 1 -->
+<div class="bg-white p-card-padding rounded-xl border border-border-base shadow-[0_4px_6px_rgba(0,0,0,0.04)] relative">
+<div class="flex flex-col">
+<span class="font-kpi-label text-kpi-label uppercase">Total High-Risk Corporates</span>
+<span class="font-kpi-value text-kpi-value mt-base">1,284</span>
+<div class="flex items-center gap-xs mt-xs text-risk-high">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+<span class="text-[12px] font-bold">+12%</span>
+</div>
+</div>
+<div class="absolute top-md right-md bg-surface-container px-xs py-0.5 rounded border border-border-base text-[10px] text-secondary">ACTIVE</div>
+</div>
+<!-- KPI 2 -->
+<div class="bg-white p-card-padding rounded-xl border border-border-base shadow-[0_4px_6px_rgba(0,0,0,0.04)]">
+<div class="flex flex-col">
+<span class="font-kpi-label text-kpi-label uppercase">Total Txns (HIGH)</span>
+<span class="font-kpi-value text-kpi-value mt-base">42.1K</span>
+<div class="flex items-center gap-xs mt-xs text-risk-high">
+<span class="material-symbols-outlined text-[16px]">warning</span>
+<span class="text-[12px] font-bold">Priority</span>
+</div>
+</div>
+</div>
+<!-- KPI 3 -->
+<div class="bg-white p-card-padding rounded-xl border border-border-base shadow-[0_4px_6px_rgba(0,0,0,0.04)]">
+<div class="flex flex-col">
+<span class="font-kpi-label text-kpi-label uppercase">Total Amount (HIGH)</span>
+<span class="font-kpi-value text-kpi-value mt-base">$1.4B</span>
+<div class="flex items-center gap-xs mt-xs text-muted">
+<span class="text-[12px]">USD Equivalent</span>
+</div>
+</div>
+</div>
+<!-- KPI 4 -->
+<div class="bg-white p-card-padding rounded-xl border border-border-base shadow-[0_4px_6px_rgba(0,0,0,0.04)]">
+<div class="flex flex-col">
+<span class="font-kpi-label text-kpi-label uppercase">% Overall Txns</span>
+<span class="font-kpi-value text-kpi-value mt-base">8.4%</span>
+<div class="flex items-center gap-xs mt-xs text-risk-low">
+<span class="material-symbols-outlined text-[16px]">trending_down</span>
+<span class="text-[12px] font-bold">-0.5%</span>
+</div>
+</div>
+</div>
+<!-- KPI 5 -->
+<div class="bg-white p-card-padding rounded-xl border border-border-base shadow-[0_4px_6px_rgba(0,0,0,0.04)]">
+<div class="flex flex-col">
+<span class="font-kpi-label text-kpi-label uppercase">% Overall Amount</span>
+<span class="font-kpi-value text-kpi-value mt-base">14.2%</span>
+<div class="flex items-center gap-xs mt-xs text-risk-medium">
+<span class="material-symbols-outlined text-[16px]">horizontal_rule</span>
+<span class="text-[12px] font-bold">Stable</span>
+</div>
+</div>
+</div>
+<!-- KPI 6 -->
+<div class="bg-white p-card-padding rounded-xl border border-border-base shadow-[0_4px_6px_rgba(0,0,0,0.04)]">
+<div class="flex flex-col">
+<span class="font-kpi-label text-kpi-label uppercase">Avg Txn / Corp</span>
+<span class="font-kpi-value text-kpi-value mt-base">$32.8K</span>
+<div class="flex items-center gap-xs mt-xs text-muted">
+<span class="text-[12px]">per period</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Charts Grid (Bento Style) -->
+<div class="grid grid-cols-12 gap-gutter mb-xl">
+<!-- Trend Chart -->
+<div class="col-span-12 lg:col-span-8 bg-white p-xl rounded-xl border border-border-base shadow-[0_4px_6px_rgba(0,0,0,0.04)]">
+<div class="flex justify-between items-center mb-xl">
+<h3 class="font-section-heading text-section-heading text-primary">High Risk Corporate Transaction Trend</h3>
+<div class="flex gap-xs">
+<button class="px-sm py-1 bg-surface rounded border border-border-base text-[12px] font-bold">VOLUME</button>
+<button class="px-sm py-1 text-secondary text-[12px] font-bold">VALUE</button>
+</div>
+</div>
+<div class="h-64 flex items-end gap-md">
+<!-- Simulated Plotly Chart -->
+<div class="flex-1 bg-surface-container-low h-[40%] rounded-t-sm relative group cursor-pointer hover:bg-primary transition-colors">
+<div class="absolute -top-xl left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] px-2 py-1 rounded hidden group-hover:block">1.2k</div>
+</div>
+<div class="flex-1 bg-surface-container-low h-[60%] rounded-t-sm relative group cursor-pointer hover:bg-primary transition-colors"></div>
+<div class="flex-1 bg-surface-container-low h-[55%] rounded-t-sm relative group cursor-pointer hover:bg-primary transition-colors"></div>
+<div class="flex-1 bg-surface-container-low h-[85%] rounded-t-sm relative group cursor-pointer hover:bg-primary transition-colors"></div>
+<div class="flex-1 bg-primary h-[95%] rounded-t-sm relative group cursor-pointer hover:bg-primary transition-colors"></div>
+<div class="flex-1 bg-surface-container-low h-[70%] rounded-t-sm relative group cursor-pointer hover:bg-primary transition-colors"></div>
+<div class="flex-1 bg-surface-container-low h-[65%] rounded-t-sm relative group cursor-pointer hover:bg-primary transition-colors"></div>
+<div class="flex-1 bg-surface-container-low h-[50%] rounded-t-sm relative group cursor-pointer hover:bg-primary transition-colors"></div>
+<div class="flex-1 bg-surface-container-low h-[45%] rounded-t-sm relative group cursor-pointer hover:bg-primary transition-colors"></div>
+<div class="flex-1 bg-surface-container-low h-[40%] rounded-t-sm relative group cursor-pointer hover:bg-primary transition-colors"></div>
+</div>
+<div class="flex justify-between mt-sm text-[11px] text-muted font-bold">
+<span>JAN</span><span>FEB</span><span>MAR</span><span>APR</span><span>MAY</span><span>JUN</span><span>JUL</span><span>AUG</span><span>SEP</span><span>OCT</span>
+</div>
+</div>
+<!-- Risk Distribution -->
+<div class="col-span-12 lg:col-span-4 bg-white p-xl rounded-xl border border-border-base shadow-[0_4px_6px_rgba(0,0,0,0.04)] flex flex-col">
+<h3 class="font-section-heading text-section-heading text-primary mb-xl">Risk Distribution</h3>
+<div class="flex-grow flex items-center justify-center relative">
+<!-- Custom Donut Chart visualization -->
+<div class="w-48 h-48 rounded-full border-[24px] border-surface-container-highest relative">
+<div class="absolute inset-0 rounded-full border-[24px] border-primary border-t-transparent border-l-transparent" style="transform: rotate(45deg);"></div>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-kpi-value text-[24px]">72%</span>
+<span class="text-[10px] text-muted font-bold">HIGH RISK</span>
+</div>
+</div>
+</div>
+<div class="mt-xl space-y-xs">
+<div class="flex justify-between items-center text-body-main">
+<div class="flex items-center gap-xs"><div class="w-3 h-3 bg-primary rounded-full"></div><span>Corporate High</span></div>
+<span class="font-bold">1,284</span>
+</div>
+<div class="flex justify-between items-center text-body-main">
+<div class="flex items-center gap-xs"><div class="w-3 h-3 bg-secondary rounded-full"></div><span>Individual High</span></div>
+<span class="font-bold">452</span>
+</div>
+</div>
+</div>
+<!-- Top Corporates (List/Chart hybrid) -->
+<div class="col-span-12 lg:col-span-4 bg-white p-xl rounded-xl border border-border-base shadow-[0_4px_6px_rgba(0,0,0,0.04)]">
+<h3 class="font-section-heading text-section-heading text-primary mb-lg">Top High-Risk Corporates</h3>
+<div class="space-y-md">
+<div class="space-y-xs">
+<div class="flex justify-between text-[12px] font-bold"><span>Apex Global Holdings</span><span>$42.4M</span></div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-risk-high h-full w-[95%]"></div>
+</div>
+</div>
+<div class="space-y-xs">
+<div class="flex justify-between text-[12px] font-bold"><span>Nexus Trading Co.</span><span>$38.1M</span></div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-risk-high h-full w-[82%]"></div>
+</div>
+</div>
+<div class="space-y-xs">
+<div class="flex justify-between text-[12px] font-bold"><span>Summit Logistics Ltd</span><span>$29.5M</span></div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-risk-high h-full w-[65%]"></div>
+</div>
+</div>
+<div class="space-y-xs">
+<div class="flex justify-between text-[12px] font-bold"><span>Vanguard Offshore</span><span>$18.2M</span></div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-risk-high h-full w-[40%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Branch Exposure -->
+<div class="col-span-12 lg:col-span-4 bg-white p-xl rounded-xl border border-border-base shadow-[0_4px_6px_rgba(0,0,0,0.04)]">
+<h3 class="font-section-heading text-section-heading text-primary mb-lg">Branch Exposure</h3>
+<div class="space-y-md">
+<div class="flex items-center gap-md">
+<span class="w-24 text-[12px] font-bold truncate">Main Branch</span>
+<div class="flex-grow bg-surface-container h-6 rounded flex items-center px-2">
+<div class="bg-primary h-3 w-[70%] rounded-sm"></div>
+</div>
+<span class="text-[12px] font-bold">70%</span>
+</div>
+<div class="flex items-center gap-md">
+<span class="w-24 text-[12px] font-bold truncate">North Region</span>
+<div class="flex-grow bg-surface-container h-6 rounded flex items-center px-2">
+<div class="bg-primary h-3 w-[15%] rounded-sm"></div>
+</div>
+<span class="text-[12px] font-bold">15%</span>
+</div>
+<div class="flex items-center gap-md">
+<span class="w-24 text-[12px] font-bold truncate">Offshore Hub</span>
+<div class="flex-grow bg-surface-container h-6 rounded flex items-center px-2">
+<div class="bg-primary h-3 w-[10%] rounded-sm"></div>
+</div>
+<span class="text-[12px] font-bold">10%</span>
+</div>
+<div class="flex items-center gap-md">
+<span class="w-24 text-[12px] font-bold truncate">West Cluster</span>
+<div class="flex-grow bg-surface-container h-6 rounded flex items-center px-2">
+<div class="bg-primary h-3 w-[5%] rounded-sm"></div>
+</div>
+<span class="text-[12px] font-bold">5%</span>
+</div>
+</div>
+</div>
+<!-- Country/Product Exposure Mix -->
+<div class="col-span-12 lg:col-span-4 grid grid-rows-2 gap-gutter">
+<div class="bg-white p-md rounded-xl border border-border-base shadow-[0_4px_6px_rgba(0,0,0,0.04)]">
+<h4 class="font-kpi-label text-kpi-label text-primary mb-sm">COUNTRY EXPOSURE</h4>
+<div class="flex flex-wrap gap-xs">
+<span class="px-xs py-0.5 bg-surface-container rounded text-[11px] font-bold">Cayman Islands (42%)</span>
+<span class="px-xs py-0.5 bg-surface-container rounded text-[11px] font-bold">Panama (18%)</span>
+<span class="px-xs py-0.5 bg-surface-container rounded text-[11px] font-bold">UAE (12%)</span>
+<span class="px-xs py-0.5 bg-surface-container rounded text-[11px] font-bold">Cyprus (8%)</span>
+</div>
+</div>
+<div class="bg-white p-md rounded-xl border border-border-base shadow-[0_4px_6px_rgba(0,0,0,0.04)]">
+<h4 class="font-kpi-label text-kpi-label text-primary mb-sm">PRODUCT EXPOSURE</h4>
+<div class="flex items-center justify-between text-[12px] font-bold mb-xs">
+<span>Wire Transfers</span>
+<span class="text-risk-high">82%</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full mb-md overflow-hidden">
+<div class="bg-risk-high h-full w-[82%]"></div>
+</div>
+<div class="flex items-center justify-between text-[12px] font-bold mb-xs">
+<span>Letter of Credit</span>
+<span class="text-primary">12%</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[12%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Corporate Summary Table -->
+<section class="bg-white rounded-xl border border-border-base shadow-[0_4px_6px_rgba(0,0,0,0.04)] overflow-hidden mb-xl">
+<div class="px-xl py-lg border-b border-border-base flex justify-between items-center">
+<h3 class="font-section-heading text-section-heading text-primary">Corporate Summary</h3>
+<div class="flex gap-md">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-muted text-[18px]">search</span>
+<input class="pl-8 pr-md py-1.5 bg-surface-container-low border border-border-base rounded-lg text-[13px] w-64 focus:ring-1 focus:ring-primary outline-none" placeholder="Search corporates..." type="text"/>
+</div>
+<button class="bg-surface border border-border-base p-1.5 rounded-lg hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-secondary">tune</span>
+</button>
+</div>
+</div>
+<div class="overflow-x-auto custom-scrollbar">
+<table class="w-full text-left">
+<thead class="bg-surface border-b border-border-base">
+<tr>
+<th class="px-xl py-md font-kpi-label text-[13px] text-muted">CORPORATE NAME</th>
+<th class="px-md py-md font-kpi-label text-[13px] text-muted">ID / REG NO.</th>
+<th class="px-md py-md font-kpi-label text-[13px] text-muted text-center">RISK SCORE</th>
+<th class="px-md py-md font-kpi-label text-[13px] text-muted text-right">TOTAL TXN VALUE</th>
+<th class="px-md py-md font-kpi-label text-[13px] text-muted">LAST ACTIVITY</th>
+<th class="px-xl py-md font-kpi-label text-[13px] text-muted text-right">ACTION</th>
+</tr>
+</thead>
+<tbody class="text-table-data text-[13px]">
+<tr class="border-b border-border-base hover:bg-surface-container-low transition-colors high-risk-border">
+<td class="px-xl py-md font-bold text-primary">Apex Global Holdings Ltd</td>
+<td class="px-md py-md font-mono">KY-92384-B</td>
+<td class="px-md py-md text-center">
+<span class="px-xs py-1 bg-risk-high bg-opacity-10 text-risk-high rounded font-bold text-[11px]">98/100</span>
+</td>
+<td class="px-md py-md text-right font-bold">$42,481,000</td>
+<td class="px-md py-md text-secondary">2023-10-24 14:22</td>
+<td class="px-xl py-md text-right">
+<button class="text-primary hover:underline font-bold">Investigate</button>
+</td>
+</tr>
+<tr class="border-b border-border-base hover:bg-surface-container-low transition-colors high-risk-border">
+<td class="px-xl py-md font-bold text-primary">Nexus Trading Co.</td>
+<td class="px-md py-md font-mono">PN-0021-TX</td>
+<td class="px-md py-md text-center">
+<span class="px-xs py-1 bg-risk-high bg-opacity-10 text-risk-high rounded font-bold text-[11px]">92/100</span>
+</td>
+<td class="px-md py-md text-right font-bold">$38,102,550</td>
+<td class="px-md py-md text-secondary">2023-10-24 11:05</td>
+<td class="px-xl py-md text-right">
+<button class="text-primary hover:underline font-bold">Investigate</button>
+</td>
+</tr>
+<tr class="border-b border-border-base hover:bg-surface-container-low transition-colors high-risk-border">
+<td class="px-xl py-md font-bold text-primary">Summit Logistics Ltd</td>
+<td class="px-md py-md font-mono">CY-88219-X</td>
+<td class="px-md py-md text-center">
+<span class="px-xs py-1 bg-risk-high bg-opacity-10 text-risk-high rounded font-bold text-[11px]">89/100</span>
+</td>
+<td class="px-md py-md text-right font-bold">$29,540,200</td>
+<td class="px-md py-md text-secondary">2023-10-23 16:40</td>
+<td class="px-xl py-md text-right">
+<button class="text-primary hover:underline font-bold">Investigate</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors high-risk-border">
+<td class="px-xl py-md font-bold text-primary">Vanguard Offshore</td>
+<td class="px-md py-md font-mono">VG-77123-S</td>
+<td class="px-md py-md text-center">
+<span class="px-xs py-1 bg-risk-high bg-opacity-10 text-risk-high rounded font-bold text-[11px]">85/100</span>
+</td>
+<td class="px-md py-md text-right font-bold">$18,220,000</td>
+<td class="px-md py-md text-secondary">2023-10-23 09:15</td>
+<td class="px-xl py-md text-right">
+<button class="text-primary hover:underline font-bold">Investigate</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="px-xl py-md bg-surface flex justify-between items-center border-t border-border-base">
+<span class="text-[12px] text-muted">Showing 4 of 1,284 Corporates</span>
+<div class="flex gap-xs">
+<button class="px-md py-1 bg-white border border-border-base rounded text-[12px] font-bold disabled:opacity-50" disabled="">Previous</button>
+<button class="px-md py-1 bg-white border border-border-base rounded text-[12px] font-bold">Next</button>
+</div>
+</div>
+</section>
+<!-- Detailed Transactions Table -->
+<section class="bg-white rounded-xl border border-border-base shadow-[0_4px_6px_rgba(0,0,0,0.04)] overflow-hidden">
+<div class="px-xl py-lg border-b border-border-base flex justify-between items-center bg-primary text-on-primary">
+<h3 class="font-section-heading text-section-heading">Detailed Transactions (Risk Category: HIGH)</h3>
+<div class="flex gap-md">
+<button class="flex items-center gap-xs text-[12px] font-bold bg-white/10 px-md py-1 rounded-full border border-white/20">
+<span class="material-symbols-outlined text-[16px]">filter_alt</span>
+<span>FILTERED: RISK=HIGH</span>
+</button>
+</div>
+</div>
+<div class="overflow-x-auto custom-scrollbar">
+<table class="w-full text-left">
+<thead class="bg-surface-container border-b border-border-base">
+<tr>
+<th class="px-xl py-md font-kpi-label text-[13px] text-primary">TXN ID</th>
+<th class="px-md py-md font-kpi-label text-[13px] text-primary">ORIGINATOR</th>
+<th class="px-md py-md font-kpi-label text-[13px] text-primary">BENEFICIARY</th>
+<th class="px-md py-md font-kpi-label text-[13px] text-primary text-right">AMOUNT</th>
+<th class="px-md py-md font-kpi-label text-[13px] text-primary">CHANNEL</th>
+<th class="px-xl py-md font-kpi-label text-[13px] text-primary">STATUS</th>
+</tr>
+</thead>
+<tbody class="text-table-data text-[13px]">
+<tr class="border-b border-border-base hover:bg-surface-container-low transition-colors">
+<td class="px-xl py-md font-mono">TXN-09283-AM</td>
+<td class="px-md py-md">Apex Global Holdings</td>
+<td class="px-md py-md">Undisclosed Recipient (Panama)</td>
+<td class="px-md py-md text-right font-bold text-risk-high">$4,200,000</td>
+<td class="px-md py-md">SWIFT MT103</td>
+<td class="px-xl py-md">
+<span class="px-xs py-1 bg-risk-medium bg-opacity-10 text-risk-medium rounded font-bold text-[11px]">PENDING REVIEW</span>
+</td>
+</tr>
+<tr class="border-b border-border-base hover:bg-surface-container-low transition-colors">
+<td class="px-xl py-md font-mono">TXN-08172-BL</td>
+<td class="px-md py-md">Nexus Trading Co.</td>
+<td class="px-md py-md">Shell Corp A-1</td>
+<td class="px-md py-md text-right font-bold text-risk-high">$2,850,000</td>
+<td class="px-md py-md">Wire Transfer</td>
+<td class="px-xl py-md">
+<span class="px-xs py-1 bg-risk-high bg-opacity-10 text-risk-high rounded font-bold text-[11px]">FLAGGED</span>
+</td>
+</tr>
+<tr class="border-b border-border-base hover:bg-surface-container-low transition-colors">
+<td class="px-xl py-md font-mono">TXN-05542-XC</td>
+<td class="px-md py-md">Summit Logistics</td>
+<td class="px-md py-md">Logistics Vendor (BVI)</td>
+<td class="px-md py-md text-right font-bold text-risk-high">$1,120,500</td>
+<td class="px-md py-md">Internal Transfer</td>
+<td class="px-xl py-md">
+<span class="px-xs py-1 bg-risk-high bg-opacity-10 text-risk-high rounded font-bold text-[11px]">HOLD</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</main>
+<!-- Micro-interaction Scripts -->
+<script>
+        // Simple mock interaction for the investigate buttons
+        document.querySelectorAll('button:contains("Investigate")').forEach(btn => {
+            btn.addEventListener('click', () => {
+                alert('Drilling down into corporate profile...');
+            });
+        });
+
+        // Add CSS selector helper for text content since JS doesn't have :contains natively
+        document.querySelectorAll('button').forEach(btn => {
+            if(btn.innerText === "Investigate") {
+                btn.classList.add('cursor-pointer');
+            }
+        });
+    </script>
+</body></html>

@@ -1,0 +1,78 @@
+{
+  "kpis": {
+    "total_transactions": 15000,
+    "total_net_amt": 45000000,
+    "ps_amount": 20000000,
+    "pb_amount": 15000000,
+    "ps_count": 8000,
+    "pb_count": 5000,
+    "ps_count_pct": 53.3,
+    "ps_amt_pct": 44.4,
+    "pb_count_pct": 33.3,
+    "pb_amt_pct": 33.3,
+    "average_transaction": 3000,
+    "highest_transaction": 500000,
+    "lowest_transaction": 100,
+    "highest_pct": 1.1,
+    "lowest_pct": 0.0002,
+    "date_range": "2023-01-01 → 2023-12-31",
+    "best_segment_name": "REMITTANCE BY TOUR OPERATORS",
+    "best_segment_amt": 12000000,
+    "best_segment_pct": 26.6,
+    "best_branch_name": "MUMBAI MAIN BRANCH",
+    "best_branch_amt": 8000000,
+    "best_branch_pct": 17.7
+  },
+  "trends": {
+    "agg_df": [
+      { "Time": "2023-01-01", "Transaction_Amount": 100000, "Transaction_Count": 50 },
+      { "Time": "2023-01-02", "Transaction_Amount": 150000, "Transaction_Count": 70 },
+      { "Time": "2023-01-03", "Transaction_Amount": 80000, "Transaction_Count": 40 },
+      { "Time": "2023-01-04", "Transaction_Amount": 200000, "Transaction_Count": 90 },
+      { "Time": "2023-01-05", "Transaction_Amount": 300000, "Transaction_Count": 120 }
+    ],
+    "highest_amount_time": { "Time": "2023-01-05", "Transaction_Amount": 300000, "Transaction_Count": 120 },
+    "lowest_amount_time": { "Time": "2023-01-03", "Transaction_Amount": 80000, "Transaction_Count": 40 },
+    "highest_count_time": { "Time": "2023-01-05", "Transaction_Amount": 300000, "Transaction_Count": 120 },
+    "lowest_count_time": { "Time": "2023-01-03", "Transaction_Amount": 80000, "Transaction_Count": 40 }
+  },
+  "breakdowns": {
+    "purpose_df": [
+      { "Purpose": "REMITTANCE BY TOUR OPERATORS", "Count": 5000, "Net Amt": 15000000 },
+      { "Purpose": "MEDICAL TREATMENT", "Count": 3000, "Net Amt": 10000000 },
+      { "Purpose": "EDUCATION", "Count": 4000, "Net Amt": 12000000 },
+      { "Purpose": "Others", "Count": 3000, "Net Amt": 8000000 }
+    ],
+    "purpose_summary_table": [
+      { "Purpose": "REMITTANCE BY TOUR OPERATORS", "Count": 5000, "% Count": 33.3, "Net Amt": 15000000, "% Net Amount": 33.3, "is_other": false },
+      { "Purpose": "MEDICAL TREATMENT", "Count": 3000, "% Count": 20.0, "Net Amt": 10000000, "% Net Amount": 22.2, "is_other": false },
+      { "Purpose": "EDUCATION", "Count": 4000, "% Count": 26.6, "Net Amt": 12000000, "% Net Amount": 26.6, "is_other": false },
+      { "Purpose": "Others", "Count": 3000, "% Count": 20.0, "Net Amt": 8000000, "% Net Amount": 17.7, "is_other": true },
+      { "Purpose": "**TOTAL**", "Count": 15000, "% Count": 100.0, "Net Amt": 45000000, "% Net Amount": 100.0, "is_other": false }
+    ],
+    "product_df": [
+      { "Product": "WIRE", "Count": 8000, "Net Amt": 25000000 },
+      { "Product": "DRAFT", "Count": 7000, "Net Amt": 20000000 }
+    ],
+    "product_summary_table": [
+      { "Product": "WIRE", "Count": 8000, "% Count": 53.3, "Net Amt": 25000000, "% Net Amount": 55.5 },
+      { "Product": "DRAFT", "Count": 7000, "% Count": 46.6, "Net Amt": 20000000, "% Net Amount": 44.4 },
+      { "Product": "**TOTAL**", "Count": 15000, "% Count": 100.0, "Net Amt": 45000000, "% Net Amount": 100.0 }
+    ],
+    "branch_df": [
+      { "Branch Name": "MUMBAI MAIN", "Count": 6000, "Net Amt": 20000000 },
+      { "Branch Name": "DELHI CENTRAL", "Count": 5000, "Net Amt": 15000000 },
+      { "Branch Name": "BANGALORE HUB", "Count": 4000, "Net Amt": 10000000 }
+    ],
+    "country_df": [
+      { "Visiting Country": "USA", "Count": 5000, "Net Amt": 20000000 },
+      { "Visiting Country": "UK", "Count": 4000, "Net Amt": 10000000 },
+      { "Visiting Country": "UAE", "Count": 6000, "Net Amt": 15000000 }
+    ]
+  },
+  "top_transactions": [
+    { "Date": "2023-01-05", "Ref Number": "TXN9023", "Account Name": "JANE DOE", "Net Amt": 500000, "Currency": "USD", "Purpose": "MEDICAL TREATMENT", "Branch": "MUMBAI MAIN" },
+    { "Date": "2023-01-04", "Ref Number": "TXN8123", "Account Name": "JOHN SMITH", "Net Amt": 200000, "Currency": "GBP", "Purpose": "EDUCATION", "Branch": "DELHI CENTRAL" },
+    { "Date": "2023-01-02", "Ref Number": "TXN4021", "Account Name": "ACME CORP", "Net Amt": 150000, "Currency": "EUR", "Purpose": "REMITTANCE BY TOUR OPERATORS", "Branch": "BANGALORE HUB" }
+  ]
+}

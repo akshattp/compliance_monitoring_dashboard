@@ -1,0 +1,246 @@
+<div class="page-container">
+
+  <!-- Header -->
+  <div class="section-header">
+    <div>
+      <h3>Transaction Summary</h3>
+      <p style="margin: 4px 0 0 0; font-size: 14px; color: #555;">Monthly summary of transaction volumes and exposure metrics.</p>
+    </div>
+    <button (click)="downloadCSV(dataService.filteredDf(), 'transaction_summary_full.csv')" style="background: #111; color: white; border: none; padding: 8px 16px; font-weight: 600; border-radius: 6px; cursor: pointer;">
+      Download CSV
+    </button>
+  </div>
+
+  <div class="section">
+    <h3 style="font-size: 18px; font-weight: 600; color: #111; margin-bottom: 16px;">Transaction Type Summary</h3>
+
+  <!-- KPI Grid (8 metrics in 2 rows of 4) -->
+    <div class="kpi-row" style="display: grid; grid-template-columns: repeat(4, 1fr);">
+      <div *ngFor="let type of ['PS', 'PB', 'CB', 'FB', 'FS', 'BB', 'BS', 'BT']" class="kpi-card">
+        <div class="kpi-title">{{type}} Transactions</div>
+        <div class="kpi-value">{{ getKpi(type).count || 0 | number }}</div>
+        <div class="kpi-stat"><strong>Amount:</strong> {{ formatAmt(getKpi(type).amount || 0) }}</div>
+      </div>
+    </div>
+  </div>
+
+  <hr style="border: 0; border-top: 1px solid #e5e5e5; margin: 32px 0;">
+
+  <!-- Transaction Analysis by Type -->
+  <div class="section">
+    <h3 style="font-size: 18px; font-weight: 600; color: #111; margin-bottom: 16px;">Transaction Analysis by Type</h3>
+    <div class="grid-row" style="grid-template-columns: 2fr 3fr;">
+      <div class="chart-container">
+        <plotly-plot *ngIf="typePieChart()" [data]="typePieChart().data" [layout]="typePieChart().layout" [useResizeHandler]="true" [style]="{width: '100%', height: '400px'}"></plotly-plot>
+      </div>
+      <div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Txn Type</th>
+                <th>Count</th>
+                <th>Count %</th>
+                <th>Amount</th>
+                <th>Amount %</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of breakdown().display_table" [ngClass]="{'total-row': row['Txn Type'] === '**TOTAL**'}">
+                <td>{{ row['Txn Type'] }}</td>
+                <td>{{ row['Count'] | number }}</td>
+                <td>{{ row['Count %'] | number:'1.2-2' }}%</td>
+                <td>{{ row['Amount'] === '**TOTAL**' ? '' : formatAmt(row['Amount']) }}</td>
+                <td>{{ row['Amount %'] | number:'1.2-2' }}%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr style="border: 0; border-top: 1px solid #e5e5e5; margin: 32px 0;">
+
+  <!-- Transaction Composition Analysis -->
+  <div class="section">
+    <div class="section-header">
+      <h3>Transaction Composition Analysis</h3>
+      
+      <div style="display: flex; gap: 24px;">
+        <div class="toggle-group">
+          <button [class.active]="globalMetric() === 'Count'" (click)="globalMetric.set('Count')">Count</button>
+          <button [class.active]="globalMetric() === 'Net Amount'" (click)="globalMetric.set('Net Amount')">Net Amount</button>
+        </div>
+
+        <div class="toggle-group" style="flex-wrap: wrap; max-width: 400px;">
+          <button *ngFor="let txn of availableTxns()" 
+                  (click)="toggleTxnSelection(txn)"
+                  [class.active]="selectedTxns().includes(txn)">
+            {{txn}}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Branch Composition -->
+    <div style="margin-bottom: 48px;">
+      <div class="chart-container" style="margin-bottom: 16px;">
+        <plotly-plot *ngIf="branchChart()" [data]="branchChart().data" [layout]="branchChart().layout" [useResizeHandler]="true" [style]="{width: '100%'}"></plotly-plot>
+      </div>
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h4 style="margin: 0;">Branch Breakdown</h4>
+        <button (click)="downloadCSV(branchComposition().display_table, 'branch_records.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Branch Name</th>
+              <th>Count</th>
+              <th>Count %</th>
+              <th>Net Amt</th>
+              <th>Net Amount %</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of branchComposition().display_table | slice:0:scrollLimitBranch()">
+              <td>{{ r['Branch Name'] }}</td>
+              <td>{{ r['Count'] | number }}</td>
+              <td>{{ r['Count %'] | number:'1.2-2' }}%</td>
+              <td>{{ formatAmt(r['Net Amt']) }}</td>
+              <td>{{ r['Net Amount %'] | number:'1.2-2' }}%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div style="margin-top: 12px; font-size: 13px; font-weight: 600; color: #475569; display: flex; gap: 24px;">
+        <span>TOTAL RECORDS: {{ branchComposition().records_count | number }}</span>
+        <span>TOTAL COUNT: {{ branchComposition().total_count | number }}</span>
+        <span>TOTAL NET AMOUNT: {{ formatAmt(branchComposition().total_amount) }}</span>
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- Product Composition -->
+    <div style="margin-bottom: 48px;">
+      <div class="chart-container" style="margin-bottom: 16px;">
+        <plotly-plot *ngIf="productChart()" [data]="productChart().data" [layout]="productChart().layout" [useResizeHandler]="true" [style]="{width: '100%'}"></plotly-plot>
+      </div>
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h4 style="margin: 0;">Product Breakdown</h4>
+        <button (click)="downloadCSV(productComposition().display_table, 'product_records.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Count</th>
+              <th>Count %</th>
+              <th>Net Amt</th>
+              <th>Net Amount %</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of productComposition().display_table | slice:0:scrollLimitProduct()">
+              <td>{{ r['Product'] }}</td>
+              <td>{{ r['Count'] | number }}</td>
+              <td>{{ r['Count %'] | number:'1.2-2' }}%</td>
+              <td>{{ formatAmt(r['Net Amt']) }}</td>
+              <td>{{ r['Net Amount %'] | number:'1.2-2' }}%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div style="margin-top: 12px; font-size: 13px; font-weight: 600; color: #475569; display: flex; gap: 24px;">
+        <span>TOTAL RECORDS: {{ productComposition().records_count | number }}</span>
+        <span>TOTAL COUNT: {{ productComposition().total_count | number }}</span>
+        <span>TOTAL NET AMOUNT: {{ formatAmt(productComposition().total_amount) }}</span>
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- Segment Composition -->
+    <div style="margin-bottom: 48px;">
+      <div class="chart-container" style="margin-bottom: 16px;">
+        <plotly-plot *ngIf="segmentChart()" [data]="segmentChart().data" [layout]="segmentChart().layout" [useResizeHandler]="true" [style]="{width: '100%'}"></plotly-plot>
+      </div>
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h4 style="margin: 0;">Segment Breakdown</h4>
+        <button (click)="downloadCSV(segmentComposition().display_table, 'segment_records.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Segments</th>
+              <th>Count</th>
+              <th>Count %</th>
+              <th>Net Amt</th>
+              <th>Net Amount %</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of segmentComposition().display_table | slice:0:scrollLimitSegment()">
+              <td>{{ r['Segments'] }}</td>
+              <td>{{ r['Count'] | number }}</td>
+              <td>{{ r['Count %'] | number:'1.2-2' }}%</td>
+              <td>{{ formatAmt(r['Net Amt']) }}</td>
+              <td>{{ r['Net Amount %'] | number:'1.2-2' }}%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div style="margin-top: 12px; font-size: 13px; font-weight: 600; color: #475569; display: flex; gap: 24px;">
+        <span>TOTAL RECORDS: {{ segmentComposition().records_count | number }}</span>
+        <span>TOTAL COUNT: {{ segmentComposition().total_count | number }}</span>
+        <span>TOTAL NET AMOUNT: {{ formatAmt(segmentComposition().total_amount) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <!-- Purpose Summary Table -->
+    <div class="section-header">
+      <h3>Purpose Summary Table</h3>
+      <button (click)="downloadCSV(purposeSummary(), 'purpose_summary.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
+    </div>
+    
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Purpose</th>
+            <th>Count</th>
+            <th>Count %</th>
+            <th>Net Amt</th>
+            <th>Net Amount %</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of purposeSummary()">
+            <td>{{ row['Purpose'] }}</td>
+            <td>{{ row['Count'] | number }}</td>
+            <td>{{ row['% Count'] | number:'1.2-2' }}%</td>
+            <td>{{ formatAmt(row['Net Amt']) }}</td>
+            <td>{{ row['% Net Amount'] | number:'1.2-2' }}%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

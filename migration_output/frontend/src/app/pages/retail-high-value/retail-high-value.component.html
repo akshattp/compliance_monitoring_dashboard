@@ -1,0 +1,182 @@
+<div class="page-container">
+  <div class="section-header">
+    <div>
+      <h3>Retail High Value TXN</h3>
+      <p style="margin: 4px 0 0 0; font-size: 14px; color: #555;">Automated monitoring of high-value retail transactions using USD equivalent thresholds.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <h3>High Risk Exposure & Key Performance Indicators</h3>
+    </div>
+    <div class="kpi-row" style="grid-template-columns: repeat(4, 1fr); display: grid;">
+      <div class="kpi-card">
+        <div class="kpi-title">High Risk</div>
+        <div class="kpi-value">{{ kpis()?.high_risk_count | number }}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">High Risk Exposure</div>
+        <div class="kpi-value">{{ kpis()?.total_high_value_amount | humanReadableAmount }}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Highest Exposure</div>
+        <div class="kpi-value">{{ kpis()?.highest_usd_txn | humanReadableAmount }}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Avg Exposure</div>
+        <div class="kpi-value">{{ kpis()?.avg_usd_txn | humanReadableAmount }}</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <div class="section-header">
+      <h3>Automated Compliance Observations</h3>
+    </div>
+    <div style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; line-height: 1.6; white-space: pre-wrap;">
+      {{ observations() }}
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-header">
+      <h3>Risk Analysis & Distribution</h3>
+    </div>
+    <div class="grid-row">
+      <div class="chart-container" *ngIf="riskDistChart()">
+        <plotly-plot [data]="riskDistChart()!.data" [layout]="riskDistChart()!.layout" [useResizeHandler]="true"></plotly-plot>
+      </div>
+      <div class="chart-container" *ngIf="segmentRiskChart()">
+        <plotly-plot [data]="segmentRiskChart()!.data" [layout]="segmentRiskChart()!.layout" [useResizeHandler]="true"></plotly-plot>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-header">
+      <h3>Branch & Corporate Exposure</h3>
+    </div>
+    <div class="grid-row">
+      <div>
+        <div class="chart-container mb-4" *ngIf="branchExposureChart()">
+          <plotly-plot [data]="branchExposureChart()!.data" [layout]="branchExposureChart()!.layout" [useResizeHandler]="true"></plotly-plot>
+        </div>
+        <div class="table-container" style="max-height: 350px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Branch Name</th>
+                <th>Count</th>
+                <th>Count %</th>
+                <th>Net Amount</th>
+                <th>Net Amount %</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let r of branchData() | slice:0:scrollLimitBranch()">
+                <td>{{ r['Branch Name'] }}</td>
+                <td>{{ r['Count'] | number }}</td>
+                <td>{{ r['Count %'] | number:'1.2-2' }}%</td>
+                <td>{{ r['Total_USD'] | number }}</td>
+                <td>{{ r['Net Amount %'] | number:'1.2-2' }}%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div>
+        <div class="chart-container mb-4" *ngIf="corpExposureChart()">
+          <plotly-plot [data]="corpExposureChart()!.data" [layout]="corpExposureChart()!.layout" [useResizeHandler]="true"></plotly-plot>
+        </div>
+        <div class="table-container" style="max-height: 350px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Corporate</th>
+                <th>Count</th>
+                <th>Count %</th>
+                <th>Net Amount</th>
+                <th>Net Amount %</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let r of corporateData() | slice:0:scrollLimitCorp()">
+                <td>{{ r['Corporate'] }}</td>
+                <td>{{ r['Count'] | number }}</td>
+                <td>{{ r['Count %'] | number:'1.2-2' }}%</td>
+                <td>{{ r['Total_USD'] | number }}</td>
+                <td>{{ r['Net Amount %'] | number:'1.2-2' }}%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-header">
+      <h3>Transaction Trends</h3>
+      
+      <div style="display: flex; gap: 24px;">
+        <div class="toggle-group">
+          <button [class.active]="trendTime() === 'DAILY'" (click)="trendTime.set('DAILY')">DAILY</button>
+          <button [class.active]="trendTime() === 'WEEKLY'" (click)="trendTime.set('WEEKLY')">WEEKLY</button>
+        </div>
+        <div class="toggle-group">
+          <button [class.active]="trendMetric() === 'COUNT'" (click)="trendMetric.set('COUNT')">COUNT</button>
+          <button [class.active]="trendMetric() === 'NET AMOUNT'" (click)="trendMetric.set('NET AMOUNT')">NET AMOUNT</button>
+        </div>
+      </div>
+    </div>
+    <div class="chart-container mb-6" *ngIf="trendChart()">
+      <plotly-plot [data]="trendChart()!.data" [layout]="trendChart()!.layout" [useResizeHandler]="true"></plotly-plot>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-header">
+      <h3>Detailed High-Value Transaction Listing</h3>
+      <button (click)="downloadCSV(transactionTable(), 'high_value_transactions.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
+    </div>
+    <div class="table-container" (scroll)="onTableScroll($event, 'tx')" style="max-height: 500px;">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Passenger Name</th>
+            <th>Passport</th>
+            <th>Corporate</th>
+            <th>Branch Name</th>
+            <th>Currency</th>
+            <th>Net Amt</th>
+            <th>EQV USD</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of transactionTable() | slice:0:scrollLimitTx()">
+            <td>{{ r['Date'] | date:'mediumDate' }}</td>
+            <td>{{ r['Passenger Name'] }}</td>
+            <td>{{ r['Passport'] }}</td>
+            <td>{{ r['Corporate'] }}</td>
+            <td>{{ r['Branch Name'] }}</td>
+            <td>{{ r['Currency'] }}</td>
+            <td>{{ formatAmt(r['Net Amt']) }}</td>
+            <td>{{ formatAmt(r['EQV USD']) }}</td>
+            <td>{{ r['Purpose'] }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,15 @@
+/* 
+All styles have been migrated to Tailwind utility classes.
+*/
+
+/* We can keep the custom scrollbar logic if it's not globally available */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+}

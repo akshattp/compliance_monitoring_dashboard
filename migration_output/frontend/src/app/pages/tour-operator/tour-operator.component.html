@@ -1,0 +1,147 @@
+<app-page-header
+  title="Tour Operator"
+  subtitle="Tour operator remittance review with branch, corporate and country concentration analysis.">
+</app-page-header>
+
+<div class="page-container">
+  <!-- KPIs -->
+  <div class="kpi-row" style="grid-template-columns: repeat(3, 1fr); display: grid;">
+    <div class="kpi-card">
+      <div class="kpi-title">Tour Operator Txn Count</div>
+      <div class="kpi-value">{{ kpis()?.total_txn | number }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-title">Tour Operator Amount</div>
+      <div class="kpi-value">{{ kpis()?.total_amount | humanReadableAmount }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-title">Contribution to PS %</div>
+      <div class="kpi-value">{{ (kpis()?.contribution_to_ps | number:'1.1-1') + '%' }}</div>
+      <div class="kpi-delta">Tour Operator amount / Total PS amount * 100</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <h3>Operator Intelligence</h3>
+    </div>
+    <div class="kpi-row" style="grid-template-columns: repeat(4, 1fr); display: grid;" *ngIf="intelligence()?.best_operator">
+      <div class="kpi-card">
+        <div class="kpi-title">Best Tour Operator</div>
+        <div class="kpi-entity">{{ intelligence().best_operator.name }}</div>
+        <div class="kpi-stat"><strong>Count:</strong> {{ intelligence().best_operator.count | number }} ({{ intelligence().best_operator.count_pct | number:'1.2-2' }}%)</div>
+        <div class="kpi-stat"><strong>Amount:</strong> {{ intelligence().best_operator.amount | humanReadableAmount }} ({{ intelligence().best_operator.amount_pct | number:'1.2-2' }}%)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Best Beneficiary</div>
+        <div class="kpi-entity">{{ intelligence().best_beneficiary.name }}</div>
+        <div class="kpi-stat"><strong>Count:</strong> {{ intelligence().best_beneficiary.count | number }} ({{ intelligence().best_beneficiary.count_pct | number:'1.2-2' }}%)</div>
+        <div class="kpi-stat"><strong>Amount:</strong> {{ intelligence().best_beneficiary.amount | humanReadableAmount }} ({{ intelligence().best_beneficiary.amount_pct | number:'1.2-2' }}%)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Best Branch by Occurrence</div>
+        <div class="kpi-entity">{{ intelligence().best_branch.name }}</div>
+        <div class="kpi-stat"><strong>Count:</strong> {{ intelligence().best_branch.count | number }} ({{ intelligence().best_branch.count_pct | number:'1.2-2' }}%)</div>
+        <div class="kpi-stat"><strong>Amount:</strong> {{ intelligence().best_branch.amount | humanReadableAmount }} ({{ intelligence().best_branch.amount_pct | number:'1.2-2' }}%)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Best Visiting Country</div>
+        <div class="kpi-entity">{{ intelligence().best_country.name }}</div>
+        <div class="kpi-stat"><strong>Count:</strong> {{ intelligence().best_country.count | number }} ({{ intelligence().best_country.count_pct | number:'1.2-2' }}%)</div>
+        <div class="kpi-stat"><strong>Amount:</strong> {{ intelligence().best_country.amount | humanReadableAmount }} ({{ intelligence().best_country.amount_pct | number:'1.2-2' }}%)</div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- Charts -->
+  <div class="section">
+    <div class="chart-container" *ngIf="purposeMixChart()">
+      <plotly-plot [data]="purposeMixChart()!.data" [layout]="purposeMixChart()!.layout" [useResizeHandler]="true"></plotly-plot>
+    </div>
+  </div>
+
+  <div class="grid-row">
+    <div class="section">
+      <div class="chart-container" *ngIf="branchChart()" style="margin-bottom: 16px;">
+        <plotly-plot [data]="branchChart()!.data" [layout]="branchChart()!.layout" [useResizeHandler]="true"></plotly-plot>
+      </div>
+      <div class="section-header">
+        <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Branch Segment Breakdown</h4>
+      </div>
+      <div class="table-container" style="max-height: 400px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Branch Name</th>
+              <th>Count</th>
+              <th>Count %</th>
+              <th>Net Amt</th>
+              <th>Net Amt %</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of branchComposition().display_table">
+              <td>{{ r['Branch Name'] }}</td>
+              <td>{{ r['Count'] | number }}</td>
+              <td>{{ r['Count %'] | number:'1.2-2' }}%</td>
+              <td>{{ r['Net Amt'] | number }}</td>
+              <td>{{ r['Net Amt %'] | number:'1.2-2' }}%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="chart-container" *ngIf="corpChart()" style="margin-bottom: 16px;">
+        <plotly-plot [data]="corpChart()!.data" [layout]="corpChart()!.layout" [useResizeHandler]="true"></plotly-plot>
+      </div>
+      <div class="section-header">
+        <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Operator Breakdown</h4>
+      </div>
+      <div class="table-container" style="max-height: 400px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Operator</th>
+              <th>Count</th>
+              <th>Count %</th>
+              <th>Net Amount</th>
+              <th>Net Amount %</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of corporateComposition().display_table">
+              <td>{{ r['Operator'] }}</td>
+              <td>{{ r['Count'] | number }}</td>
+              <td>{{ r['Count %'] | number:'1.2-2' }}%</td>
+              <td>{{ r['Net Amount'] | number }}</td>
+              <td>{{ r['Net Amount %'] | number:'1.2-2' }}%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top: 12px; font-size: 13px; font-weight: 600; color: #475569; display: flex; gap: 24px;">
+        <span>TOTAL RECORDS: {{ corporateComposition().total_count | number }}</span>
+        <span>TOTAL NET AMOUNT: {{ corporateComposition().total_amt | humanReadableAmount }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="chart-container" *ngIf="countryChart()">
+      <plotly-plot [data]="countryChart()!.data" [layout]="countryChart()!.layout" [useResizeHandler]="true"></plotly-plot>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <h3>Automated Observation</h3>
+    </div>
+    <div style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; line-height: 1.6;">
+      {{ observation() }}
+    </div>
+  </div>
+</div>

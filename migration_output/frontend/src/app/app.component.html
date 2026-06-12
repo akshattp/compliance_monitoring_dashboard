@@ -1,0 +1,48 @@
+<!-- Top Navigation -->
+<nav class="fixed top-0 w-full z-50 bg-surface dark:bg-background shadow-sm dark:shadow-none">
+  <div class="flex justify-between items-center max-w-[1440px] mx-auto px-lg py-sm">
+    <div class="flex items-center gap-sm">
+      <div class="font-page-title text-page-title text-primary dark:text-on-primary-fixed">
+        GlobalPay AML
+      </div>
+      <div class="text-xs font-medium px-2 py-0.5 rounded-full" 
+           [class.bg-green-100]="backendStatus() === 'connected'" [class.text-green-800]="backendStatus() === 'connected'"
+           [class.bg-red-100]="backendStatus() === 'offline'" [class.text-red-800]="backendStatus() === 'offline'"
+           [class.bg-gray-100]="backendStatus() === 'checking'" [class.text-gray-800]="backendStatus() === 'checking'">
+        @if(backendStatus() === 'connected') { Backend Connected }
+        @else if (backendStatus() === 'offline') { Backend Offline }
+        @else { Checking Backend... }
+      </div>
+    </div>
+    
+    <div class="hidden md:flex items-center gap-base">
+      <a routerLink="/home" routerLinkActive="active-pill" class="nav-link font-nav-pill text-nav-pill px-md py-xs rounded-full transition-all duration-300 ease-in-out cursor-pointer">HOME PAGE</a>
+      <a routerLink="/transaction-summary" routerLinkActive="active-pill" class="nav-link font-nav-pill text-nav-pill px-md py-xs rounded-full transition-all duration-300 ease-in-out cursor-pointer">TRANSACTION SUMMARY</a>
+      <a routerLink="/tour-operator" routerLinkActive="active-pill" class="nav-link font-nav-pill text-nav-pill px-md py-xs rounded-full transition-all duration-300 ease-in-out cursor-pointer">TOUR OPERATOR</a>
+      <a routerLink="/retail-high-value" routerLinkActive="active-pill" class="nav-link font-nav-pill text-nav-pill px-md py-xs rounded-full transition-all duration-300 ease-in-out cursor-pointer">RETAIL HIGH VALUE TXN</a>
+      <a routerLink="/high-risk-corporate" routerLinkActive="active-pill" class="nav-link font-nav-pill text-nav-pill px-md py-xs rounded-full transition-all duration-300 ease-in-out cursor-pointer">HIGH RISK CORPORATE</a>
+      <a routerLink="/fatf" routerLinkActive="active-pill" class="nav-link font-nav-pill text-nav-pill px-md py-xs rounded-full transition-all duration-300 ease-in-out cursor-pointer">FATF</a>
+      <a routerLink="/transaction-monitoring" routerLinkActive="active-pill" class="nav-link font-nav-pill text-nav-pill px-md py-xs rounded-full transition-all duration-300 ease-in-out cursor-pointer">MONITORING</a>
+      <a routerLink="/agent-analysis" routerLinkActive="active-pill" class="nav-link font-nav-pill text-nav-pill px-md py-xs rounded-full transition-all duration-300 ease-in-out cursor-pointer">AGENT ANALYSIS</a>
+      <a routerLink="/passenger-analysis" routerLinkActive="active-pill" class="nav-link font-nav-pill text-nav-pill px-md py-xs rounded-full transition-all duration-300 ease-in-out cursor-pointer">PASSENGER ANALYSIS</a>
+    </div>
+    
+    <div class="flex items-center gap-md">
+      <div class="relative hidden lg:block">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm">search</span>
+        <input class="pl-10 pr-4 py-1.5 bg-surface-container-low border border-border-base rounded-full text-sm focus:outline-none focus:ring-1 focus:ring-primary w-64" placeholder="Search parameters..." type="text"/>
+      </div>
+      <button class="bg-primary text-on-primary px-lg py-xs rounded-lg font-nav-pill text-nav-pill hover:opacity-90 transition-opacity">
+        DOWNLOAD CSV
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Sidebar -->
+<app-sidebar #sidebar></app-sidebar>
+
+<!-- Main Content Area -->
+<main class="pt-24 pb-12 px-xl max-w-[1440px] mx-auto transition-all duration-300" [class.ml-0]="sidebar.isCollapsed" [class.ml-[280px]]="!sidebar.isCollapsed">
+  <router-outlet></router-outlet>
+</main>

@@ -1,0 +1,194 @@
+<div class="page-container" *ngIf="paxData() && paxData().kpis">
+  <div class="section-header">
+    <div>
+      <h3>PASSENGER DATA QUALITY & KYC</h3>
+      <p style="margin: 4px 0 0 0; font-size: 14px; color: #555;">Analyze KYC completeness and data quality anomalies across passenger records.</p>
+    </div>
+  </div>
+
+  <div class="kpi-row" style="grid-template-columns: repeat(4, 1fr); display: grid; margin-bottom: 24px;">
+    <div class="kpi-card" style="border-left: 4px solid #10b981;">
+      <div class="kpi-title">Valid PAN Count</div>
+      <div class="kpi-value">{{ paxData().kpis.pan_count | number }}</div>
+      <div style="font-size: 12px; color: #64748b; margin-top: 4px;">{{ paxData().kpis.pan_pct | number:'1.0-1' }}% of total</div>
+    </div>
+    <div class="kpi-card" style="border-left: 4px solid #3b82f6;">
+      <div class="kpi-title">Valid Passport Count</div>
+      <div class="kpi-value">{{ paxData().kpis.passport_count | number }}</div>
+      <div style="font-size: 12px; color: #64748b; margin-top: 4px;">{{ paxData().kpis.passport_pct | number:'1.0-1' }}% of total</div>
+    </div>
+    <div class="kpi-card" style="border-left: 4px solid #f59e0b;">
+      <div class="kpi-title">Invalid IDs</div>
+      <div class="kpi-value">{{ paxData().kpis.invalid_count | number }}</div>
+      <div style="font-size: 12px; color: #64748b; margin-top: 4px;">{{ paxData().kpis.invalid_pct | number:'1.0-1' }}% of total</div>
+    </div>
+    <div class="kpi-card" style="border-left: 4px solid #ef4444;">
+      <div class="kpi-title">Blank / Missing IDs</div>
+      <div class="kpi-value">{{ paxData().kpis.blank_count | number }}</div>
+      <div style="font-size: 12px; color: #64748b; margin-top: 4px;">{{ paxData().kpis.blank_pct | number:'1.0-1' }}% of total</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Data Quality & Anomalies (Actionable Rules)</h4>
+    </div>
+
+    <!-- Rule A -->
+    <div class="section">
+      <div class="section-header" style="background: #f8fafc; padding: 12px 16px; border-radius: 6px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between;">
+        <h5 style="margin: 0; font-size: 14px; font-weight: 600;">Rule A: Same PAX ID, Different Email ID ({{ paxData().anomalies.rule_a?.length || 0 }} records)</h5>
+        <button (click)="downloadCSV(paxData().anomalies.rule_a, 'rule_a.csv')" style="padding: 4px 8px; background: #fff; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; cursor: pointer;">Export</button>
+      </div>
+      <div class="table-container" style="max-height: 250px;" *ngIf="paxData().anomalies.rule_a?.length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>PAX ID</th>
+              <th>Passenger Name</th>
+              <th>Email ID</th>
+              <th>Mobile No</th>
+              <th>Branch</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of paxData().anomalies.rule_a">
+              <td>{{ r['PAXIDNO_CLEAN'] }}</td>
+              <td>{{ r['Passenger Name'] }}</td>
+              <td>{{ r['EMAIL_CLEAN'] }}</td>
+              <td>{{ r['MOBILE_CLEAN'] }}</td>
+              <td>{{ r['Branch Name'] }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Rule B -->
+    <div class="section" style="margin-top: 24px;">
+      <div class="section-header" style="background: #f8fafc; padding: 12px 16px; border-radius: 6px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between;">
+        <h5 style="margin: 0; font-size: 14px; font-weight: 600;">Rule B: Same PAX ID, Different Passenger Name ({{ paxData().anomalies.rule_b?.length || 0 }} records)</h5>
+        <button (click)="downloadCSV(paxData().anomalies.rule_b, 'rule_b.csv')" style="padding: 4px 8px; background: #fff; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; cursor: pointer;">Export</button>
+      </div>
+      <div class="table-container" style="max-height: 250px;" *ngIf="paxData().anomalies.rule_b?.length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>PAX ID</th>
+              <th>Passenger Name</th>
+              <th>Email ID</th>
+              <th>Mobile No</th>
+              <th>Branch</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of paxData().anomalies.rule_b">
+              <td>{{ r['PAXIDNO_CLEAN'] }}</td>
+              <td>{{ r['Passenger Name'] }}</td>
+              <td>{{ r['EMAIL_CLEAN'] }}</td>
+              <td>{{ r['MOBILE_CLEAN'] }}</td>
+              <td>{{ r['Branch Name'] }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Rule C -->
+    <div class="section" style="margin-top: 24px;">
+      <div class="section-header" style="background: #f8fafc; padding: 12px 16px; border-radius: 6px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between;">
+        <h5 style="margin: 0; font-size: 14px; font-weight: 600;">Rule C: Same PAX ID, Different Mobile Number ({{ paxData().anomalies.rule_c?.length || 0 }} records)</h5>
+        <button (click)="downloadCSV(paxData().anomalies.rule_c, 'rule_c.csv')" style="padding: 4px 8px; background: #fff; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; cursor: pointer;">Export</button>
+      </div>
+      <div class="table-container" style="max-height: 250px;" *ngIf="paxData().anomalies.rule_c?.length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>PAX ID</th>
+              <th>Passenger Name</th>
+              <th>Email ID</th>
+              <th>Mobile No</th>
+              <th>Branch</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of paxData().anomalies.rule_c">
+              <td>{{ r['PAXIDNO_CLEAN'] }}</td>
+              <td>{{ r['Passenger Name'] }}</td>
+              <td>{{ r['EMAIL_CLEAN'] }}</td>
+              <td>{{ r['MOBILE_CLEAN'] }}</td>
+              <td>{{ r['Branch Name'] }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Missing KYC -->
+    <div class="section" style="margin-top: 24px;">
+      <div class="section-header" style="background: #f8fafc; padding: 12px 16px; border-radius: 6px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between;">
+        <h5 style="margin: 0; font-size: 14px; font-weight: 600;">Missing KYC Information ({{ paxData().anomalies.rule_j?.length || 0 }} records)</h5>
+        <button (click)="downloadCSV(paxData().anomalies.rule_j, 'rule_j.csv')" style="padding: 4px 8px; background: #fff; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; cursor: pointer;">Export</button>
+      </div>
+      <div class="table-container" style="max-height: 250px;" *ngIf="paxData().anomalies.rule_j?.length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>Passenger Name</th>
+              <th>PAX ID (Clean)</th>
+              <th>Email ID (Clean)</th>
+              <th>Mobile No (Clean)</th>
+              <th>Branch</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of paxData().anomalies.rule_j">
+              <td>{{ r['Passenger Name'] }}</td>
+              <td>{{ r['PAXIDNO_CLEAN'] }}</td>
+              <td>{{ r['EMAIL_CLEAN'] }}</td>
+              <td>{{ r['MOBILE_CLEAN'] }}</td>
+              <td>{{ r['Branch Name'] }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-header">
+      <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Branch Quality Overview</h4>
+      <button (click)="downloadCSV(paxData().branch_summary, 'branch_quality.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
+    </div>
+    <div class="table-container" style="max-height: 400px;">
+      <table>
+        <thead>
+          <tr>
+            <th>Branch Name</th>
+            <th style="text-align: right">Total Records</th>
+            <th style="text-align: right">Invalid ID</th>
+            <th style="text-align: right">Invalid Mobile</th>
+            <th style="text-align: right">Invalid Email</th>
+            <th style="text-align: right">Missing KYC</th>
+            <th style="text-align: right">Total Issues</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of paxData().branch_summary">
+            <td style="font-weight: 600">{{ r['Branch Name'] }}</td>
+            <td style="text-align: right">{{ r['Total_Records'] | number }}</td>
+            <td style="text-align: right">{{ r['Invalid_ID'] | number }}</td>
+            <td style="text-align: right">{{ r['Invalid_Mobile'] | number }}</td>
+            <td style="text-align: right">{{ r['Invalid_Email'] | number }}</td>
+            <td style="text-align: right">{{ r['Missing_KYC'] | number }}</td>
+            <td style="text-align: right; color: #b91c1c; font-weight: 600;">{{ r['Total_Issues'] | number }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

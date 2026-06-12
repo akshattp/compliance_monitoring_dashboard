@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Passenger Analysis | GlobalPay AML</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#1c1b1b",
+                        "secondary": "#5f5e5e",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed-variant": "#474646",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "on-primary-container": "#858383",
+                        "surface-dim": "#dadada",
+                        "risk-low": "#00CC96",
+                        "outline-variant": "#c4c7c7",
+                        "surface-container-highest": "#e2e2e2",
+                        "on-tertiary-fixed": "#1b1c1c",
+                        "error-container": "#ffdad6",
+                        "risk-high": "#EF553B",
+                        "surface-bright": "#f9f9f9",
+                        "light-ui": "#BBBBBB",
+                        "on-secondary": "#ffffff",
+                        "risk-medium": "#FFA15A",
+                        "on-secondary-fixed-variant": "#474747",
+                        "background": "#f9f9f9",
+                        "kpi-value": "#0F172A",
+                        "surface-container-low": "#f3f3f3",
+                        "outline": "#747878",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-container": "#1b1c1c",
+                        "on-secondary-container": "#656464",
+                        "inverse-on-surface": "#f1f1f1",
+                        "on-surface-variant": "#444748",
+                        "tertiary-fixed": "#e3e2e2",
+                        "on-primary-fixed": "#1c1b1b",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-container": "#848484",
+                        "muted": "#999999",
+                        "on-tertiary": "#ffffff",
+                        "border-base": "#E5E5E5",
+                        "surface-variant": "#e2e2e2",
+                        "surface-container": "#eeeeee",
+                        "surface-container-high": "#e8e8e8",
+                        "on-primary": "#ffffff",
+                        "primary-fixed": "#e5e2e1",
+                        "inverse-primary": "#c8c6c5",
+                        "grid-line": "#EEEEEE",
+                        "tertiary": "#000000",
+                        "on-error": "#ffffff",
+                        "secondary-container": "#e4e2e2",
+                        "surface-tint": "#5f5e5e",
+                        "secondary-fixed-dim": "#c8c6c6",
+                        "on-background": "#1a1c1c",
+                        "kpi-label": "#64748B",
+                        "on-surface": "#1a1c1c",
+                        "surface": "#f9f9f9",
+                        "secondary-fixed": "#e4e2e2",
+                        "primary": "#000000",
+                        "primary-fixed-dim": "#c8c6c5",
+                        "on-tertiary-fixed-variant": "#464747",
+                        "inverse-surface": "#2f3131",
+                        "tertiary-fixed-dim": "#c7c6c6",
+                        "risk-unknown": "#636363"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "12px",
+                        "xl": "16px",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "md": "16px",
+                        "gutter": "16px",
+                        "xl": "24px",
+                        "xs": "8px",
+                        "sidebar-width": "280px",
+                        "card-padding": "20px",
+                        "sm": "12px",
+                        "lg": "20px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "kpi-value": ["Inter"],
+                        "nav-pill": ["Inter"],
+                        "kpi-label": ["Inter"],
+                        "table-data": ["Inter"],
+                        "section-heading": ["Inter"],
+                        "page-title": ["Inter"],
+                        "body-main": ["Inter"]
+                    },
+                    "fontSize": {
+                        "kpi-value": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                        "nav-pill": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                        "kpi-label": ["13px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "table-data": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "section-heading": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "page-title": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-main": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .sidebar-transition { transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .accordion-content { transition: max-height 0.3s ease-out, opacity 0.3s ease-out; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #888; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #555; }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 w-full z-50 bg-surface dark:bg-background shadow-sm dark:shadow-none transition-all duration-300 ease-in-out">
+<div class="flex justify-between items-center max-w-[1440px] mx-auto px-lg py-sm">
+<div class="flex items-center gap-xl">
+<span class="font-page-title text-page-title text-primary dark:text-on-primary-fixed tracking-tight">GlobalPay AML</span>
+<nav class="hidden md:flex gap-xs bg-surface-container rounded-full p-1">
+<a class="px-md py-1.5 font-nav-pill text-nav-pill text-secondary hover:bg-surface-container-low transition-all" href="#">HOME PAGE</a>
+<a class="px-md py-1.5 font-nav-pill text-nav-pill bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed rounded-full shadow-md" href="#">PASSENGER ANALYSIS</a>
+<a class="px-md py-1.5 font-nav-pill text-nav-pill text-secondary hover:bg-surface-container-low transition-all" href="#">TRANSACTION SUMMARY</a>
+<a class="px-md py-1.5 font-nav-pill text-nav-pill text-secondary hover:bg-surface-container-low transition-all" href="#">TOUR OPERATOR</a>
+</nav>
+</div>
+<div class="flex items-center gap-md">
+<div class="relative hidden lg:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-secondary text-sm">search</span>
+<input class="pl-10 pr-4 py-2 bg-surface-container-low border border-border-base rounded-lg text-body-main focus:outline-none focus:ring-1 focus:ring-primary w-64" placeholder="Quick search PAX ID..." type="text"/>
+</div>
+<button class="bg-primary text-on-primary px-md py-2 rounded-lg font-nav-pill text-xs tracking-wider flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">download</span>
+                    DOWNLOAD CSV
+                </button>
+</div>
+</div>
+</header>
+<!-- Side Navigation Bar -->
+<aside class="fixed left-0 top-0 h-full w-sidebar-width bg-surface-container-low dark:bg-surface-container border-r border-border-base dark:border-outline-variant z-40 sidebar-transition pt-24 pb-xl px-md flex flex-col" id="sidebar">
+<div class="mb-xl px-2">
+<div class="flex items-center gap-3 mb-2">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary">account_circle</span>
+</div>
+<div>
+<p class="font-section-heading text-sm font-bold text-tertiary">Global Filters</p>
+<p class="text-[11px] text-muted uppercase tracking-widest font-semibold">Regulatory Oversight</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 space-y-2">
+<div class="group">
+<div class="text-primary dark:text-on-primary-fixed font-bold border-l-4 border-primary px-3 py-2 flex items-center gap-3 bg-surface-container-highest cursor-pointer">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span class="font-body-main text-body-main">Date Range</span>
+</div>
+<div class="mt-2 px-6 space-y-1">
+<select class="w-full bg-surface-container-lowest border-border-base rounded-md text-xs py-1.5">
+<option>Last 30 Days</option>
+<option>Current Quarter</option>
+<option>Custom Range</option>
+</select>
+</div>
+</div>
+<div class="group">
+<div class="text-secondary dark:text-secondary-fixed-dim hover:text-primary px-3 py-2 flex items-center gap-3 transition-colors cursor-pointer">
+<span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+<span class="font-body-main text-body-main">FATF/OFAC Status</span>
+</div>
+</div>
+<div class="group">
+<div class="text-secondary dark:text-secondary-fixed-dim hover:text-primary px-3 py-2 flex items-center gap-3 transition-colors cursor-pointer">
+<span class="material-symbols-outlined" data-icon="filter_list">filter_list</span>
+<span class="font-body-main text-body-main">Dynamic Filters</span>
+</div>
+</div>
+</nav>
+<button class="mt-auto bg-primary text-on-primary w-full py-3 rounded-lg font-nav-pill text-sm shadow-lg hover:opacity-90 transition-opacity">
+            Apply All Filters
+        </button>
+<div class="mt-6 flex flex-col gap-2 pt-6 border-t border-border-base">
+<div class="text-secondary dark:text-secondary-fixed-dim hover:text-primary px-3 py-1.5 flex items-center gap-3 cursor-pointer text-sm">
+<span class="material-symbols-outlined text-sm" data-icon="settings">settings</span>
+<span>Settings</span>
+</div>
+<div class="text-secondary dark:text-secondary-fixed-dim hover:text-primary px-3 py-1.5 flex items-center gap-3 cursor-pointer text-sm">
+<span class="material-symbols-outlined text-sm" data-icon="help">help</span>
+<span>Support</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-sidebar-width pt-24 px-xl pb-xl max-w-[1440px] mx-auto">
+<!-- Page Header -->
+<div class="mb-xl flex justify-between items-end">
+<div>
+<h1 class="font-page-title text-page-title mb-1">PASSENGER ANALYSIS</h1>
+<p class="text-secondary font-body-main">Cross-referencing identity documentation and behavioral anomalies across GlobalPay networks.</p>
+</div>
+<div class="flex items-center gap-4 bg-white p-3 rounded-lg border border-border-base shadow-sm">
+<div class="text-right">
+<label class="block text-[10px] font-bold text-muted uppercase tracking-tighter">Transaction Count Threshold</label>
+<input class="w-16 border-none p-0 text-right font-bold text-primary text-lg focus:ring-0" type="number" value="10"/>
+</div>
+<span class="material-symbols-outlined text-light-ui">tune</span>
+</div>
+</div>
+<!-- KPI Row 1 -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-lg mb-lg">
+<div class="bg-surface-container-lowest p-card-padding rounded-lg border border-border-base shadow-sm">
+<p class="font-kpi-label text-kpi-label text-kpi-label uppercase mb-2">Total Records Analyzed</p>
+<div class="flex items-baseline gap-2">
+<span class="font-kpi-value text-kpi-value">1,248,902</span>
+<span class="text-risk-low text-xs font-bold">+2.4%</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-card-padding rounded-lg border border-border-base shadow-sm relative overflow-hidden">
+<div class="absolute top-4 right-4 bg-surface-container-low border border-border-base px-2 py-0.5 rounded text-[10px] font-bold">64% OF TOTAL</div>
+<p class="font-kpi-label text-kpi-label text-kpi-label uppercase mb-2">PAN Card Identifiers</p>
+<div class="flex items-baseline gap-2">
+<span class="font-kpi-value text-kpi-value">799,297</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-card-padding rounded-lg border border-border-base shadow-sm relative overflow-hidden">
+<div class="absolute top-4 right-4 bg-surface-container-low border border-border-base px-2 py-0.5 rounded text-[10px] font-bold">31% OF TOTAL</div>
+<p class="font-kpi-label text-kpi-label text-kpi-label uppercase mb-2">Passport Identifiers</p>
+<div class="flex items-baseline gap-2">
+<span class="font-kpi-value text-kpi-value">387,159</span>
+</div>
+</div>
+</div>
+<!-- KPI Row 2 -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-lg mb-xl">
+<div class="bg-surface-container-lowest p-card-padding rounded-lg border border-border-base shadow-sm border-l-4 border-l-risk-medium">
+<p class="font-kpi-label text-kpi-label text-kpi-label uppercase mb-2">Invalid/Unknown IDs</p>
+<div class="flex items-baseline gap-2">
+<span class="font-kpi-value text-kpi-value text-risk-medium">12,408</span>
+<span class="text-error text-xs font-bold">(-402)</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-card-padding rounded-lg border border-border-base shadow-sm border-l-4 border-l-risk-high">
+<p class="font-kpi-label text-kpi-label text-kpi-label uppercase mb-2">Blank Identifiers</p>
+<div class="flex items-baseline gap-2">
+<span class="font-kpi-value text-kpi-value text-risk-high">4,122</span>
+<span class="text-error text-xs font-bold">(-118)</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-card-padding rounded-lg border border-border-base shadow-sm">
+<p class="font-kpi-label text-kpi-label text-kpi-label uppercase mb-2">Most Frequent Identity</p>
+<div class="flex flex-col">
+<span class="font-bold text-primary text-sm">PAX-882910 | PASSPORT</span>
+<div class="flex justify-between items-center mt-1">
+<span class="text-secondary text-xs">Alexander V. K.</span>
+<span class="bg-primary text-on-primary text-[10px] px-1.5 py-0.5 rounded">0.42% SHARE</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Anomaly Detection Rules (Accordions) -->
+<section class="mb-xl">
+<div class="mb-lg">
+<h2 class="font-section-heading text-section-heading mb-1">Data Quality Surveillance</h2>
+<p class="text-secondary font-body-main">Filter and analyze records based on identity documentation and contact data integrity.</p>
+</div>
+<div class="bg-surface-container-lowest p-card-padding rounded-lg border border-border-base shadow-sm mb-lg">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-xl">
+<!-- PAXIDNO Toggle -->
+<div class="flex flex-col gap-2">
+<label class="font-kpi-label text-kpi-label uppercase">PAXIDNO</label>
+<div class="flex bg-surface-container rounded-md p-1">
+<button class="flex-1 py-1.5 text-xs font-bold rounded bg-white shadow-sm text-primary">Valid</button>
+<button class="flex-1 py-1.5 text-xs font-semibold text-secondary hover:text-primary transition-colors">Unknown / Invalid</button>
+<button class="flex-1 py-1.5 text-xs font-semibold text-secondary hover:text-primary transition-colors">Blank</button>
+</div>
+</div>
+<!-- MOBILENO Toggle -->
+<div class="flex flex-col gap-2">
+<label class="font-kpi-label text-kpi-label uppercase">MOBILENO</label>
+<div class="flex bg-surface-container rounded-md p-1">
+<button class="flex-1 py-1.5 text-xs font-bold rounded bg-white shadow-sm text-primary">Valid</button>
+<button class="flex-1 py-1.5 text-xs font-semibold text-secondary hover:text-primary transition-colors">Unknown / Invalid</button>
+<button class="flex-1 py-1.5 text-xs font-semibold text-secondary hover:text-primary transition-colors">Blank</button>
+</div>
+</div>
+<!-- EMAILID Toggle -->
+<div class="flex flex-col gap-2">
+<label class="font-kpi-label text-kpi-label uppercase">EMAILID</label>
+<div class="flex bg-surface-container rounded-md p-1">
+<button class="flex-1 py-1.5 text-xs font-bold rounded bg-white shadow-sm text-primary">Valid</button>
+<button class="flex-1 py-1.5 text-xs font-semibold text-secondary hover:text-primary transition-colors">Unknown / Invalid</button>
+<button class="flex-1 py-1.5 text-xs font-semibold text-secondary hover:text-primary transition-colors">Blank</button>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-white border border-border-base rounded-lg shadow-sm overflow-hidden">
+<div class="px-lg py-3 border-b border-border-base bg-surface-container-low flex justify-between items-center">
+<h3 class="font-bold text-sm text-primary">Data Quality Records</h3>
+<span class="text-[10px] font-bold text-muted uppercase tracking-widest">Live Feed</span>
+</div>
+<div class="overflow-x-auto custom-scrollbar">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container font-table-data text-xs text-secondary border-b border-border-base">
+<tr>
+<th class="px-4 py-3 font-bold">PAX ID</th>
+<th class="px-4 py-3 font-bold">NAME</th>
+<th class="px-4 py-3 font-bold">MOBILE STATUS</th>
+<th class="px-4 py-3 font-bold">EMAIL STATUS</th>
+<th class="px-4 py-3 font-bold">LAST UPDATED</th>
+</tr>
+</thead>
+<tbody class="font-table-data text-table-data">
+<tr class="border-b border-border-base hover:bg-surface-container-low">
+<td class="px-4 py-3 font-mono font-semibold">PAX-99281</td>
+<td class="px-4 py-3">Michael Chen</td>
+<td class="px-4 py-3"><span class="text-risk-low flex items-center gap-1"><span class="material-symbols-outlined text-xs">check_circle</span> Valid</span></td>
+<td class="px-4 py-3"><span class="text-risk-low flex items-center gap-1"><span class="material-symbols-outlined text-xs">check_circle</span> Valid</span></td>
+<td class="px-4 py-3">2023-10-25</td>
+</tr>
+<tr class="border-b border-border-base hover:bg-surface-container-low">
+<td class="px-4 py-3 font-mono font-semibold">PAX-11023</td>
+<td class="px-4 py-3">Elena Rodriguez</td>
+<td class="px-4 py-3"><span class="text-risk-low flex items-center gap-1"><span class="material-symbols-outlined text-xs">check_circle</span> Valid</span></td>
+<td class="px-4 py-3"><span class="text-risk-low flex items-center gap-1"><span class="material-symbols-outlined text-xs">check_circle</span> Valid</span></td>
+<td class="px-4 py-3">2023-10-25</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section><h2 class="font-section-heading text-section-heading mb-md px-2">Anomaly Detection Rules &amp; Flagged Records</h2>
+<div class="space-y-4">
+<!-- Rule A -->
+<div class="accordion-item bg-white border border-border-base rounded-lg shadow-sm overflow-hidden transition-all duration-300">
+<button class="w-full flex items-center justify-between p-lg hover:bg-surface-container-low transition-colors" onclick="toggleAccordion(this)">
+<div class="flex items-center gap-4">
+<div class="p-2 bg-surface-container-high rounded-lg">
+<span class="material-symbols-outlined text-primary">mail</span>
+</div>
+<div class="text-left">
+<h3 class="font-bold text-primary">Rule A: Same PAX ID, Different Emails</h3>
+<p class="text-xs text-secondary mt-0.5">Identifies single identity numbers associated with multiple distinct email accounts.</p>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<span class="px-3 py-1 bg-error-container text-on-error-container text-[11px] font-bold rounded-full">1,240 FLAGGED</span>
+<span class="material-symbols-outlined transition-transform duration-300">expand_more</span>
+</div>
+</button>
+<div class="accordion-content hidden border-t border-border-base p-lg bg-surface-bright">
+<div class="flex justify-between items-center mb-4">
+<div class="text-xs text-muted">Showing top suspicious clusters. Multi-email association often indicates synthetic identity farming.</div>
+<button class="text-[11px] font-bold flex items-center gap-1.5 border border-border-base px-3 py-1.5 rounded hover:bg-surface-container transition-all">
+<span class="material-symbols-outlined text-sm">download</span> EXPORT CSV
+                        </button>
+</div>
+<div class="overflow-x-auto border border-border-base rounded-lg bg-white custom-scrollbar">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container font-table-data text-xs text-secondary border-b border-border-base">
+<tr>
+<th class="px-4 py-3 font-bold">PAX ID</th>
+<th class="px-4 py-3 font-bold">DOC TYPE</th>
+<th class="px-4 py-3 font-bold">UNIQUE EMAILS</th>
+<th class="px-4 py-3 font-bold">ASSOCIATED NAMES</th>
+<th class="px-4 py-3 font-bold">LAST TXN</th>
+<th class="px-4 py-3 font-bold text-right">ACTION</th>
+</tr>
+</thead>
+<tbody class="font-table-data text-table-data">
+<tr class="border-b border-border-base hover:bg-surface-container-low">
+<td class="px-4 py-3 font-mono font-semibold">ABC1289P</td>
+<td class="px-4 py-3">PAN CARD</td>
+<td class="px-4 py-3">8</td>
+<td class="px-4 py-3">John Doe, J. Doe, Jonathan D.</td>
+<td class="px-4 py-3">2023-10-24</td>
+<td class="px-4 py-3 text-right"><span class="text-primary cursor-pointer hover:underline">Investigate</span></td>
+</tr>
+<tr class="border-b border-border-base hover:bg-surface-container-low">
+<td class="px-4 py-3 font-mono font-semibold">Z8219034</td>
+<td class="px-4 py-3">PASSPORT</td>
+<td class="px-4 py-3">5</td>
+<td class="px-4 py-3">Sarah Connor</td>
+<td class="px-4 py-3">2023-10-22</td>
+<td class="px-4 py-3 text-right"><span class="text-primary cursor-pointer hover:underline">Investigate</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Rule B -->
+<div class="accordion-item bg-white border border-border-base rounded-lg shadow-sm overflow-hidden transition-all duration-300">
+<button class="w-full flex items-center justify-between p-lg hover:bg-surface-container-low transition-colors" onclick="toggleAccordion(this)">
+<div class="flex items-center gap-4">
+<div class="p-2 bg-surface-container-high rounded-lg">
+<span class="material-symbols-outlined text-primary">person</span>
+</div>
+<div class="text-left">
+<h3 class="font-bold text-primary">Rule B: Same PAX ID, Different Names</h3>
+<p class="text-xs text-secondary mt-0.5">Flags identity numbers that have been used with significantly different legal names.</p>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<span class="px-3 py-1 bg-error-container text-on-error-container text-[11px] font-bold rounded-full">482 FLAGGED</span>
+<span class="material-symbols-outlined transition-transform duration-300">expand_more</span>
+</div>
+</button>
+<div class="accordion-content hidden border-t border-border-base p-lg bg-surface-bright">
+<div class="h-32 flex items-center justify-center text-muted italic text-sm">Rule B details loading...</div>
+</div>
+</div>
+<!-- Rule C -->
+<div class="accordion-item bg-white border border-border-base rounded-lg shadow-sm overflow-hidden transition-all duration-300">
+<button class="w-full flex items-center justify-between p-lg hover:bg-surface-container-low transition-colors" onclick="toggleAccordion(this)">
+<div class="flex items-center gap-4">
+<div class="p-2 bg-surface-container-high rounded-lg">
+<span class="material-symbols-outlined text-primary">smartphone</span>
+</div>
+<div class="text-left">
+<h3 class="font-bold text-primary">Rule C: Same PAX ID, Different Mobiles</h3>
+<p class="text-xs text-secondary mt-0.5">Monitors for identity tokens linked to a rotating set of mobile phone numbers.</p>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<span class="px-3 py-1 bg-error-container text-on-error-container text-[11px] font-bold rounded-full">185 FLAGGED</span>
+<span class="material-symbols-outlined transition-transform duration-300">expand_more</span>
+</div>
+</button>
+<div class="accordion-content hidden border-t border-border-base p-lg bg-surface-bright">
+<div class="h-32 flex items-center justify-center text-muted italic text-sm">Rule C details loading...</div>
+</div>
+</div>
+<!-- Rule D -->
+<div class="accordion-item bg-white border border-border-base rounded-lg shadow-sm overflow-hidden transition-all duration-300">
+<button class="w-full flex items-center justify-between p-lg hover:bg-surface-container-low transition-colors" onclick="toggleAccordion(this)">
+<div class="flex items-center gap-4">
+<div class="p-2 bg-surface-container-high rounded-lg">
+<span class="material-symbols-outlined text-primary">contact_support</span>
+</div>
+<div class="text-left">
+<h3 class="font-bold text-primary">Rule D: Missing PAX ID with Contact Info</h3>
+<p class="text-xs text-secondary mt-0.5">Captures records where identity documentation is blank but contact data exists.</p>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<span class="px-3 py-1 bg-surface-container-high text-secondary text-[11px] font-bold rounded-full">4,122 FLAGGED</span>
+<span class="material-symbols-outlined transition-transform duration-300">expand_more</span>
+</div>
+</button>
+<div class="accordion-content hidden border-t border-border-base p-lg bg-surface-bright">
+<div class="h-32 flex items-center justify-center text-muted italic text-sm">Rule D details loading...</div>
+</div>
+</div>
+<!-- Rule E -->
+<div class="accordion-item bg-white border border-border-base rounded-lg shadow-sm overflow-hidden transition-all duration-300">
+<button class="w-full flex items-center justify-between p-lg hover:bg-surface-container-low transition-colors" onclick="toggleAccordion(this)">
+<div class="flex items-center gap-4">
+<div class="p-2 bg-surface-container-high rounded-lg">
+<span class="material-symbols-outlined text-primary">diversity_1</span>
+</div>
+<div class="text-left">
+<h3 class="font-bold text-primary">Rule E: Same Email, Different PAX IDs</h3>
+<p class="text-xs text-secondary mt-0.5">One email account managing multiple distinct passenger identities.</p>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<span class="px-3 py-1 bg-error-container text-on-error-container text-[11px] font-bold rounded-full">2,118 FLAGGED</span>
+<span class="material-symbols-outlined transition-transform duration-300">expand_more</span>
+</div>
+</button>
+<div class="accordion-content hidden border-t border-border-base p-lg bg-surface-bright">
+<div class="h-32 flex items-center justify-center text-muted italic text-sm">Rule E details loading...</div>
+</div>
+</div>
+<!-- Rule F -->
+<div class="accordion-item bg-white border border-border-base rounded-lg shadow-sm overflow-hidden transition-all duration-300">
+<button class="w-full flex items-center justify-between p-lg hover:bg-surface-container-low transition-colors" onclick="toggleAccordion(this)">
+<div class="flex items-center gap-4">
+<div class="p-2 bg-surface-container-high rounded-lg">
+<span class="material-symbols-outlined text-primary">settings_phone</span>
+</div>
+<div class="text-left">
+<h3 class="font-bold text-primary">Rule F: Same Mobile, Different PAX IDs</h3>
+<p class="text-xs text-secondary mt-0.5">High-frequency mobile overlap across supposedly unique passengers.</p>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<span class="px-3 py-1 bg-error-container text-on-error-container text-[11px] font-bold rounded-full">943 FLAGGED</span>
+<span class="material-symbols-outlined transition-transform duration-300">expand_more</span>
+</div>
+</button>
+<div class="accordion-content hidden border-t border-border-base p-lg bg-surface-bright">
+<div class="h-32 flex items-center justify-center text-muted italic text-sm">Rule F details loading...</div>
+</div>
+</div>
+<!-- Rule G -->
+<div class="accordion-item bg-white border border-border-base rounded-lg shadow-sm overflow-hidden transition-all duration-300">
+<button class="w-full flex items-center justify-between p-lg hover:bg-surface-container-low transition-colors" onclick="toggleAccordion(this)">
+<div class="flex items-center gap-4">
+<div class="p-2 bg-surface-container-high rounded-lg">
+<span class="material-symbols-outlined text-primary">potted_plant</span>
+</div>
+<div class="text-left">
+<h3 class="font-bold text-primary">Rule G: Frequent Passenger</h3>
+<p class="text-xs text-secondary mt-0.5">Flagging passengers exceeding the transaction threshold (current: 10).</p>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<span class="px-3 py-1 bg-risk-low/20 text-risk-low text-[11px] font-bold rounded-full">51,002 PASSENGERS</span>
+<span class="material-symbols-outlined transition-transform duration-300">expand_more</span>
+</div>
+</button>
+<div class="accordion-content hidden border-t border-border-base p-lg bg-surface-bright">
+<div class="h-32 flex items-center justify-center text-muted italic text-sm">Rule G details loading...</div>
+</div>
+</div>
+<!-- Rule H -->
+<div class="accordion-item bg-white border border-border-base rounded-lg shadow-sm overflow-hidden transition-all duration-300">
+<button class="w-full flex items-center justify-between p-lg hover:bg-surface-container-low transition-colors" onclick="toggleAccordion(this)">
+<div class="flex items-center gap-4">
+<div class="p-2 bg-surface-container-high rounded-lg">
+<span class="material-symbols-outlined text-primary">copy_all</span>
+</div>
+<div class="text-left">
+<h3 class="font-bold text-primary">Rule H: Duplicate/Shared Identity</h3>
+<p class="text-xs text-secondary mt-0.5">Detection of exact identity credential duplication across high-value transactions.</p>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<span class="px-3 py-1 bg-error-container text-on-error-container text-[11px] font-bold rounded-full">154 FLAGGED</span>
+<span class="material-symbols-outlined transition-transform duration-300">expand_more</span>
+</div>
+</button>
+<div class="accordion-content hidden border-t border-border-base p-lg bg-surface-bright">
+<div class="h-32 flex items-center justify-center text-muted italic text-sm">Rule H details loading...</div>
+</div>
+</div>
+</div>
+</main>
+<script>
+        function toggleAccordion(button) {
+            const content = button.nextElementSibling;
+            const icon = button.querySelector('span:last-child');
+            const item = button.closest('.accordion-item');
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+                item.classList.add('ring-2', 'ring-primary/10');
+            } else {
+                content.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+                item.classList.remove('ring-2', 'ring-primary/10');
+            }
+        }
+
+        // Micro-interaction for sidebar collapse (visual only for this prototype)
+        document.addEventListener('keydown', (e) => {
+            if(e.key === 'b' && (e.ctrlKey || e.metaKey)) {
+                const sidebar = document.getElementById('sidebar');
+                sidebar.classList.toggle('w-sidebar-width');
+                sidebar.classList.toggle('w-20');
+                // Additional logic to hide text would go here
+            }
+        });
+    </script>
+</body></html>

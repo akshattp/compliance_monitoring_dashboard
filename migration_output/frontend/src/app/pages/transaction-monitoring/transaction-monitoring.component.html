@@ -1,0 +1,474 @@
+<div class="page-container" *ngIf="tmData()">
+  <div class="section-header">
+    <div>
+      <h3>TRANSACTION MONITORING</h3>
+      <p style="margin: 4px 0 0 0; font-size: 14px; color: #555;">AML Surveillance Console — Investigate isolated risk rules with independent datasets and controls.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <h3>Transaction Monitoring Summary</h3>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Risk Name</th>
+            <th>Description</th>
+            <th style="text-align: right">Flagged Count</th>
+            <th style="text-align: right">Total Exposure</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of summaryTable()">
+            <td style="font-weight: 600">{{ row.ruleName }}</td>
+            <td>{{ row.description }}</td>
+            <td style="text-align: right">{{ row.flaggedCount | number }}</td>
+            <td style="text-align: right">{{ row.totalExposure | humanReadableAmount }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section-header">
+    <div>
+      <h3>AML Risk Rules</h3>
+      <p style="margin: 4px 0 0 0; font-size: 14px; color: #555;">Each rule below is independently isolated with its own KPIs and transaction tables.</p>
+    </div>
+  </div>
+
+  <!-- High Value -->
+  <div class="accordion">
+    <div class="accordion-header" (click)="toggleRule('HV')">
+      <div class="accordion-title">HIGH VALUE TRANSACTION ({{ tmData().high_value.summary.high_value_count | number }})</div>
+      <div class="accordion-icon">{{ expandedRule() === 'HV' ? '▲' : '▼' }}</div>
+    </div>
+    <div class="accordion-body" *ngIf="expandedRule() === 'HV'">
+      <p style="font-size: 14px; margin-top: 0; margin-bottom: 16px; color: #334155;">Detect and monitor transactions exceeding $25,000 USD threshold.</p>
+      <div class="kpi-row" style="grid-template-columns: repeat(4, 1fr); display: grid; margin-bottom: 24px;">
+        <div class="kpi-card">
+          <div class="kpi-title">High Value Count</div>
+          <div class="kpi-value">{{ tmData().high_value.summary.high_value_count | number }}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Total Amount</div>
+          <div class="kpi-value">{{ tmData().high_value.summary.high_value_amount | humanReadableAmount }}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Structuring Alerts</div>
+          <div class="kpi-value">{{ tmData().high_value.summary.structuring_count | number }}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Highest Transaction</div>
+          <div class="kpi-value">{{ tmData().high_value.summary.highest_transaction | humanReadableAmount }}</div>
+        </div>
+      </div>
+      
+      <div class="section-header">
+        <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Suspicious High-Value Transactions</h4>
+        <button (click)="downloadCSV(tmData().high_value.data, 'high_value.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
+      </div>
+      <div class="table-container" style="max-height: 400px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Corporate</th>
+              <th>Passenger Name</th>
+              <th>Branch Name</th>
+              <th>Net Amt</th>
+              <th>EQV USD</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of tmData().high_value.data">
+              <td>{{ r['Date'] | date:'mediumDate' }}</td>
+              <td>{{ r['Corporate'] }}</td>
+              <td>{{ r['Passenger Name'] }}</td>
+              <td>{{ r['Branch Name'] }}</td>
+              <td>{{ formatAmt(r['Net Amt']) }}</td>
+              <td>{{ formatAmt(r['EQV USD']) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- FATF / OFAC -->
+  <div class="accordion">
+    <div class="accordion-header" (click)="toggleRule('FATF')">
+      <div class="accordion-title">FATF / OFAC FLAGGED TRANSACTIONS ({{ tmData().fatf_ofac.summary.flagged_count | number }})</div>
+      <div class="accordion-icon">{{ expandedRule() === 'FATF' ? '▲' : '▼' }}</div>
+    </div>
+    <div class="accordion-body" *ngIf="expandedRule() === 'FATF'">
+      <p style="font-size: 14px; margin-top: 0; margin-bottom: 16px; color: #334155;">Monitor transactions flagged for FATF/OFAC exposure or high-risk geography.</p>
+      <h2>FATF / OFAC Watchlist</h2>
+
+      <div class="kpi-row" style="grid-template-columns: repeat(4, 1fr); display: grid; margin-bottom: 24px;">
+        <div class="kpi-card">
+          <div class="kpi-title">Flagged Transaction Count</div>
+          <div class="kpi-value">{{ tmData().fatf_ofac.summary.flagged_count | number }}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Total Flagged Amount</div>
+          <div class="kpi-value">{{ tmData().fatf_ofac.summary.flagged_amount | humanReadableAmount }}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Affected Branches</div>
+          <div class="kpi-value">{{ tmData().fatf_ofac.summary.affected_branches | number }}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Affected Countries</div>
+          <div class="kpi-value">{{ tmData().fatf_ofac.summary.affected_countries | number }}</div>
+        </div>
+      </div>
+      
+      <div class="section-header">
+        <h4 style="margin: 0; font-size: 16px; font-weight: 600;">FATF / OFAC Flagged Transactions</h4>
+        <button (click)="downloadCSV(tmData().fatf_ofac.data, 'fatf_ofac.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
+      </div>
+      <div class="table-container" style="max-height: 400px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Corporate</th>
+              <th>Visiting Country</th>
+              <th>OFAC / FATF</th>
+              <th>Net Amt</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of tmData().fatf_ofac.data">
+              <td>{{ r['Date'] | date:'mediumDate' }}</td>
+              <td>{{ r['Corporate'] }}</td>
+              <td>{{ r['Visiting Country'] }}</td>
+              <td>{{ r['OFAC _ FATF'] }}</td>
+              <td>{{ formatAmt(r['Net Amt']) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Multiple Operators -->
+  <div class="accordion">
+    <div class="accordion-header" (click)="toggleRule('MULT_OP')">
+      <div class="accordion-title">MULTIPLE TOUR OPERATORS/REMITTERS TO SAME BENEFICIARY ({{ tmData().multiple_operators.summary.suspicious_beneficiary_count | number }})</div>
+      <div class="accordion-icon">{{ expandedRule() === 'MULT_OP' ? '▲' : '▼' }}</div>
+    </div>
+    <div class="accordion-body" *ngIf="expandedRule() === 'MULT_OP'">
+      <p style="font-size: 14px; margin-top: 0; margin-bottom: 16px; color: #334155;">Detect multiple operators sending remittances to the same beneficiary.</p>
+      <div class="kpi-row" style="grid-template-columns: repeat(3, 1fr); display: grid; margin-bottom: 24px;">
+        <div class="kpi-card">
+          <div class="kpi-title">Suspicious Beneficiaries</div>
+          <div class="kpi-value">{{ tmData().multiple_operators.summary.suspicious_beneficiary_count | number }}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Flagged Transactions</div>
+          <div class="kpi-value">{{ tmData().multiple_operators.summary.flagged_txn_count | number }}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Total Exposure</div>
+          <div class="kpi-value">{{ tmData().multiple_operators.summary.flagged_amount | humanReadableAmount }}</div>
+        </div>
+      </div>
+      
+      <div class="section-header">
+        <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Suspicious Transactions</h4>
+        <button (click)="downloadCSV(tmData().multiple_operators.data, 'mult_op.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
+      </div>
+      <div class="table-container" style="max-height: 400px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Corporate</th>
+              <th>Beneficiary / Card Number</th>
+              <th>Net Amt</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of tmData().multiple_operators.data">
+              <td>{{ r['Date'] | date:'mediumDate' }}</td>
+              <td>{{ r['Corporate'] }}</td>
+              <td>{{ r['Beneficiary Type Load or Reload'] }}</td>
+              <td>{{ formatAmt(r['Net Amt']) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- High Frequency -->
+  <div class="accordion">
+    <div class="accordion-header" (click)="toggleRule('HIGH_FREQ')">
+      <div class="accordion-title">HIGH-FREQUENCY REMITTANCES TO SINGLE BENEFICIARY ({{ tmData().high_frequency.summary.repeat_pair_count | number }})</div>
+      <div class="accordion-icon">{{ expandedRule() === 'HIGH_FREQ' ? '▲' : '▼' }}</div>
+    </div>
+    <div class="accordion-body" *ngIf="expandedRule() === 'HIGH_FREQ'">
+      <p style="font-size: 14px; margin-top: 0; margin-bottom: 16px; color: #334155;">Detect single operator sending repeated remittances to same beneficiary.</p>
+      <div class="kpi-row" style="grid-template-columns: repeat(3, 1fr); display: grid; margin-bottom: 24px;">
+        <div class="kpi-card">
+          <div class="kpi-title">Repeat Pairs</div>
+          <div class="kpi-value">{{ tmData().high_frequency.summary.repeat_pair_count | number }}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Flagged Transactions</div>
+          <div class="kpi-value">{{ tmData().high_frequency.summary.flagged_txn_count | number }}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Total Exposure</div>
+          <div class="kpi-value">{{ tmData().high_frequency.summary.flagged_amount | humanReadableAmount }}</div>
+        </div>
+      </div>
+      
+      <div class="section-header">
+        <h4 style="margin: 0; font-size: 16px; font-weight: 600;">High-Frequency Transactions</h4>
+        <button (click)="downloadCSV(tmData().high_frequency.data, 'high_freq.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
+      </div>
+      <div class="table-container" style="max-height: 400px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Corporate</th>
+              <th>Beneficiary / Card Number</th>
+              <th>Net Amt</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of tmData().high_frequency.data">
+              <td>{{ r['Date'] | date:'mediumDate' }}</td>
+              <td>{{ r['Corporate'] }}</td>
+              <td>{{ r['Beneficiary Type Load or Reload'] }}</td>
+              <td>{{ formatAmt(r['Net Amt']) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load Refund Window -->
+  <div class="accordion">
+    <div class="accordion-header" (click)="toggleRule('LRW')">
+      <div class="accordion-title">CONFIGURABLE LOAD-TO-REFUND WINDOW ({{ tmData().load_refund_window.summary.events | number }})</div>
+      <div class="accordion-icon">{{ expandedRule() === 'LRW' ? '▲' : '▼' }}</div>
+    </div>
+    <div class="accordion-body" *ngIf="expandedRule() === 'LRW'">
+      <p style="font-size: 14px; margin-top: 0; margin-bottom: 16px; color: #334155;">Identify cards where a refund occurs within a configurable number of days after a load/reload transaction.</p>
+      
+      <div style="margin-bottom: 24px; max-width: 320px;">
+        <label style="display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px;">Load-to-Refund Interval Threshold (Days): {{ thresholdDays() }}</label>
+        <input type="range" min="0" max="30" [ngModel]="thresholdDays()" (ngModelChange)="thresholdDays.set($event); fetchData()" style="width: 100%; cursor: pointer;" />
+      </div>
+
+      <div class="kpi-row" style="grid-template-columns: repeat(4, 1fr); display: grid; margin-bottom: 24px;">
+        <div class="kpi-card">
+          <div class="kpi-title">Flagged Cards</div>
+          <div class="kpi-value">{{ tmData().load_refund_window.summary.count | number }}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Events</div>
+          <div class="kpi-value">{{ tmData().load_refund_window.summary.events | number }}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Same-Day Refunds</div>
+          <div class="kpi-value">{{ tmData().load_refund_window.summary.same_day_refunds | number }}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Exposure</div>
+          <div class="kpi-value">{{ tmData().load_refund_window.summary.exposure | humanReadableAmount }}</div>
+        </div>
+      </div>
+      
+      <div class="section-header">
+        <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Load/Refund Events</h4>
+        <button (click)="downloadCSV(tmData().load_refund_window.data, 'lrw.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
+      </div>
+      <div class="table-container" style="max-height: 400px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Card Number</th>
+              <th>Within Days</th>
+              <th>Load Date</th>
+              <th>Refund Date</th>
+              <th>Load Amount</th>
+              <th>Refund Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of tmData().load_refund_window.data">
+              <td>{{ r['INSTRUMENTNO'] }}</td>
+              <td>{{ r['WITHIN_DAYS'] }}</td>
+              <td>{{ r['LOAD_DATE'] | date:'mediumDate' }}</td>
+              <td>{{ r['REFUND_DATE'] | date:'mediumDate' }}</td>
+              <td>{{ formatAmt(r['LOAD_AMOUNT']) }}</td>
+              <td>{{ formatAmt(r['REFUND_AMOUNT']) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+  <!-- Rule 6: Multiple Cards to Same Contact -->
+  <div class="accordion">
+    <div class="accordion-header" (click)="toggleRule('MC_CONTACT')">
+      <div class="accordion-title">MULTIPLE CARDS TO SAME CONTACT ({{ tmData().multiple_cards_contact.summary.count | number }})</div>
+      <div class="accordion-icon">{{ expandedRule() === 'MC_CONTACT' ? '▲' : '▼' }}</div>
+    </div>
+    <div class="accordion-body" *ngIf="expandedRule() === 'MC_CONTACT'">
+      <p style="font-size: 14px; margin-top: 0; margin-bottom: 16px; color: #334155;">Mobile numbers associated with 3 or more distinct cards.</p>
+      <div class="kpi-row" style="grid-template-columns: repeat(3, 1fr); display: grid; margin-bottom: 24px;">
+        <div class="kpi-card">
+          <div class="kpi-title">Flagged Mobile Numbers</div>
+          <div class="kpi-value">{{ tmData().multiple_cards_contact.summary.count | number }}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Total Transactions</div>
+          <div class="kpi-value">{{ tmData().multiple_cards_contact.summary.txn_count | number }}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Total Exposure</div>
+          <div class="kpi-value">{{ tmData().multiple_cards_contact.summary.exposure | humanReadableAmount }}</div>
+        </div>
+      </div>
+      <div class="section-header">
+        <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Flagged Records</h4>
+        <button (click)="downloadCSV(tmData().multiple_cards_contact.data, 'mc_contact.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
+      </div>
+      <div class="table-container" style="max-height: 400px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Mobile Number</th>
+              <th>Distinct Cards</th>
+              <th>Transactions</th>
+              <th>Exposure</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of tmData().multiple_cards_contact.data">
+              <td>{{ r['MOBILENO'] }}</td>
+              <td>{{ r['Distinct_Cards'] }}</td>
+              <td>{{ r['Transactions'] }}</td>
+              <td>{{ formatAmt(r['Exposure']) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rule 7: Multiple Cards to Same Traveller -->
+  <div class="accordion">
+    <div class="accordion-header" (click)="toggleRule('MC_TRAVELLER')">
+      <div class="accordion-title">MULTIPLE CARDS TO SAME TRAVELLER ({{ tmData().multiple_cards_traveller.summary.count | number }})</div>
+      <div class="accordion-icon">{{ expandedRule() === 'MC_TRAVELLER' ? '▲' : '▼' }}</div>
+    </div>
+    <div class="accordion-body" *ngIf="expandedRule() === 'MC_TRAVELLER'">
+      <p style="font-size: 14px; margin-top: 0; margin-bottom: 16px; color: #334155;">Travellers associated with 2 or more distinct cards.</p>
+      <div class="kpi-row" style="grid-template-columns: repeat(3, 1fr); display: grid; margin-bottom: 24px;">
+        <div class="kpi-card">
+          <div class="kpi-title">Flagged Travellers</div>
+          <div class="kpi-value">{{ tmData().multiple_cards_traveller.summary.count | number }}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Total Transactions</div>
+          <div class="kpi-value">{{ tmData().multiple_cards_traveller.summary.txn_count | number }}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Total Exposure</div>
+          <div class="kpi-value">{{ tmData().multiple_cards_traveller.summary.exposure | humanReadableAmount }}</div>
+        </div>
+      </div>
+      <div class="section-header">
+        <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Flagged Records</h4>
+        <button (click)="downloadCSV(tmData().multiple_cards_traveller.data, 'mc_traveller.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
+      </div>
+      <div class="table-container" style="max-height: 400px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Traveller ID</th>
+              <th>Traveller Name</th>
+              <th>Distinct Cards</th>
+              <th>Transactions</th>
+              <th>Exposure</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of tmData().multiple_cards_traveller.data">
+              <td>{{ r['PAXIDNO'] }}</td>
+              <td>{{ r['PAXNAME'] }}</td>
+              <td>{{ r['Distinct_Cards'] }}</td>
+              <td>{{ r['Transactions'] }}</td>
+              <td>{{ formatAmt(r['Exposure']) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rule 8: Multi-Card Multi-Operator Use -->
+  <div class="accordion">
+    <div class="accordion-header" (click)="toggleRule('MC_MO')">
+      <div class="accordion-title">MULTI-CARD MULTI-OPERATOR USE ({{ tmData().multi_card_multi_operator.summary.count | number }})</div>
+      <div class="accordion-icon">{{ expandedRule() === 'MC_MO' ? '▲' : '▼' }}</div>
+    </div>
+    <div class="accordion-body" *ngIf="expandedRule() === 'MC_MO'">
+      <p style="font-size: 14px; margin-top: 0; margin-bottom: 16px; color: #334155;">Travellers using 2 or more cards across 2 or more operators.</p>
+      <div class="kpi-row" style="grid-template-columns: repeat(3, 1fr); display: grid; margin-bottom: 24px;">
+        <div class="kpi-card">
+          <div class="kpi-title">Flagged Travellers</div>
+          <div class="kpi-value">{{ tmData().multi_card_multi_operator.summary.count | number }}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Total Transactions</div>
+          <div class="kpi-value">{{ tmData().multi_card_multi_operator.summary.txn_count | number }}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Total Exposure</div>
+          <div class="kpi-value">{{ tmData().multi_card_multi_operator.summary.exposure | humanReadableAmount }}</div>
+        </div>
+      </div>
+      <div class="section-header">
+        <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Flagged Records</h4>
+        <button (click)="downloadCSV(tmData().multi_card_multi_operator.data, 'mc_mo.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
+      </div>
+      <div class="table-container" style="max-height: 400px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Traveller ID</th>
+              <th>Traveller Name</th>
+              <th>Distinct Cards</th>
+              <th>Distinct Operators</th>
+              <th>Transactions</th>
+              <th>Exposure</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of tmData().multi_card_multi_operator.data">
+              <td>{{ r['PAXIDNO'] }}</td>
+              <td>{{ r['PAXNAME'] }}</td>
+              <td>{{ r['Distinct_Cards'] }}</td>
+              <td>{{ r['Distinct_Operators'] }}</td>
+              <td>{{ r['Transactions'] }}</td>
+              <td>{{ formatAmt(r['Exposure']) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>

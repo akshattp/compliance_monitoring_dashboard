@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GlobalPay AML Compliance Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "border-base": "#E5E5E5",
+            "surface-container-high": "#e8e8e8",
+            "on-primary-fixed-variant": "#474646",
+            "on-background": "#1a1c1c",
+            "primary-fixed": "#e5e2e1",
+            "outline-variant": "#c4c7c7",
+            "muted": "#999999",
+            "error": "#ba1a1a",
+            "secondary-container": "#e4e2e2",
+            "on-secondary": "#ffffff",
+            "inverse-on-surface": "#f1f1f1",
+            "secondary-fixed-dim": "#c8c6c6",
+            "tertiary": "#000000",
+            "on-secondary-fixed": "#1b1c1c",
+            "error-container": "#ffdad6",
+            "surface-container-low": "#f3f3f3",
+            "risk-low": "#00CC96",
+            "surface-bright": "#f9f9f9",
+            "on-primary": "#ffffff",
+            "surface": "#f9f9f9",
+            "inverse-primary": "#c8c6c5",
+            "secondary": "#5f5e5e",
+            "outline": "#747878",
+            "risk-medium": "#FFA15A",
+            "surface-container-highest": "#e2e2e2",
+            "grid-line": "#EEEEEE",
+            "on-tertiary": "#ffffff",
+            "on-tertiary-container": "#848484",
+            "primary-fixed-dim": "#c8c6c5",
+            "primary": "#000000",
+            "on-error": "#ffffff",
+            "on-primary-fixed": "#1c1b1b",
+            "primary-container": "#1c1b1b",
+            "on-error-container": "#93000a",
+            "risk-high": "#EF553B",
+            "secondary-fixed": "#e4e2e2",
+            "inverse-surface": "#2f3131",
+            "risk-unknown": "#636363",
+            "surface-container": "#eeeeee",
+            "on-tertiary-fixed": "#1b1c1c",
+            "on-secondary-fixed-variant": "#474747",
+            "tertiary-container": "#1b1c1c",
+            "surface-tint": "#5f5e5e",
+            "surface-variant": "#e2e2e2",
+            "kpi-label": "#64748B",
+            "on-surface-variant": "#444748",
+            "kpi-value": "#0F172A",
+            "on-secondary-container": "#656464",
+            "light-ui": "#BBBBBB",
+            "tertiary-fixed-dim": "#c7c6c6",
+            "background": "#f9f9f9",
+            "on-surface": "#1a1c1c",
+            "on-primary-container": "#858383",
+            "tertiary-fixed": "#e3e2e2",
+            "surface-container-lowest": "#ffffff",
+            "on-tertiary-fixed-variant": "#464747",
+            "surface-dim": "#dadada"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "card-padding": "20px",
+            "base": "4px",
+            "lg": "20px",
+            "sidebar-width": "280px",
+            "sm": "12px",
+            "xs": "8px",
+            "gutter": "16px",
+            "xl": "24px",
+            "md": "16px"
+          },
+          "fontFamily": {
+            "section-heading": ["Inter"],
+            "kpi-label": ["Inter"],
+            "kpi-value": ["Inter"],
+            "kpi-value-mobile": ["Inter"],
+            "nav-pill": ["Inter"],
+            "page-title": ["Inter"],
+            "body-main": ["Inter"],
+            "table-data": ["Inter"]
+          },
+          "fontSize": {
+            "section-heading": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+            "kpi-label": ["13px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+            "kpi-value": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+            "kpi-value-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+            "nav-pill": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+            "page-title": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+            "body-main": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+            "table-data": ["13px", {"lineHeight": "18px", "fontWeight": "400"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      background-color: #f9f9f9;
+      font-family: 'Inter', sans-serif;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #ccc;
+      border-radius: 10px;
+    }
+    .kpi-card {
+      box-shadow: 0 4px 6px rgba(0,0,0,0.04);
+      border: 1px solid #E5E5E5;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.06);
+    }
+  </style>
+</head>
+<body class="text-on-surface">
+<!-- Top Navigation (Immutable Logic from JSON) -->
+<nav class="fixed top-0 w-full z-50 bg-surface dark:bg-background shadow-sm dark:shadow-none">
+<div class="flex justify-between items-center max-w-[1440px] mx-auto px-lg py-sm">
+<div class="font-page-title text-page-title text-primary dark:text-on-primary-fixed">
+        GlobalPay AML
+      </div>
+<div class="hidden md:flex items-center gap-base">
+<a class="font-nav-pill text-nav-pill px-md py-xs bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed rounded-full shadow-md transition-all duration-300 ease-in-out cursor-pointer" href="#">HOME PAGE</a>
+<a class="font-nav-pill text-nav-pill px-md py-xs text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-container-high transition-all transition-all duration-300 ease-in-out cursor-pointer" href="#">TRANSACTION SUMMARY</a>
+<a class="font-nav-pill text-nav-pill px-md py-xs text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-container-high transition-all transition-all duration-300 ease-in-out cursor-pointer" href="#">TOUR OPERATOR</a>
+<a class="font-nav-pill text-nav-pill px-md py-xs text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-container-high transition-all transition-all duration-300 ease-in-out cursor-pointer" href="#">RETAIL HIGH VALUE TXN</a>
+<a class="font-nav-pill text-nav-pill px-md py-xs text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-container-high transition-all transition-all duration-300 ease-in-out cursor-pointer" href="#">HIGH RISK CORPORATE</a>
+<a class="font-nav-pill text-nav-pill px-md py-xs text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-container-high transition-all transition-all duration-300 ease-in-out cursor-pointer" href="#">FATF</a>
+</div>
+<div class="flex items-center gap-md">
+<div class="relative hidden lg:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm">search</span>
+<input class="pl-10 pr-4 py-1.5 bg-surface-container-low border border-border-base rounded-full text-sm focus:outline-none focus:ring-1 focus:ring-primary w-64" placeholder="Search parameters..." type="text"/>
+</div>
+<button class="bg-primary text-on-primary px-lg py-xs rounded-lg font-nav-pill text-nav-pill hover:opacity-90 transition-opacity">
+          DOWNLOAD CSV
+        </button>
+</div>
+</div>
+</nav>
+<!-- Side Navigation / Filters (Immutable Logic from JSON) -->
+<aside class="fixed left-0 top-0 h-full w-sidebar-width bg-surface-container-low dark:bg-surface-container border-r border-border-base dark:border-outline-variant flex flex-col h-full py-xl px-md z-40 mt-16">
+<div class="mb-xl px-xs">
+<div class="flex items-center gap-md mb-base">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary font-bold">JD</div>
+<div>
+<h2 class="font-section-heading text-section-heading font-bold text-tertiary">Global Filters</h2>
+<p class="text-xs text-secondary">Regulatory Oversight</p>
+</div>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar space-y-lg">
+<!-- Date Range -->
+<div class="space-y-sm">
+<label class="flex items-center gap-xs font-kpi-label text-kpi-label uppercase">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+          Date Range
+        </label>
+<div class="space-y-xs">
+<input class="w-full bg-white border border-border-base rounded-lg px-sm py-xs text-body-main" type="date"/>
+<input class="w-full bg-white border border-border-base rounded-lg px-sm py-xs text-body-main" type="date"/>
+</div>
+</div>
+<!-- FATF Status -->
+<div class="space-y-sm">
+<label class="flex items-center gap-xs font-kpi-label text-kpi-label uppercase">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+          FATF/OFAC Status
+        </label>
+<div class="space-y-base">
+<label class="flex items-center gap-xs p-xs hover:bg-surface-container-highest rounded-lg cursor-pointer transition-colors">
+<input checked="" class="rounded border-border-base text-primary focus:ring-primary" type="checkbox"/>
+<span class="text-body-main">High Risk Jurisdictions</span>
+</label>
+<label class="flex items-center gap-xs p-xs hover:bg-surface-container-highest rounded-lg cursor-pointer transition-colors">
+<input class="rounded border-border-base text-primary focus:ring-primary" type="checkbox"/>
+<span class="text-body-main">OFAC Sanctioned</span>
+</label>
+<label class="flex items-center gap-xs p-xs hover:bg-surface-container-highest rounded-lg cursor-pointer transition-colors">
+<input class="rounded border-border-base text-primary focus:ring-primary" type="checkbox"/>
+<span class="text-body-main">Enhanced Monitoring</span>
+</label>
+</div>
+</div>
+<!-- Dynamic Filters -->
+<div class="space-y-sm">
+<label class="flex items-center gap-xs font-kpi-label text-kpi-label uppercase">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+          Dynamic Filters
+        </label>
+<select class="w-full bg-white border border-border-base rounded-lg px-sm py-xs text-body-main">
+<option>All Business Segments</option>
+<option>Retail Banking</option>
+<option>Corporate Finance</option>
+<option>Private Wealth</option>
+</select>
+<select class="w-full bg-white border border-border-base rounded-lg px-sm py-xs text-body-main">
+<option>All Product Types</option>
+<option>SWIFT Transfer</option>
+<option>Crypto Settlement</option>
+<option>Internal Transfer</option>
+</select>
+</div>
+</div>
+<div class="pt-xl border-t border-border-base">
+<button class="w-full bg-primary text-on-primary py-sm rounded-lg font-bold hover:bg-on-primary-container transition-all">
+        Apply All Filters
+      </button>
+<div class="mt-lg grid grid-cols-2 gap-md">
+<button class="flex flex-col items-center gap-xs text-secondary hover:text-primary transition-colors">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Settings</span>
+</button>
+<button class="flex flex-col items-center gap-xs text-secondary hover:text-primary transition-colors">
+<span class="material-symbols-outlined">help</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Support</span>
+</button>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-sidebar-width pt-24 pb-12 px-xl max-w-[1440px] mx-auto">
+<!-- Page Header -->
+<header class="flex justify-between items-end mb-xl">
+<div>
+<h1 class="font-page-title text-page-title">HOME PAGE</h1>
+<p class="text-secondary text-body-main">Comprehensive AML Transaction Monitoring Overview</p>
+</div>
+<div class="flex items-center gap-md">
+<div class="bg-surface-container rounded-lg px-md py-xs text-xs font-bold text-secondary">
+          LAST SYNC: 2 MINS AGO
+        </div>
+</div>
+</header>
+<!-- KPI Row 1: Primary Metrics -->
+<section class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-md mb-xl">
+<div class="kpi-card bg-white p-card-padding rounded-xl">
+<span class="font-kpi-label text-kpi-label uppercase block mb-xs">Total Transactions Recorded</span>
+<div class="font-kpi-value text-kpi-value">1,248,302</div>
+<div class="flex items-center gap-xs mt-xs text-xs text-risk-low">
+<span class="material-symbols-outlined text-sm">trending_up</span> 12.5% vs LW
+        </div>
+</div>
+<div class="kpi-card bg-white p-card-padding rounded-xl">
+<span class="font-kpi-label text-kpi-label uppercase block mb-xs">Total Transaction Amount</span>
+<div class="font-kpi-value text-kpi-value">$14.2B</div>
+<div class="flex items-center gap-xs mt-xs text-xs text-risk-high">
+<span class="material-symbols-outlined text-sm">trending_up</span> 4.2% vs LW
+        </div>
+</div>
+<div class="kpi-card bg-white p-card-padding rounded-xl">
+<span class="font-kpi-label text-kpi-label uppercase block mb-xs">Average Transaction Value</span>
+<div class="font-kpi-value text-kpi-value">$11.3K</div>
+<div class="flex items-center gap-xs mt-xs text-xs text-muted">
+          Stable vs LW
+        </div>
+</div>
+<div class="kpi-card bg-white p-card-padding rounded-xl border-l-4 border-l-risk-high">
+<span class="font-kpi-label text-kpi-label uppercase block mb-xs">Highest Single Txn</span>
+<div class="font-kpi-value text-kpi-value">$8.4M</div>
+<div class="flex items-center gap-xs mt-xs text-xs text-risk-high">
+<span class="material-symbols-outlined text-sm">warning</span> Critical Alert
+        </div>
+</div>
+<div class="kpi-card bg-white p-card-padding rounded-xl">
+<span class="font-kpi-label text-kpi-label uppercase block mb-xs">Lowest Single Txn</span>
+<div class="font-kpi-value text-kpi-value">$0.02</div>
+<div class="flex items-center gap-xs mt-xs text-xs text-muted">
+          Micro-payment
+        </div>
+</div>
+</section>
+<!-- KPI Row 2 & 3: PS/PB & Contextual -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-xl mb-xl">
+<!-- Row 2 Mix: PS / PB Count -->
+<div class="lg:col-span-8 grid grid-cols-2 md:grid-cols-4 gap-md">
+<div class="kpi-card bg-white p-card-padding rounded-xl">
+<span class="font-kpi-label text-kpi-label uppercase block mb-xs">PS Count</span>
+<div class="font-kpi-value text-kpi-value">842</div>
+</div>
+<div class="kpi-card bg-white p-card-padding rounded-xl">
+<span class="font-kpi-label text-kpi-label uppercase block mb-xs">Total PS Amount</span>
+<div class="font-kpi-value text-kpi-value">$1.2B</div>
+</div>
+<div class="kpi-card bg-white p-card-padding rounded-xl">
+<span class="font-kpi-label text-kpi-label uppercase block mb-xs">PB Count</span>
+<div class="font-kpi-value text-kpi-value">1,590</div>
+</div>
+<div class="kpi-card bg-white p-card-padding rounded-xl">
+<span class="font-kpi-label text-kpi-label uppercase block mb-xs">Total PB Amount</span>
+<div class="font-kpi-value text-kpi-value">$3.8B</div>
+</div>
+</div>
+<!-- Row 3 Mix: Dates & Best segments -->
+<div class="lg:col-span-4 grid grid-cols-1 gap-md">
+<div class="kpi-card bg-white p-md rounded-xl flex items-center justify-between border-l-4 border-l-primary">
+<div>
+<span class="font-kpi-label text-kpi-label uppercase text-[11px]">Best Segment</span>
+<div class="font-bold text-lg">RETAIL BANKING</div>
+</div>
+<div class="text-right">
+<div class="font-bold text-risk-low">34% SHARE</div>
+</div>
+</div>
+<div class="kpi-card bg-white p-md rounded-xl flex items-center justify-between border-l-4 border-l-primary">
+<div>
+<span class="font-kpi-label text-kpi-label uppercase text-[11px]">Best Branch</span>
+<div class="font-bold text-lg">SINGAPORE-HQ</div>
+</div>
+<div class="text-right">
+<div class="font-bold text-risk-low">$4.1B VOL</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Trend Highlights Section -->
+<section class="bg-white border border-border-base rounded-xl mb-xl overflow-hidden">
+<div class="px-xl py-lg border-b border-border-base flex justify-between items-center bg-surface-container-lowest">
+<h2 class="font-section-heading text-section-heading uppercase tracking-tight">Trend Highlights</h2>
+<div class="flex bg-surface-container rounded-lg p-1">
+<button class="px-md py-xs text-xs font-bold rounded-md bg-white shadow-sm">DAILY</button>
+<button class="px-md py-xs text-xs font-bold rounded-md text-secondary hover:text-primary transition-colors">WEEKLY</button>
+</div>
+</div>
+<div class="p-xl grid grid-cols-1 lg:grid-cols-12 gap-xl">
+<div class="lg:col-span-8 space-y-xl">
+<div class="h-64 relative bg-surface-container-lowest rounded-lg border border-grid-line p-lg">
+<div class="absolute top-4 left-4 flex gap-lg">
+<div class="flex items-center gap-xs">
+<div class="w-3 h-3 bg-primary rounded-full"></div>
+<span class="text-xs font-bold text-secondary uppercase">Transaction Amount</span>
+</div>
+<div class="flex items-center gap-xs">
+<div class="w-3 h-3 bg-muted rounded-full"></div>
+<span class="text-xs font-bold text-secondary uppercase">Transaction Count</span>
+</div>
+</div>
+<!-- Placeholder for Line Chart Visual -->
+<div class="w-full h-full flex items-end justify-between gap-base pt-12">
+<div class="flex-1 bg-primary/10 rounded-t h-[40%] transition-all hover:bg-primary"></div>
+<div class="flex-1 bg-primary/20 rounded-t h-[60%] transition-all hover:bg-primary"></div>
+<div class="flex-1 bg-primary/15 rounded-t h-[35%] transition-all hover:bg-primary"></div>
+<div class="flex-1 bg-primary/40 rounded-t h-[80%] transition-all hover:bg-primary"></div>
+<div class="flex-1 bg-primary/30 rounded-t h-[55%] transition-all hover:bg-primary"></div>
+<div class="flex-1 bg-primary/25 rounded-t h-[45%] transition-all hover:bg-primary"></div>
+<div class="flex-1 bg-primary/60 rounded-t h-[95%] transition-all hover:bg-primary"></div>
+</div>
+<div class="flex justify-between mt-xs text-[10px] text-muted font-bold">
+<span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span>
+</div>
+</div>
+</div>
+<div class="lg:col-span-4 flex flex-col gap-md">
+<div class="flex-1 p-lg bg-surface-container-low rounded-xl border border-border-base">
+<span class="font-kpi-label text-kpi-label uppercase block mb-xs">Highest Amount Day</span>
+<div class="text-2xl font-bold">Friday, Oct 12</div>
+<div class="text-primary font-bold text-lg mt-base">$1.82B</div>
+</div>
+<div class="flex-1 p-lg bg-surface-container-low rounded-xl border border-border-base">
+<span class="font-kpi-label text-kpi-label uppercase block mb-xs">Lowest Amount Day</span>
+<div class="text-2xl font-bold">Sunday, Oct 14</div>
+<div class="text-muted font-bold text-lg mt-base">$240M</div>
+</div>
+<div class="flex-1 p-lg bg-surface-container-low rounded-xl border border-border-base">
+<span class="font-kpi-label text-kpi-label uppercase block mb-xs">Peak Vol Count</span>
+<div class="text-2xl font-bold">Monday, Oct 08</div>
+<div class="text-primary font-bold text-lg mt-base">242,103 TXNS</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Breakdowns Section -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-xl mb-xl">
+<!-- Control & Charts -->
+<div class="lg:col-span-12 flex justify-between items-center mb-base">
+<div class="flex items-center gap-xl">
+<div class="flex bg-surface-container rounded-lg p-1">
+<button class="px-md py-xs text-xs font-bold rounded-md bg-white shadow-sm">NET AMOUNT</button>
+<button class="px-md py-xs text-xs font-bold rounded-md text-secondary hover:text-primary transition-colors">COUNT</button>
+</div>
+<div class="flex items-center gap-md">
+<span class="text-xs font-bold text-secondary uppercase">Threshold:</span>
+<input class="border border-border-base rounded px-md py-xs text-xs w-24 font-bold" type="text" value="$50,000"/>
+</div>
+</div>
+</div>
+<!-- Donut Charts -->
+<div class="lg:col-span-6 bg-white p-xl rounded-xl border border-border-base">
+<h3 class="font-section-heading text-section-heading uppercase mb-xl border-b border-grid-line pb-xs">Purpose-wise Share</h3>
+<div class="flex items-center gap-xl">
+<div class="relative w-40 h-40">
+<svg class="w-full h-full -rotate-90" viewbox="0 0 36 36">
+<circle cx="18" cy="18" fill="none" r="16" stroke="#f1f1f1" stroke-width="4"></circle>
+<circle cx="18" cy="18" fill="none" r="16" stroke="#000000" stroke-dasharray="70, 100" stroke-width="4"></circle>
+<circle cx="18" cy="18" fill="none" r="16" stroke="#444444" stroke-dasharray="20, 100" stroke-dashoffset="-70" stroke-width="4"></circle>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center flex-col">
+<span class="text-2xl font-bold">14.2B</span>
+<span class="text-[10px] text-muted font-bold uppercase">Total</span>
+</div>
+</div>
+<div class="flex-1 space-y-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-xs">
+<div class="w-3 h-3 bg-primary rounded-full"></div>
+<span class="text-sm font-bold">Trade Settlement</span>
+</div>
+<span class="text-sm text-secondary">70%</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-xs">
+<div class="w-3 h-3 bg-on-surface-variant rounded-full"></div>
+<span class="text-sm font-bold">Personal Remit</span>
+</div>
+<span class="text-sm text-secondary">20%</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-xs">
+<div class="w-3 h-3 bg-muted rounded-full"></div>
+<span class="text-sm font-bold">Other</span>
+</div>
+<span class="text-sm text-secondary">10%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Horizontal Bar Charts -->
+<div class="lg:col-span-6 bg-white p-xl rounded-xl border border-border-base">
+<h3 class="font-section-heading text-section-heading uppercase mb-xl border-b border-grid-line pb-xs">Branch-wise Distribution</h3>
+<div class="space-y-lg">
+<div class="space-y-base">
+<div class="flex justify-between text-xs font-bold uppercase text-secondary">
+<span>Singapore HQ</span>
+<span>$4.1B</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[85%]"></div>
+</div>
+</div>
+<div class="space-y-base">
+<div class="flex justify-between text-xs font-bold uppercase text-secondary">
+<span>London City</span>
+<span>$2.8B</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[60%]"></div>
+</div>
+</div>
+<div class="space-y-base">
+<div class="flex justify-between text-xs font-bold uppercase text-secondary">
+<span>New York Wall St</span>
+<span>$2.1B</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[45%]"></div>
+</div>
+</div>
+<div class="space-y-base">
+<div class="flex justify-between text-xs font-bold uppercase text-secondary">
+<span>Dubai DIFC</span>
+<span>$1.9B</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[40%]"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom: AG-Grid Table -->
+<section class="bg-white border border-border-base rounded-xl overflow-hidden shadow-sm">
+<div class="px-xl py-lg border-b border-border-base bg-surface-container-lowest flex justify-between items-center">
+<div class="flex items-center gap-md">
+<h2 class="font-section-heading text-section-heading uppercase">Top Transactions</h2>
+<span class="bg-risk-high/10 text-risk-high text-[10px] font-extrabold px-xs py-[2px] rounded uppercase">Critical Monitoring</span>
+</div>
+<div class="flex gap-md">
+<button class="p-xs hover:bg-surface-container transition-colors rounded">
+<span class="material-symbols-outlined text-secondary">filter_alt</span>
+</button>
+<button class="p-xs hover:bg-surface-container transition-colors rounded">
+<span class="material-symbols-outlined text-secondary">fullscreen</span>
+</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-surface text-xs font-bold text-secondary uppercase border-b border-border-base">
+<tr>
+<th class="px-xl py-md">Date &amp; Time</th>
+<th class="px-xl py-md">Transaction ID</th>
+<th class="px-xl py-md">Entity/Client</th>
+<th class="px-xl py-md">Country</th>
+<th class="px-xl py-md">Amount</th>
+<th class="px-xl py-md">Status</th>
+<th class="px-xl py-md">Risk Score</th>
+</tr>
+</thead>
+<tbody class="text-table-data">
+<tr class="border-b border-grid-line hover:bg-surface-container-low transition-colors border-l-4 border-l-risk-high">
+<td class="px-xl py-md whitespace-nowrap">2023-10-15 09:42:11</td>
+<td class="px-xl py-md font-mono">TXN-94821038</td>
+<td class="px-xl py-md font-bold">Horizon Logistics Ltd</td>
+<td class="px-xl py-md">Panama</td>
+<td class="px-xl py-md font-bold">$1,240,000.00</td>
+<td class="px-xl py-md">
+<span class="px-xs py-[2px] rounded bg-risk-high/10 text-risk-high text-[10px] font-bold">HELD</span>
+</td>
+<td class="px-xl py-md text-right">
+<div class="flex items-center gap-xs">
+<div class="flex-1 bg-surface-container h-1 rounded-full overflow-hidden">
+<div class="bg-risk-high h-full w-[94%]"></div>
+</div>
+<span class="text-risk-high font-bold">94</span>
+</div>
+</td>
+</tr>
+<tr class="border-b border-grid-line hover:bg-surface-container-low transition-colors">
+<td class="px-xl py-md whitespace-nowrap">2023-10-15 09:45:02</td>
+<td class="px-xl py-md font-mono">TXN-94821039</td>
+<td class="px-xl py-md font-bold">Alpha Capital Partners</td>
+<td class="px-xl py-md">UK</td>
+<td class="px-xl py-md font-bold">$450,000.00</td>
+<td class="px-xl py-md">
+<span class="px-xs py-[2px] rounded bg-risk-low/10 text-risk-low text-[10px] font-bold">CLEAR</span>
+</td>
+<td class="px-xl py-md text-right">
+<div class="flex items-center gap-xs">
+<div class="flex-1 bg-surface-container h-1 rounded-full overflow-hidden">
+<div class="bg-risk-low h-full w-[12%]"></div>
+</div>
+<span class="text-risk-low font-bold">12</span>
+</div>
+</td>
+</tr>
+<tr class="border-b border-grid-line hover:bg-surface-container-low transition-colors border-l-4 border-l-risk-medium">
+<td class="px-xl py-md whitespace-nowrap">2023-10-15 10:11:58</td>
+<td class="px-xl py-md font-mono">TXN-94821042</td>
+<td class="px-xl py-md font-bold">CryptoExchange Global</td>
+<td class="px-xl py-md">Cayman Is.</td>
+<td class="px-xl py-md font-bold">$89,400.00</td>
+<td class="px-xl py-md">
+<span class="px-xs py-[2px] rounded bg-risk-medium/10 text-risk-medium text-[10px] font-bold">PENDING</span>
+</td>
+<td class="px-xl py-md text-right">
+<div class="flex items-center gap-xs">
+<div class="flex-1 bg-surface-container h-1 rounded-full overflow-hidden">
+<div class="bg-risk-medium h-full w-[65%]"></div>
+</div>
+<span class="text-risk-medium font-bold">65</span>
+</div>
+</td>
+</tr>
+<tr class="border-b border-grid-line hover:bg-surface-container-low transition-colors">
+<td class="px-xl py-md whitespace-nowrap">2023-10-15 10:22:45</td>
+<td class="px-xl py-md font-mono">TXN-94821045</td>
+<td class="px-xl py-md font-bold">United Retail Group</td>
+<td class="px-xl py-md">Germany</td>
+<td class="px-xl py-md font-bold">$12,200.00</td>
+<td class="px-xl py-md">
+<span class="px-xs py-[2px] rounded bg-risk-low/10 text-risk-low text-[10px] font-bold">CLEAR</span>
+</td>
+<td class="px-xl py-md text-right">
+<div class="flex items-center gap-xs">
+<div class="flex-1 bg-surface-container h-1 rounded-full overflow-hidden">
+<div class="bg-risk-low h-full w-[05%]"></div>
+</div>
+<span class="text-risk-low font-bold">05</span>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="px-xl py-md bg-surface-container-low border-t border-border-base flex justify-between items-center">
+<span class="text-xs text-secondary font-bold">SHOWING 1 - 25 OF 1,248,302 ENTRIES</span>
+<div class="flex gap-xs">
+<button class="px-md py-xs bg-white border border-border-base text-xs font-bold rounded hover:bg-surface-container transition-colors disabled:opacity-50">PREV</button>
+<button class="px-md py-xs bg-primary text-on-primary text-xs font-bold rounded">1</button>
+<button class="px-md py-xs bg-white border border-border-base text-xs font-bold rounded hover:bg-surface-container transition-colors">2</button>
+<button class="px-md py-xs bg-white border border-border-base text-xs font-bold rounded hover:bg-surface-container transition-colors">3</button>
+<button class="px-md py-xs bg-white border border-border-base text-xs font-bold rounded hover:bg-surface-container transition-colors">NEXT</button>
+</div>
+</div>
+</section>
+</main>
+<script>
+    // Add micro-interactions for active tabs
+    document.querySelectorAll('nav a').forEach(link => {
+      link.addEventListener('click', (e) => {
+        document.querySelectorAll('nav a').forEach(l => {
+          l.classList.remove('bg-primary', 'dark:bg-primary-fixed', 'text-on-primary', 'dark:text-on-primary-fixed', 'shadow-md');
+          l.classList.add('text-secondary', 'dark:text-secondary-fixed-dim');
+        });
+        link.classList.add('bg-primary', 'dark:bg-primary-fixed', 'text-on-primary', 'dark:text-on-primary-fixed', 'shadow-md');
+        link.classList.remove('text-secondary', 'dark:text-secondary-fixed-dim');
+      });
+    });
+
+    // Handle Trend section tab switching (Visual only for now)
+    const trendButtons = document.querySelectorAll('.Trend-Highlights-Controls button');
+    trendButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            trendButtons.forEach(b => {
+                b.classList.remove('bg-white', 'shadow-sm');
+                b.classList.add('text-secondary');
+            });
+            btn.classList.add('bg-white', 'shadow-sm');
+            btn.classList.remove('text-secondary');
+        });
+    });
+  </script>
+</body></html>

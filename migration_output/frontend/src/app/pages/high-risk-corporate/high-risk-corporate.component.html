@@ -1,0 +1,204 @@
+<div class="page-container">
+  <!-- Party Master Upload Section -->
+  <div class="section-header">
+    <div>
+      <h3>HIGH RISK CORPORATE</h3>
+      <p style="margin: 4px 0 0 0; font-size: 14px; color: #555;">Automate corporate risk categorization and identify high-risk exposure using the Party Master.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <h3>Party Master Integration</h3>
+    </div>
+    <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 24px; text-align: center;">
+      <div style="margin-bottom: 16px; font-weight: 500;">
+        <input type="file" accept=".csv" (change)="onFileChange($event)" style="margin-right: 12px; font-size: 14px;"/>
+        <button (click)="enrichData()" style="padding: 8px 16px; background: #111; color: #fff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Enrich Data</button>
+      </div>
+      <p style="margin: 0; font-size: 13px; color: #64748b;">Please upload the <strong>Party Master New report.csv</strong> file to enrich corporate risk categories.</p>
+    </div>
+  </div>
+
+  <hr>
+
+  <ng-container *ngIf="enrichedDf().length > 0">
+    <div class="section">
+      <div class="section-header">
+        <h3>Corporate Risk Overview</h3>
+      </div>
+      
+      <div class="kpi-row" style="grid-template-columns: repeat(3, 1fr); display: grid; margin-bottom: 24px;">
+        <div class="kpi-card">
+          <div class="kpi-title">Total Corporates Analyzed</div>
+          <div class="kpi-value">{{ kpis()?.base_total_corps | number }}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">High Risk</div>
+          <div class="kpi-value">{{ kpis()?.high_risk_count | number }}</div>
+          <div class="kpi-delta">Contribution: {{ (kpis()?.high_risk_pct | number:'1.1-1') + '%' }}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">High Risk Amount</div>
+          <div class="kpi-value">{{ kpis()?.high_risk_amount | humanReadableAmount }}</div>
+        </div>
+      </div>
+
+      <div class="kpi-row" style="grid-template-columns: repeat(4, 1fr); display: grid;">
+        <!-- Highest Risk Corporate -->
+        <div class="kpi-card">
+          <div class="kpi-badge">{{ kpis()?.top_corp?.pct | number:'1.1-1' }}%</div>
+          <div class="kpi-title">Highest Risk Corporate</div>
+          <div class="kpi-entity">{{ kpis()?.top_corp?.name }}</div>
+          <div class="kpi-stat"><strong>Count:</strong> {{ kpis()?.top_corp?.count | number }}</div>
+          <div class="kpi-stat"><strong>Net Amount:</strong> {{ kpis()?.top_corp?.exposure | humanReadableAmount }}</div>
+        </div>
+        <!-- Highest Risk Product -->
+        <div class="kpi-card">
+          <div class="kpi-badge">{{ kpis()?.top_product?.pct | number:'1.1-1' }}%</div>
+          <div class="kpi-title">Highest Risk Product</div>
+          <div class="kpi-entity">{{ kpis()?.top_product?.name }}</div>
+          <div class="kpi-stat"><strong>Count:</strong> {{ kpis()?.top_product?.count | number }}</div>
+          <div class="kpi-stat"><strong>Net Amount:</strong> {{ kpis()?.top_product?.exposure | humanReadableAmount }}</div>
+        </div>
+        <!-- Highest Risk Segment -->
+        <div class="kpi-card">
+          <div class="kpi-badge">{{ kpis()?.top_segment?.pct | number:'1.1-1' }}%</div>
+          <div class="kpi-title">Highest Risk Segment</div>
+          <div class="kpi-entity">{{ kpis()?.top_segment?.name }}</div>
+          <div class="kpi-stat"><strong>Count:</strong> {{ kpis()?.top_segment?.count | number }}</div>
+          <div class="kpi-stat"><strong>Net Amount:</strong> {{ kpis()?.top_segment?.exposure | humanReadableAmount }}</div>
+        </div>
+        <!-- Highest Risk Branch -->
+        <div class="kpi-card">
+          <div class="kpi-badge">{{ kpis()?.top_branch?.pct | number:'1.1-1' }}%</div>
+          <div class="kpi-title">Highest Risk Branch</div>
+          <div class="kpi-entity">{{ kpis()?.top_branch?.name }}</div>
+          <div class="kpi-stat"><strong>Count:</strong> {{ kpis()?.top_branch?.count | number }}</div>
+          <div class="kpi-stat"><strong>Net Amount:</strong> {{ kpis()?.top_branch?.exposure | humanReadableAmount }}</div>
+        </div>
+      </div>
+    </div>
+
+    <hr>
+    
+    <div class="section">
+      <div class="section-header">
+        <h3>Risk Breakdowns</h3>
+        <div class="toggle-group">
+          <button [class.active]="chartMetric() === 'COUNT'" (click)="chartMetric.set('COUNT'); fetchCharts()">COUNT</button>
+          <button [class.active]="chartMetric() === 'NET AMOUNT'" (click)="chartMetric.set('NET AMOUNT'); fetchCharts()">NET AMOUNT</button>
+        </div>
+      </div>
+
+      <div class="grid-row">
+        <div class="chart-container" *ngIf="distChart()">
+          <plotly-plot [data]="distChart()!.data" [layout]="distChart()!.layout" [useResizeHandler]="true"></plotly-plot>
+        </div>
+        <div class="chart-container" *ngIf="corpChart()">
+          <plotly-plot [data]="corpChart()!.data" [layout]="corpChart()!.layout" [useResizeHandler]="true"></plotly-plot>
+        </div>
+      </div>
+
+      <div class="grid-row">
+        <div class="chart-container" *ngIf="branchChart()">
+          <plotly-plot [data]="branchChart()!.data" [layout]="branchChart()!.layout" [useResizeHandler]="true"></plotly-plot>
+        </div>
+        <div class="chart-container" *ngIf="countryChart()">
+          <plotly-plot [data]="countryChart()!.data" [layout]="countryChart()!.layout" [useResizeHandler]="true"></plotly-plot>
+        </div>
+      </div>
+    </div>
+
+    <hr>
+
+    <div class="section">
+      <div class="grid-row">
+        <div>
+          <div class="chart-container" *ngIf="prodChart()" style="margin-bottom: 16px;">
+            <plotly-plot [data]="prodChart()!.data" [layout]="prodChart()!.layout" [useResizeHandler]="true"></plotly-plot>
+          </div>
+          <div class="section-header">
+            <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Product Breakdown</h4>
+            <button (click)="downloadCSV(productExposure().display_prod_table, 'product_records.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
+          </div>
+          <div class="table-container" (scroll)="onTableScroll($event, 'prod')" style="max-height: 300px;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Count</th>
+                  <th>Count %</th>
+                  <th>Net Amount</th>
+                  <th>Net Amount %</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let r of productExposure().display_prod_table | slice:0:scrollLimitProd()">
+                  <td>{{ r['Product'] }}</td>
+                  <td>{{ r['Count'] | number }}</td>
+                  <td>{{ r['Count %'] | number:'1.2-2' }}%</td>
+                  <td>{{ formatAmt(r['Net Amount']) }}</td>
+                  <td>{{ r['Net Amount %'] | number:'1.2-2' }}%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <div>
+          <div class="section-header">
+            <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Trend Analysis</h4>
+            <div class="toggle-group">
+              <button [class.active]="trendAgg() === 'DAILY'" (click)="trendAgg.set('DAILY')">DAILY</button>
+              <button [class.active]="trendAgg() === 'WEEKLY'" (click)="trendAgg.set('WEEKLY')">WEEKLY</button>
+            </div>
+          </div>
+          <div class="chart-container" *ngIf="trendChartObj()">
+            <plotly-plot [data]="trendChartObj()!.data" [layout]="trendChartObj()!.layout" [useResizeHandler]="true"></plotly-plot>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr>
+
+    <div class="section">
+      <div class="section-header">
+        <h3>Related Transaction Records</h3>
+        <button (click)="downloadCSV(transactionsTable(), 'high_risk_transactions.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
+      </div>
+      <div class="table-container" (scroll)="onTableScroll($event, 'tx')" style="max-height: 500px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Corporate</th>
+              <th>Passenger Name</th>
+              <th>Passport</th>
+              <th>Branch Name</th>
+              <th>Net Amt</th>
+              <th>EQV USD</th>
+              <th>Risk Classification</th>
+              <th>Visiting Country</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of transactionsTable() | slice:0:scrollLimitTx()">
+              <td>{{ r['Date'] | date:'mediumDate' }}</td>
+              <td>{{ r['Corporate'] }}</td>
+              <td>{{ r['Passenger Name'] }}</td>
+              <td>{{ r['Passport'] }}</td>
+              <td>{{ r['Branch Name'] }}</td>
+              <td>{{ formatAmt(r['Net Amt']) }}</td>
+              <td>{{ formatAmt(r['EQV USD']) }}</td>
+              <td>{{ r['Risk Classification'] }}</td>
+              <td>{{ r['Visiting Country'] }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </ng-container>
+</div>
