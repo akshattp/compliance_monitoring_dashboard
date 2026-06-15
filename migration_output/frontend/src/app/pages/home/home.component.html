@@ -91,30 +91,17 @@
 <div class="px-xl py-lg border-b border-border-base flex justify-between items-center bg-surface-container-lowest">
 <h2 class="font-section-heading text-section-heading uppercase tracking-tight">Trend Highlights</h2>
 <div class="flex bg-surface-container rounded-lg p-1">
-<button (click)="breakdownAgg.set('NET AMOUNT')" [ngClass]="breakdownAgg() === 'NET AMOUNT' ? 'px-md py-xs text-xs font-bold rounded-md bg-white shadow-sm' : 'px-md py-xs text-xs font-bold rounded-md text-secondary hover:text-primary transition-colors'">NET AMOUNT</button>
-<button (click)="breakdownAgg.set('COUNT')" [ngClass]="breakdownAgg() === 'COUNT' ? 'px-md py-xs text-xs font-bold rounded-md bg-white shadow-sm' : 'px-md py-xs text-xs font-bold rounded-md text-secondary hover:text-primary transition-colors'">COUNT</button>
+<button (click)="trendAgg.set('DAILY')" [ngClass]="trendAgg() === 'DAILY' ? 'px-md py-xs text-xs font-bold rounded-md bg-white shadow-sm' : 'px-md py-xs text-xs font-bold rounded-md text-secondary hover:text-primary transition-colors'">DAILY</button>
+<button (click)="trendAgg.set('WEEKLY')" [ngClass]="trendAgg() === 'WEEKLY' ? 'px-md py-xs text-xs font-bold rounded-md bg-white shadow-sm' : 'px-md py-xs text-xs font-bold rounded-md text-secondary hover:text-primary transition-colors'">WEEKLY</button>
 </div>
 </div>
 <div class="p-xl grid grid-cols-1 lg:grid-cols-12 gap-xl">
-<div class="lg:col-span-8 space-y-xl">
-<div class="h-64 relative bg-surface-container-lowest rounded-lg border border-grid-line p-0 overflow-hidden" *ngIf="trendAmountChart()">
-<plotly-plot [data]="trendAmountChart().data" [layout]="trendAmountChart().layout" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
+<div class="lg:col-span-8 flex flex-col gap-xl">
+<div class="h-80 relative bg-surface-container-lowest rounded-lg border border-grid-line p-0 overflow-hidden shadow-sm" *ngIf="trendAmountChart()">
+<plotly-plot [data]="trendAmountChart().data" [layout]="trendAmountChart().layout" [config]="{responsive: true, displayModeBar: false}" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
 </div>
-<div class="h-64 relative bg-surface-container-lowest rounded-lg border border-grid-line p-0 overflow-hidden mt-4" *ngIf="trendCountChart()">
-<plotly-plot [data]="trendCountChart().data" [layout]="trendCountChart().layout" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
-</div>
-<!-- Placeholder for Line Chart Visual -->
-<div class="w-full h-full flex items-end justify-between gap-base pt-12">
-<div class="flex-1 bg-primary/10 rounded-t h-[40%] transition-all hover:bg-primary"></div>
-<div class="flex-1 bg-primary/20 rounded-t h-[60%] transition-all hover:bg-primary"></div>
-<div class="flex-1 bg-primary/15 rounded-t h-[35%] transition-all hover:bg-primary"></div>
-<div class="flex-1 bg-primary/40 rounded-t h-[80%] transition-all hover:bg-primary"></div>
-<div class="flex-1 bg-primary/30 rounded-t h-[55%] transition-all hover:bg-primary"></div>
-<div class="flex-1 bg-primary/25 rounded-t h-[45%] transition-all hover:bg-primary"></div>
-<div class="flex-1 bg-primary/60 rounded-t h-[95%] transition-all hover:bg-primary"></div>
-</div>
-<div class="flex justify-between mt-xs text-[10px] text-muted font-bold">
-<span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span>
+<div class="h-80 relative bg-surface-container-lowest rounded-lg border border-grid-line p-0 overflow-hidden shadow-sm" *ngIf="trendCountChart()">
+<plotly-plot [data]="trendCountChart().data" [layout]="trendCountChart().layout" [config]="{responsive: true, displayModeBar: false}" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
 </div>
 </div>
 
@@ -140,26 +127,36 @@
 <!-- Breakdowns Section -->
 <section class="grid grid-cols-1 lg:grid-cols-12 gap-xl mb-xl">
 <!-- Control & Charts -->
-<div class="lg:col-span-12 flex justify-between items-center mb-base">
-<div class="flex items-center gap-xl">
+<div class="lg:col-span-12 flex justify-end items-center mb-base">
 <div class="flex bg-surface-container rounded-lg p-1">
-<button class="px-md py-xs text-xs font-bold rounded-md bg-white shadow-sm">NET AMOUNT</button>
-<button class="px-md py-xs text-xs font-bold rounded-md text-secondary hover:text-primary transition-colors">COUNT</button>
-</div>
-<div class="flex items-center gap-md">
-<span class="text-xs font-bold text-secondary uppercase">Threshold:</span>
-<input class="border border-border-base rounded px-md py-xs text-xs w-24 font-bold" type="number" [ngModel]="purposeThreshold()" (ngModelChange)="purposeThreshold.set($event)" step="0.5" min="0" max="100"/>
-</div>
+<button (click)="breakdownAgg.set('NET AMOUNT')" [ngClass]="breakdownAgg() === 'NET AMOUNT' ? 'px-md py-xs text-xs font-bold rounded-md bg-white shadow-sm' : 'px-md py-xs text-xs font-bold rounded-md text-secondary hover:text-primary transition-colors'">NET AMOUNT</button>
+<button (click)="breakdownAgg.set('COUNT')" [ngClass]="breakdownAgg() === 'COUNT' ? 'px-md py-xs text-xs font-bold rounded-md bg-white shadow-sm' : 'px-md py-xs text-xs font-bold rounded-md text-secondary hover:text-primary transition-colors'">COUNT</button>
 </div>
 </div>
 <!-- Donut Charts -->
 <div class="lg:col-span-6 bg-white p-xl rounded-xl border border-border-base">
-<h3 class="font-section-heading text-section-heading uppercase mb-xl border-b border-grid-line pb-xs">Purpose-wise Share</h3>
+<div class="flex justify-between items-center mb-xl border-b border-grid-line pb-xs">
+<h3 class="font-section-heading text-section-heading uppercase">Purpose-wise Share</h3>
+<div class="flex items-center gap-sm">
+<span class="text-xs font-bold text-secondary uppercase">Threshold:</span>
+<input class="border border-border-base rounded px-sm py-1 text-xs w-20 font-bold" type="number" [ngModel]="purposeThreshold()" (ngModelChange)="purposeThreshold.set($event)" step="0.5" min="0" max="100"/>
+</div>
+</div>
 <div class="w-full h-80" *ngIf="purposePieChart()">
-<plotly-plot [data]="purposePieChart().data" [layout]="purposePieChart().layout" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
+<plotly-plot [data]="purposePieChart().data" [layout]="purposePieChart().layout" [config]="{responsive: true, displayModeBar: false}" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
 </div>
 <div class="mt-4 flex justify-end">
 <button (click)="downloadCSV(breakdowns()?.purpose_summary_table || [], 'purpose_breakdown.csv')" class="text-xs text-primary font-bold underline">Download Data</button>
+</div>
+</div>
+
+<div class="lg:col-span-6 bg-white p-xl rounded-xl border border-border-base">
+<h3 class="font-section-heading text-section-heading uppercase mb-xl border-b border-grid-line pb-xs">Product-wise Share</h3>
+<div class="w-full h-80" *ngIf="productPieChart()">
+<plotly-plot [data]="productPieChart().data" [layout]="productPieChart().layout" [config]="{responsive: true, displayModeBar: false}" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
+</div>
+<div class="mt-4 flex justify-end">
+<button (click)="downloadCSV(breakdowns()?.product_summary_table || [], 'product_breakdown.csv')" class="text-xs text-primary font-bold underline">Download Data</button>
 </div>
 </div>
 
@@ -167,10 +164,20 @@
 <div class="lg:col-span-6 bg-white p-xl rounded-xl border border-border-base">
 <h3 class="font-section-heading text-section-heading uppercase mb-xl border-b border-grid-line pb-xs">Branch-wise Distribution</h3>
 <div class="w-full h-80" *ngIf="branchBarChart()">
-<plotly-plot [data]="branchBarChart().data" [layout]="branchBarChart().layout" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
+<plotly-plot [data]="branchBarChart().data" [layout]="branchBarChart().layout" [config]="{responsive: true, displayModeBar: false}" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
 </div>
 <div class="mt-4 flex justify-end">
 <button (click)="downloadCSV(breakdowns()?.branch_df || [], 'branch_breakdown.csv')" class="text-xs text-primary font-bold underline">Download Data</button>
+</div>
+</div>
+
+<div class="lg:col-span-6 bg-white p-xl rounded-xl border border-border-base">
+<h3 class="font-section-heading text-section-heading uppercase mb-xl border-b border-grid-line pb-xs">Country-wise Distribution</h3>
+<div class="w-full h-80" *ngIf="countryBarChart()">
+<plotly-plot [data]="countryBarChart().data" [layout]="countryBarChart().layout" [config]="{responsive: true, displayModeBar: false}" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
+</div>
+<div class="mt-4 flex justify-end">
+<button (click)="downloadCSV(breakdowns()?.country_df || [], 'country_breakdown.csv')" class="text-xs text-primary font-bold underline">Download Data</button>
 </div>
 </div>
 </section>
@@ -198,7 +205,7 @@ CSV
 <tbody class="text-table-data">
 <tr *ngFor="let row of scrollableTransactions; let i = index" class="border-b border-grid-line hover:bg-surface-container-low transition-colors" [ngClass]="{'border-l-4 border-l-risk-high': i%3===0, 'border-l-4 border-l-risk-medium': i%3===1}">
 <td *ngFor="let header of tableHeaders()" class="px-xl py-md whitespace-nowrap overflow-hidden text-ellipsis max-w-[200px]">
-  {{ header === 'Net Amt' ? formatAmt(row[header]) : row[header] }}
+  {{ header === 'INRAMOUNT' ? formatAmt(row[header]) : row[header] }}
 </td>
 </tr>
 <tr *ngIf="filteredTableCount() === 0">

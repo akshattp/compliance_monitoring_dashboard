@@ -34,28 +34,7 @@
         <plotly-plot *ngIf="typePieChart()" [data]="typePieChart().data" [layout]="typePieChart().layout" [useResizeHandler]="true" [style]="{width: '100%', height: '400px'}"></plotly-plot>
       </div>
       <div>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Txn Type</th>
-                <th>Count</th>
-                <th>Count %</th>
-                <th>Amount</th>
-                <th>Amount %</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let row of breakdown().display_table" [ngClass]="{'total-row': row['Txn Type'] === '**TOTAL**'}">
-                <td>{{ row['Txn Type'] }}</td>
-                <td>{{ row['Count'] | number }}</td>
-                <td>{{ row['Count %'] | number:'1.2-2' }}%</td>
-                <td>{{ row['Amount'] === '**TOTAL**' ? '' : formatAmt(row['Amount']) }}</td>
-                <td>{{ row['Amount %'] | number:'1.2-2' }}%</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <app-shared-table [data]="breakdown().display_table" [columns]="typeCols" maxHeight="350px" downloadFilename="txn_type_summary.csv" [showDownload]="false"></app-shared-table>
       </div>
     </div>
   </div>
@@ -94,34 +73,7 @@
         <button (click)="downloadCSV(branchComposition().display_table, 'branch_records.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
       </div>
 
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Branch Name</th>
-              <th>Count</th>
-              <th>Count %</th>
-              <th>Net Amt</th>
-              <th>Net Amount %</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let r of branchComposition().display_table | slice:0:scrollLimitBranch()">
-              <td>{{ r['Branch Name'] }}</td>
-              <td>{{ r['Count'] | number }}</td>
-              <td>{{ r['Count %'] | number:'1.2-2' }}%</td>
-              <td>{{ formatAmt(r['Net Amt']) }}</td>
-              <td>{{ r['Net Amount %'] | number:'1.2-2' }}%</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      
-      <div style="margin-top: 12px; font-size: 13px; font-weight: 600; color: #475569; display: flex; gap: 24px;">
-        <span>TOTAL RECORDS: {{ branchComposition().records_count | number }}</span>
-        <span>TOTAL COUNT: {{ branchComposition().total_count | number }}</span>
-        <span>TOTAL NET AMOUNT: {{ formatAmt(branchComposition().total_amount) }}</span>
-      </div>
+      <app-shared-table [data]="branchComposition().display_table" [columns]="branchCols" maxHeight="350px" downloadFilename="branch_records.csv" [showDownload]="false"></app-shared-table>
     </div>
 
     <hr>
@@ -137,34 +89,7 @@
         <button (click)="downloadCSV(productComposition().display_table, 'product_records.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
       </div>
 
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Product</th>
-              <th>Count</th>
-              <th>Count %</th>
-              <th>Net Amt</th>
-              <th>Net Amount %</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let r of productComposition().display_table | slice:0:scrollLimitProduct()">
-              <td>{{ r['Product'] }}</td>
-              <td>{{ r['Count'] | number }}</td>
-              <td>{{ r['Count %'] | number:'1.2-2' }}%</td>
-              <td>{{ formatAmt(r['Net Amt']) }}</td>
-              <td>{{ r['Net Amount %'] | number:'1.2-2' }}%</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      
-      <div style="margin-top: 12px; font-size: 13px; font-weight: 600; color: #475569; display: flex; gap: 24px;">
-        <span>TOTAL RECORDS: {{ productComposition().records_count | number }}</span>
-        <span>TOTAL COUNT: {{ productComposition().total_count | number }}</span>
-        <span>TOTAL NET AMOUNT: {{ formatAmt(productComposition().total_amount) }}</span>
-      </div>
+      <app-shared-table [data]="productComposition().display_table" [columns]="productCols" maxHeight="350px" downloadFilename="product_records.csv" [showDownload]="false"></app-shared-table>
     </div>
 
     <hr>
@@ -180,34 +105,7 @@
         <button (click)="downloadCSV(segmentComposition().display_table, 'segment_records.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
       </div>
 
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Segments</th>
-              <th>Count</th>
-              <th>Count %</th>
-              <th>Net Amt</th>
-              <th>Net Amount %</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let r of segmentComposition().display_table | slice:0:scrollLimitSegment()">
-              <td>{{ r['Segments'] }}</td>
-              <td>{{ r['Count'] | number }}</td>
-              <td>{{ r['Count %'] | number:'1.2-2' }}%</td>
-              <td>{{ formatAmt(r['Net Amt']) }}</td>
-              <td>{{ r['Net Amount %'] | number:'1.2-2' }}%</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      
-      <div style="margin-top: 12px; font-size: 13px; font-weight: 600; color: #475569; display: flex; gap: 24px;">
-        <span>TOTAL RECORDS: {{ segmentComposition().records_count | number }}</span>
-        <span>TOTAL COUNT: {{ segmentComposition().total_count | number }}</span>
-        <span>TOTAL NET AMOUNT: {{ formatAmt(segmentComposition().total_amount) }}</span>
-      </div>
+      <app-shared-table [data]="segmentComposition().display_table" [columns]="segmentCols" maxHeight="350px" downloadFilename="segment_records.csv" [showDownload]="false"></app-shared-table>
     </div>
   </div>
 
@@ -220,27 +118,6 @@
       <button (click)="downloadCSV(purposeSummary(), 'purpose_summary.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
     </div>
     
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>Purpose</th>
-            <th>Count</th>
-            <th>Count %</th>
-            <th>Net Amt</th>
-            <th>Net Amount %</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let row of purposeSummary()">
-            <td>{{ row['Purpose'] }}</td>
-            <td>{{ row['Count'] | number }}</td>
-            <td>{{ row['% Count'] | number:'1.2-2' }}%</td>
-            <td>{{ formatAmt(row['Net Amt']) }}</td>
-            <td>{{ row['% Net Amount'] | number:'1.2-2' }}%</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <app-shared-table [data]="purposeSummary()" [columns]="purposeCols" maxHeight="350px" downloadFilename="purpose_summary.csv" [showDownload]="false"></app-shared-table>
   </div>
 </div>

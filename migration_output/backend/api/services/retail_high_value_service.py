@@ -16,17 +16,17 @@ def classify_retail_risk_level(eqv_usd):
 
 def add_retail_risk_classification(df: pd.DataFrame) -> pd.DataFrame:
     work_df = df.copy()
-    if 'EQV USD' not in work_df.columns:
+    if 'Equivalent USD Amount' not in work_df.columns:
         work_df['Retail_Risk_Level'] = 'UNKNOWN'
         return work_df
     
-    work_df['Retail_Risk_Level'] = work_df['EQV USD'].apply(classify_retail_risk_level)
+    work_df['Retail_Risk_Level'] = work_df['Equivalent USD Amount'].apply(classify_retail_risk_level)
     return work_df
 
 def identify_high_value_transactions(df: pd.DataFrame) -> pd.DataFrame:
-    if 'EQV USD' not in df.columns:
-        return df[df['Net Amt'] > 10000] if 'Net Amt' in df.columns else df.iloc[0:0]
-    return df[df['EQV USD'] >= 10000]
+    if 'Equivalent USD Amount' not in df.columns:
+        return df[df['INRAMOUNT'] > 10000] if 'INRAMOUNT' in df.columns else df.iloc[0:0]
+    return df[df['Equivalent USD Amount'] >= 10000]
 
 def calculate_kpis(high_value_df: pd.DataFrame) -> dict:
     kpis = {}
@@ -42,21 +42,21 @@ def calculate_kpis(high_value_df: pd.DataFrame) -> dict:
         return kpis
     
     kpis['total_high_value_txn'] = len(high_value_df)
-    kpis['total_high_value_amount'] = float(high_value_df['EQV USD'].fillna(0).sum())
-    kpis['highest_usd_txn'] = float(high_value_df['EQV USD'].fillna(0).max())
-    kpis['avg_usd_txn'] = float(high_value_df['EQV USD'].fillna(0).mean())
+    kpis['total_high_value_amount'] = float(high_value_df['Equivalent USD Amount'].fillna(0).sum())
+    kpis['highest_usd_txn'] = float(high_value_df['Equivalent USD Amount'].fillna(0).max())
+    kpis['avg_usd_txn'] = float(high_value_df['Equivalent USD Amount'].fillna(0).mean())
     
     kpis['high_risk_count'] = int(len(high_value_df[high_value_df['Retail_Risk_Level'] == 'HIGH']))
     kpis['medium_risk_count'] = int(len(high_value_df[high_value_df['Retail_Risk_Level'] == 'MEDIUM']))
     
-    if 'Branch Name' in high_value_df.columns:
-        top_branch = high_value_df.groupby('Branch Name')['EQV USD'].sum().idxmax()
+    if 'LOCATION' in high_value_df.columns:
+        top_branch = high_value_df.groupby('LOCATION')['Equivalent USD Amount'].sum().idxmax()
         kpis['high_exposure_branch'] = str(top_branch)
     else:
         kpis['high_exposure_branch'] = 'N/A'
     
-    if 'Corporate' in high_value_df.columns:
-        top_corp = high_value_df.groupby('Corporate')['EQV USD'].sum().idxmax()
+    if 'CUSTOMERNAME' in high_value_df.columns:
+        top_corp = high_value_df.groupby('CUSTOMERNAME')['Equivalent USD Amount'].sum().idxmax()
         kpis['high_exposure_corporate'] = str(top_corp)
     else:
         kpis['high_exposure_corporate'] = 'N/A'
@@ -64,68 +64,92 @@ def calculate_kpis(high_value_df: pd.DataFrame) -> dict:
     return kpis
 
 def branch_wise_analysis(high_value_df: pd.DataFrame) -> list:
-    if 'Branch Name' not in high_value_df.columns or high_value_df.empty:
+    if 'LOCATION' not in high_value_df.columns or high_value_df.empty:
         return []
     
-    res = high_value_df.groupby('Branch Name').agg(
-        Transaction_Count=('EQV USD', 'size'),
-        Total_USD=('EQV USD', 'sum'),
-        Avg_USD=('EQV USD', 'mean'),
-        Max_USD=('EQV USD', 'max'),
+    res = high_value_df.groupby('LOCATION').agg(
+        Transaction_Count=('Equivalent USD Amount', 'size'),
+        Total_USD=('Equivalent USD Amount', 'sum'),
+        Avg_USD=('Equivalent USD Amount', 'mean'),
+        Max_USD=('Equivalent USD Amount', 'max'),
         High_Risk_Count=('Retail_Risk_Level', lambda x: (x == 'HIGH').sum()),
         Medium_Risk_Count=('Retail_Risk_Level', lambda x: (x == 'MEDIUM').sum()),
     ).reset_index().sort_values('Total_USD', ascending=False)
+
+    total_count = res['Transaction_Count'].sum()
+    total_usd = res['Total_USD'].sum()
+    res['Count'] = res['Transaction_Count']
+    res['Count %'] = (res['Transaction_Count'] / total_count * 100).fillna(0) if total_count > 0 else 0
+    res['Net Amount %'] = (res['Total_USD'] / total_usd * 100).fillna(0) if total_usd > 0 else 0
     return clean_for_json(res)
 
 def corporate_wise_analysis(high_value_df: pd.DataFrame) -> list:
-    if 'Corporate' not in high_value_df.columns or high_value_df.empty:
+    if 'CUSTOMERNAME' not in high_value_df.columns or high_value_df.empty:
         return []
     
-    res = high_value_df.groupby('Corporate').agg(
-        Transaction_Count=('EQV USD', 'size'),
-        Total_USD=('EQV USD', 'sum'),
-        Avg_USD=('EQV USD', 'mean'),
-        Max_USD=('EQV USD', 'max'),
-        Customer_Count=('Passenger Name', 'nunique') if 'Passenger Name' in high_value_df.columns else (lambda x: 0),
-        Branch_Count=('Branch Name', 'nunique') if 'Branch Name' in high_value_df.columns else (lambda x: 0),
+    res = high_value_df.groupby('CUSTOMERNAME').agg(
+        Transaction_Count=('Equivalent USD Amount', 'size'),
+        Total_USD=('Equivalent USD Amount', 'sum'),
+        Avg_USD=('Equivalent USD Amount', 'mean'),
+        Max_USD=('Equivalent USD Amount', 'max'),
+        Customer_Count=('PAXNAME', 'nunique') if 'PAXNAME' in high_value_df.columns else (lambda x: 0),
+        Branch_Count=('LOCATION', 'nunique') if 'LOCATION' in high_value_df.columns else (lambda x: 0),
     ).reset_index().sort_values('Total_USD', ascending=False)
+
+    total_count = res['Transaction_Count'].sum()
+    total_usd = res['Total_USD'].sum()
+    res['Count'] = res['Transaction_Count']
+    res['Count %'] = (res['Transaction_Count'] / total_count * 100).fillna(0) if total_count > 0 else 0
+    res['Net Amount %'] = (res['Total_USD'] / total_usd * 100).fillna(0) if total_usd > 0 else 0
     return clean_for_json(res)
 
 def customer_concentration(high_value_df: pd.DataFrame) -> list:
-    if 'Passenger Name' not in high_value_df.columns or high_value_df.empty:
+    if 'PAXNAME' not in high_value_df.columns or high_value_df.empty:
         return []
     
-    res = high_value_df.groupby('Passenger Name').agg(
-        Transaction_Count=('EQV USD', 'size'),
-        Total_USD=('EQV USD', 'sum'),
-        Avg_USD=('EQV USD', 'mean'),
-        Max_USD=('EQV USD', 'max'),
-        Corporate_Count=('Corporate', 'nunique') if 'Corporate' in high_value_df.columns else (lambda x: 0),
-        Branch_Count=('Branch Name', 'nunique') if 'Branch Name' in high_value_df.columns else (lambda x: 0),
+    res = high_value_df.groupby('PAXNAME').agg(
+        Transaction_Count=('Equivalent USD Amount', 'size'),
+        Total_USD=('Equivalent USD Amount', 'sum'),
+        Avg_USD=('Equivalent USD Amount', 'mean'),
+        Max_USD=('Equivalent USD Amount', 'max'),
+        Corporate_Count=('CUSTOMERNAME', 'nunique') if 'CUSTOMERNAME' in high_value_df.columns else (lambda x: 0),
+        Branch_Count=('LOCATION', 'nunique') if 'LOCATION' in high_value_df.columns else (lambda x: 0),
     ).reset_index().sort_values('Total_USD', ascending=False).head(20)
     return clean_for_json(res)
 
 def product_wise_analysis(high_value_df: pd.DataFrame) -> list:
-    if 'Product' not in high_value_df.columns or high_value_df.empty:
+    if 'PRODUCT' not in high_value_df.columns or high_value_df.empty:
         return []
     
-    res = high_value_df.groupby('Product').agg(
-        Transaction_Count=('EQV USD', 'size'),
-        Total_USD=('EQV USD', 'sum'),
-        Avg_USD=('EQV USD', 'mean'),
+    res = high_value_df.groupby('PRODUCT').agg(
+        Transaction_Count=('Equivalent USD Amount', 'size'),
+        Total_USD=('Equivalent USD Amount', 'sum'),
+        Avg_USD=('Equivalent USD Amount', 'mean'),
     ).reset_index().sort_values('Total_USD', ascending=False)
     return clean_for_json(res)
 
 def currency_wise_analysis(high_value_df: pd.DataFrame) -> list:
-    if 'Currency' not in high_value_df.columns or high_value_df.empty:
+    if 'CURRENCY' not in high_value_df.columns or high_value_df.empty:
         return []
     
-    res = high_value_df.groupby('Currency').agg(
-        Transaction_Count=('EQV USD', 'size'),
-        Total_USD=('EQV USD', 'sum'),
-        Avg_USD=('EQV USD', 'mean'),
+    res = high_value_df.groupby('CURRENCY').agg(
+        Transaction_Count=('Equivalent USD Amount', 'size'),
+        Total_USD=('Equivalent USD Amount', 'sum'),
+        Avg_USD=('Equivalent USD Amount', 'mean'),
     ).reset_index().sort_values('Total_USD', ascending=False)
     return clean_for_json(res)
+
+def country_wise_analysis(high_value_df: pd.DataFrame) -> list:
+    if 'CountryToTravel' not in high_value_df.columns or high_value_df.empty:
+        return []
+    
+    res = high_value_df.groupby('CountryToTravel').agg(
+        Count=('Equivalent USD Amount', 'size'),
+        Total_USD=('Equivalent USD Amount', 'sum'),
+    ).reset_index().sort_values('Total_USD', ascending=False)
+    return clean_for_json(res)
+
+
 
 def generate_observations(high_value_df: pd.DataFrame, kpis: dict) -> str:
     observations = []
@@ -134,8 +158,8 @@ def generate_observations(high_value_df: pd.DataFrame, kpis: dict) -> str:
         return "No high-value transactions detected in current filters."
     
     # Branch concentration
-    if 'Branch Name' in high_value_df.columns:
-        branch_summary = high_value_df['Branch Name'].value_counts()
+    if 'LOCATION' in high_value_df.columns:
+        branch_summary = high_value_df['LOCATION'].value_counts()
         if len(branch_summary) > 0:
             top_branch_pct = (branch_summary.iloc[0] / len(high_value_df)) * 100
             if top_branch_pct > 30:
@@ -151,8 +175,8 @@ def generate_observations(high_value_df: pd.DataFrame, kpis: dict) -> str:
         )
     
     # Repeated high-value customers
-    if 'Passenger Name' in high_value_df.columns:
-        repeat_customers = high_value_df['Passenger Name'].value_counts()
+    if 'PAXNAME' in high_value_df.columns:
+        repeat_customers = high_value_df['PAXNAME'].value_counts()
         multi_transaction_customers = len(repeat_customers[repeat_customers > 1])
         if multi_transaction_customers > 0:
             observations.append(
@@ -160,8 +184,8 @@ def generate_observations(high_value_df: pd.DataFrame, kpis: dict) -> str:
             )
     
     # Country concentration
-    if 'Visiting Country' in high_value_df.columns:
-        country_summary = high_value_df['Visiting Country'].value_counts()
+    if 'CountryToTravel' in high_value_df.columns:
+        country_summary = high_value_df['CountryToTravel'].value_counts()
         if len(country_summary) > 0:
             top_country_pct = (country_summary.iloc[0] / len(high_value_df)) * 100
             if top_country_pct > 20:
@@ -170,7 +194,7 @@ def generate_observations(high_value_df: pd.DataFrame, kpis: dict) -> str:
                 )
     
     # Average transaction spike
-    avg_usd = high_value_df['EQV USD'].mean() if 'EQV USD' in high_value_df.columns else 0
+    avg_usd = high_value_df['Equivalent USD Amount'].mean() if 'Equivalent USD Amount' in high_value_df.columns else 0
     if avg_usd > 50000:
         observations.append(
             f"📈 **High Average Transaction**: Average USD value of ${avg_usd:,.0f} indicates significant exposure."
@@ -183,17 +207,16 @@ def format_transaction_table(high_value_df: pd.DataFrame) -> list:
         return []
     
     display_cols = [
-        'Date', 'Passenger Name', 'Passport', 'Corporate', 'Branch Name',
-        'Currency', 'Net Amt', 'EQV USD', 'Retail_Risk_Level', 'Product',
-        'Visiting Country'
+        'TXNDATE', 'PAXNAME', 'PAXIDNO', 'CUSTOMERNAME', 'LOCATION',
+        'CURRENCY', 'INRAMOUNT', 'Equivalent USD Amount', 'Retail_Risk_Level', 'PRODUCT',
+        'CountryToTravel', 'TxnPurpose'
     ]
     
     available_cols = [col for col in display_cols if col in high_value_df.columns]
     
-    result = high_value_df[available_cols].sort_values('EQV USD', ascending=False).copy()
-    if 'EQV USD' in result.columns:
-        result['EQV USD'] = result['EQV USD'].apply(lambda x: f"${x:,.2f}" if pd.notna(x) else "N/A")
-    if 'Date' in result.columns:
-        result['Date'] = result['Date'].astype(str)
+    result = high_value_df[available_cols].sort_values('Equivalent USD Amount', ascending=False).copy()
+    if 'TXNDATE' in result.columns:
+        result['TXNDATE'] = result['TXNDATE'].astype(str)
     
     return clean_for_json(result)
+

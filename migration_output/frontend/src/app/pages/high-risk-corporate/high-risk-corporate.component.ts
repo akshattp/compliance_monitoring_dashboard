@@ -10,6 +10,7 @@ import { PageHeaderComponent } from '../../shared/components/page-header/page-he
 import { HumanReadableAmountPipe } from '../../shared/pipes/human-readable-amount.pipe';
 import { ENTERPRISE_THEME } from '../../shared/chart-theme.service';
 import { FormsModule } from '@angular/forms';
+import { SharedTableComponent, ColumnDef } from '../../shared/components/shared-table/shared-table.component';
 
 @Component({
   selector: 'app-high-risk-corporate',
@@ -19,12 +20,33 @@ import { FormsModule } from '@angular/forms';
     PlotlyViaWindowModule, 
     HumanReadableAmountPipe,
     DecimalPipe,
-    FormsModule
+    FormsModule,
+    SharedTableComponent
   ],
   templateUrl: './high-risk-corporate.component.html',
   styleUrls: ['./high-risk-corporate.component.scss']
 })
 export class HighRiskCorporateComponent {
+  prodCols: ColumnDef[] = [
+    { field: 'PRODUCT', header: 'PRODUCT' },
+    { field: 'Count', header: 'Count', type: 'number', align: 'right' },
+    { field: 'Count %', header: 'Count %', type: 'number', format: '1.2-2', align: 'right' },
+    { field: 'INRAMOUNT', header: 'Net Amount', type: 'amount', align: 'right' },
+    { field: 'Net Amount %', header: 'Net Amount %', type: 'number', format: '1.2-2', align: 'right' }
+  ];
+
+  txCols: ColumnDef[] = [
+    { field: 'TXNDATE', header: 'TXNDATE', type: 'date' },
+    { field: 'CUSTOMERNAME', header: 'CUSTOMERNAME' },
+    { field: 'PAXNAME', header: 'PAXNAME' },
+    { field: 'PAXIDNO', header: 'PAXIDNO' },
+    { field: 'LOCATION', header: 'LOCATION' },
+    { field: 'Segment', header: 'Segment' },
+    { field: 'INRAMOUNT', header: 'INRAMOUNT', type: 'amount', align: 'right' },
+    { field: 'Equivalent USD Amount', header: 'Equivalent USD Amount ($)', type: 'usd', align: 'right' },
+    { field: 'Risk Classification', header: 'Risk Classification' },
+    { field: 'CountryToTravel', header: 'CountryToTravel' }
+  ];
   dataService = inject(DataService);
   private http = inject(HttpClient);
 
@@ -97,40 +119,15 @@ export class HighRiskCorporateComponent {
 
   enrichData() {
     const file = this.pmFile();
-    const df = this.dataService.filteredDf();
-    
     if (!file) {
       alert('Please upload Party Master CSV first.');
       return;
     }
-    if (!df || df.length === 0) {
-      alert('No base transaction data available. Please upload main dataset on Home page.');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('filtered_df', JSON.stringify(df));
-
-    this.http.post<any>(`${environment.apiBaseUrl}/api/upload/party-master`, formData)
-      .subscribe({
-        next: (res) => {
-          if (res.error) {
-            alert('Error enriching data: ' + res.error);
-          } else {
-            this.enrichedDf.set(res.enriched_data);
-            this.fetchCharts();
-          }
-        },
-        error: (err) => {
-          console.error(err);
-          alert('Failed to enrich data.');
-        }
-      });
+    this.dataService.uploadPartyMaster(file);
   }
 
   fetchCharts() {
-    const edf = this.enrichedDf();
+    const edf = this.dataService.filteredDf();
     if (!edf || edf.length === 0) return;
 
     this.http.post<any>(`${environment.apiBaseUrl}/api/pages/high-risk-corporate`, {
@@ -149,12 +146,12 @@ export class HighRiskCorporateComponent {
     });
   }
 
-  // Refetch when trend changes
+  // Refetch when trend changes or data changes
   constructor() {
     effect(() => {
       const agg = this.trendAgg();
-      // Only refetch if we already have enriched data
-      if (this.enrichedDf().length > 0) {
+      const df = this.dataService.filteredDf();
+      if (df.length > 0) {
         this.fetchCharts();
       }
     });
@@ -167,7 +164,7 @@ export class HighRiskCorporateComponent {
     const yKey = this.chartMetric() === 'COUNT' ? 'Transaction_Count' : 'Net_Amt';
     return {
       data: [{ type: 'bar', x: data.map(d => d['Risk Classification']), y: data.map(d => d[yKey]), marker: { color: data.map(d => this.riskColors[d['Risk Classification']] || '#636363') } }],
-      layout: { ...this.theme, title: 'Risk Category Overview', margin: { l: 40, r: 15, t: 45, b: 40 } }
+      layout: { ...this.theme, title: 'Risk Category Overview', margin: { l: 80, r: 20, t: 50, b: 100 }, xaxis: { automargin: true, tickangle: -45 } }
     };
   });
 
@@ -177,7 +174,7 @@ export class HighRiskCorporateComponent {
     const yKey = this.chartMetric() === 'COUNT' ? 'Transaction_Count' : 'Net_Amt';
     return {
       data: [{ type: 'bar', x: data.map(d => d['Corporate_Code']), y: data.map(d => d[yKey]), marker: { color: '#111111' } }],
-      layout: { ...this.theme, title: 'Top Corporates', margin: { l: 40, r: 15, t: 45, b: 60 } }
+      layout: { ...this.theme, title: 'Top Corporates', margin: { l: 80, r: 20, t: 50, b: 100 }, xaxis: { automargin: true, tickangle: -45 } }
     };
   });
 
@@ -190,7 +187,7 @@ export class HighRiskCorporateComponent {
       const filtered = data.filter(d => d['Risk Classification'] === risk);
       return {
         type: 'bar', name: risk,
-        x: filtered.map(d => d['Branch Name']),
+        x: filtered.map(d => d['LOCATION']),
         y: filtered.map(d => d[yKey]),
         marker: { color: this.riskColors[risk] }
       };
@@ -198,7 +195,7 @@ export class HighRiskCorporateComponent {
 
     return {
       data: traces,
-      layout: { ...this.theme, title: 'Branch Exposure Profile', barmode: 'stack', margin: { l: 40, r: 15, t: 45, b: 60 } }
+      layout: { ...this.theme, title: 'Branch Exposure Profile', barmode: 'stack', margin: { l: 80, r: 20, t: 50, b: 120 }, xaxis: { automargin: true, tickangle: -45 } }
     };
   });
 
@@ -211,7 +208,7 @@ export class HighRiskCorporateComponent {
       const filtered = data.filter(d => d['Risk Classification'] === risk);
       return {
         type: 'bar', name: risk,
-        x: filtered.map(d => d['Visiting Country']),
+        x: filtered.map(d => d['CountryToTravel']),
         y: filtered.map(d => d[yKey]),
         marker: { color: this.riskColors[risk] }
       };
@@ -219,7 +216,7 @@ export class HighRiskCorporateComponent {
 
     return {
       data: traces,
-      layout: { ...this.theme, title: 'Country Exposure Profile', barmode: 'stack', margin: { l: 40, r: 15, t: 45, b: 60 } }
+      layout: { ...this.theme, title: 'Country Exposure Profile', barmode: 'stack', margin: { l: 80, r: 20, t: 50, b: 120 }, xaxis: { automargin: true, tickangle: -45 } }
     };
   });
 
@@ -232,7 +229,7 @@ export class HighRiskCorporateComponent {
       const filtered = data.filter((d: any) => d['Risk Classification'] === risk);
       return {
         type: 'bar', name: risk,
-        x: filtered.map((d: any) => d['Product']),
+        x: filtered.map((d: any) => d['PRODUCT']),
         y: filtered.map((d: any) => d[yKey]),
         marker: { color: this.riskColors[risk] }
       };
@@ -240,7 +237,7 @@ export class HighRiskCorporateComponent {
 
     return {
       data: traces,
-      layout: { ...this.theme, title: 'Product Exposure Profile', barmode: 'stack', margin: { l: 40, r: 15, t: 45, b: 60 } }
+      layout: { ...this.theme, title: 'Product Exposure Profile', barmode: 'stack', margin: { l: 80, r: 20, t: 50, b: 120 }, xaxis: { automargin: true, tickangle: -45 } }
     };
   });
 
@@ -251,17 +248,21 @@ export class HighRiskCorporateComponent {
     
     const traces = ['High Risk', 'Medium Risk', 'Low Risk', 'Unknown Risk'].map(risk => {
       const filtered = data.filter(d => d['Risk Classification'] === risk);
+      const yData = filtered.map(d => d[yKey]);
       return {
-        type: 'scatter', mode: 'lines+markers', name: risk,
+        type: 'scatter', mode: 'lines+markers+text', name: risk,
         x: filtered.map(d => d['Time']),
-        y: filtered.map(d => d[yKey]),
-        line: { color: this.riskColors[risk] }
+        y: yData,
+        text: yData.map(v => this.chartMetric() === 'COUNT' ? v : this.formatAmt(v)),
+        textposition: 'top center',
+        line: { color: this.riskColors[risk], shape: 'spline' },
+        fill: 'tozeroy'
       };
     });
 
     return {
       data: traces,
-      layout: { ...this.theme, title: `Risk Trend (${this.trendAgg()})`, margin: { l: 40, r: 15, t: 45, b: 40 } }
+      layout: { ...this.theme, title: `Risk Trend (${this.trendAgg()})`, margin: { l: 80, r: 20, t: 50, b: 100 }, xaxis: { automargin: true, tickangle: -45 } }
     };
   });
 

@@ -1,0 +1,52 @@
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Python cache and virtualenvs
+**/__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+.env
+
+# MS Office temp files
+~$*
+
+# Node / Angular
+node_modules/
+dist/
+tmp/
+out-tsc/
+.angular/
+connect.lock
+npm-debug.log
+yarn-error.log
+
+# IDEs
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Root data files
+/*.xlsx
+/*.csv
+
+# Root mockups
+/UI Folder/
+
+# Root/Backend/Frontend diagnostic scripts
+test_merge.py
+migration_output/backend/fix_backend_bugs.py
+migration_output/backend/fix_remaining_bugs.py
+migration_output/backend/test_np.py
+migration_output/backend/update_services.py
+migration_output/frontend/fix_frontend_bugs.py
+migration_output/frontend/update_frontend.py
+

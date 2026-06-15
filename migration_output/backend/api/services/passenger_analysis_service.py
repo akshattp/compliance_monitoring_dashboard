@@ -22,10 +22,10 @@ def prepare_passenger_data(df: pd.DataFrame) -> pd.DataFrame:
     work_df = df.copy()
 
     # Standardize and Validate PAXIDNO (Passport)
-    if 'Passport' in work_df.columns:
-        work_df['PAXIDNO_CLEAN'] = work_df['Passport'].astype(str).str.strip().str.upper().replace('NAN', np.nan).replace('', np.nan)
+    if 'PAXIDNO' in work_df.columns:
+        work_df['PAXIDNO_CLEAN'] = work_df['PAXIDNO'].astype(str).str.strip().str.upper().replace('NAN', np.nan).replace('', np.nan)
     else:
-        work_df['Passport'] = np.nan
+        work_df['PAXIDNO'] = np.nan
         work_df['PAXIDNO_CLEAN'] = np.nan
 
     # Create DOC_TYPE
@@ -85,7 +85,7 @@ def get_passenger_kpis(df: pd.DataFrame) -> dict:
             most_freq_pct = (most_freq_count / total_records * 100) if total_records > 0 else 0
             
             record = df[df['PAXIDNO_CLEAN'] == most_freq_pax_id].iloc[0]
-            most_freq_pax_name = record['Passenger Name'] if 'Passenger Name' in record else 'N/A'
+            most_freq_pax_name = record['PAXNAME'] if 'PAXNAME' in record else 'N/A'
             most_freq_doc_type = record['DOC_TYPE']
 
     return {
@@ -114,9 +114,9 @@ def get_passenger_anomalies(df: pd.DataFrame, rule_i_threshold: int = 10) -> dic
     anomalies['rule_a'] = df[df['PAXIDNO_CLEAN'].isin(suspicious_pax_email)].sort_values(['PAXIDNO_CLEAN', 'EMAIL_CLEAN'])
 
     # Rule B: Same PAXIDNO, Different PAXNAME
-    pax_grouped_name = df.dropna(subset=['PAXIDNO_CLEAN', 'Passenger Name']).groupby('PAXIDNO_CLEAN')['Passenger Name'].nunique()
+    pax_grouped_name = df.dropna(subset=['PAXIDNO_CLEAN', 'PAXNAME']).groupby('PAXIDNO_CLEAN')['PAXNAME'].nunique()
     suspicious_pax_name = pax_grouped_name[pax_grouped_name > 1].index
-    anomalies['rule_b'] = df[df['PAXIDNO_CLEAN'].isin(suspicious_pax_name)].sort_values(['PAXIDNO_CLEAN', 'Passenger Name'])
+    anomalies['rule_b'] = df[df['PAXIDNO_CLEAN'].isin(suspicious_pax_name)].sort_values(['PAXIDNO_CLEAN', 'PAXNAME'])
 
     # Rule C: Same PAXIDNO, Different MOBILENO
     pax_grouped_mobile = df.dropna(subset=['PAXIDNO_CLEAN', 'MOBILE_CLEAN']).groupby('PAXIDNO_CLEAN')['MOBILE_CLEAN'].nunique()
@@ -124,7 +124,7 @@ def get_passenger_anomalies(df: pd.DataFrame, rule_i_threshold: int = 10) -> dic
     anomalies['rule_c'] = df[df['PAXIDNO_CLEAN'].isin(suspicious_pax_mobile)].sort_values(['PAXIDNO_CLEAN', 'MOBILE_CLEAN'])
 
     # Rule D: Has EMAILID/PAXNAME, Missing PAXIDNO
-    anomalies['rule_d'] = df[df['EMAIL_CLEAN'].notna() & df['Passenger Name'].notna() & df['PAXIDNO_CLEAN'].isna()]
+    anomalies['rule_d'] = df[df['EMAIL_CLEAN'].notna() & df['PAXNAME'].notna() & df['PAXIDNO_CLEAN'].isna()]
 
     # Rule E: Same EMAILID, Different PAXIDNO
     email_grouped_pax = df.dropna(subset=['EMAIL_CLEAN', 'PAXIDNO_CLEAN']).groupby('EMAIL_CLEAN')['PAXIDNO_CLEAN'].nunique()
@@ -137,14 +137,14 @@ def get_passenger_anomalies(df: pd.DataFrame, rule_i_threshold: int = 10) -> dic
     anomalies['rule_f'] = df[df['MOBILE_CLEAN'].isin(suspicious_mobile_pax)].sort_values(['MOBILE_CLEAN', 'PAXIDNO_CLEAN'])
 
     # Rule G: Same EMAILID, Different PAXNAME
-    email_grouped_name = df.dropna(subset=['EMAIL_CLEAN', 'Passenger Name']).groupby('EMAIL_CLEAN')['Passenger Name'].nunique()
+    email_grouped_name = df.dropna(subset=['EMAIL_CLEAN', 'PAXNAME']).groupby('EMAIL_CLEAN')['PAXNAME'].nunique()
     suspicious_email_name = email_grouped_name[email_grouped_name > 1].index
-    anomalies['rule_g'] = df[df['EMAIL_CLEAN'].isin(suspicious_email_name)].sort_values(['EMAIL_CLEAN', 'Passenger Name'])
+    anomalies['rule_g'] = df[df['EMAIL_CLEAN'].isin(suspicious_email_name)].sort_values(['EMAIL_CLEAN', 'PAXNAME'])
 
     # Rule H: Same MOBILENO, Different PAXNAME
-    mobile_grouped_name = df.dropna(subset=['MOBILE_CLEAN', 'Passenger Name']).groupby('MOBILE_CLEAN')['Passenger Name'].nunique()
+    mobile_grouped_name = df.dropna(subset=['MOBILE_CLEAN', 'PAXNAME']).groupby('MOBILE_CLEAN')['PAXNAME'].nunique()
     suspicious_mobile_name = mobile_grouped_name[mobile_grouped_name > 1].index
-    anomalies['rule_h'] = df[df['MOBILE_CLEAN'].isin(suspicious_mobile_name)].sort_values(['MOBILE_CLEAN', 'Passenger Name'])
+    anomalies['rule_h'] = df[df['MOBILE_CLEAN'].isin(suspicious_mobile_name)].sort_values(['MOBILE_CLEAN', 'PAXNAME'])
 
     # Rule I: Frequent Passenger Activity
     pax_counts = df['PAXIDNO_CLEAN'].value_counts()
@@ -157,11 +157,11 @@ def get_passenger_anomalies(df: pd.DataFrame, rule_i_threshold: int = 10) -> dic
     return anomalies
 
 def get_branch_quality_summary(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
-    if 'Branch Name' not in df.columns:
+    if 'LOCATION' not in df.columns:
         return pd.DataFrame(), {}
 
-    branch_summary = df.groupby('Branch Name').agg(
-        Total_Records=('Date', 'size'),
+    branch_summary = df.groupby('LOCATION').agg(
+        Total_Records=('TXNDATE', 'size'),
         Invalid_ID=('PAX_VALID', lambda x: (~x).sum()),
         Invalid_Mobile=('MOBILE_VALID', lambda x: (~x).sum()),
         Invalid_Email=('EMAIL_VALID', lambda x: (~x).sum()),
@@ -180,15 +180,15 @@ def get_branch_quality_summary(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     worst_kpis = {}
     if not branch_summary.empty:
         worst_id = branch_summary.sort_values('Invalid_ID', ascending=False).iloc[0]
-        worst_kpis['worst_id'] = {'Branch': worst_id['Branch Name'], 'Count': worst_id['Invalid_ID']}
+        worst_kpis['worst_id'] = {'Branch': worst_id['LOCATION'], 'Count': worst_id['Invalid_ID']}
 
         worst_mobile = branch_summary.sort_values('Invalid_Mobile', ascending=False).iloc[0]
-        worst_kpis['worst_mobile'] = {'Branch': worst_mobile['Branch Name'], 'Count': worst_mobile['Invalid_Mobile']}
+        worst_kpis['worst_mobile'] = {'Branch': worst_mobile['LOCATION'], 'Count': worst_mobile['Invalid_Mobile']}
 
         worst_email = branch_summary.sort_values('Invalid_Email', ascending=False).iloc[0]
-        worst_kpis['worst_email'] = {'Branch': worst_email['Branch Name'], 'Count': worst_email['Invalid_Email']}
+        worst_kpis['worst_email'] = {'Branch': worst_email['LOCATION'], 'Count': worst_email['Invalid_Email']}
 
         worst_kyc = branch_summary.sort_values('Missing_KYC', ascending=False).iloc[0]
-        worst_kpis['worst_kyc'] = {'Branch': worst_kyc['Branch Name'], 'Count': worst_kyc['Missing_KYC']}
+        worst_kpis['worst_kyc'] = {'Branch': worst_kyc['LOCATION'], 'Count': worst_kyc['Missing_KYC']}
 
     return branch_summary, worst_kpis

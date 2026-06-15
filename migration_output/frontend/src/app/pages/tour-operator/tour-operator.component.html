@@ -70,28 +70,7 @@
       <div class="section-header">
         <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Branch Segment Breakdown</h4>
       </div>
-      <div class="table-container" style="max-height: 400px;">
-        <table>
-          <thead>
-            <tr>
-              <th>Branch Name</th>
-              <th>Count</th>
-              <th>Count %</th>
-              <th>Net Amt</th>
-              <th>Net Amt %</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let r of branchComposition().display_table">
-              <td>{{ r['Branch Name'] }}</td>
-              <td>{{ r['Count'] | number }}</td>
-              <td>{{ r['Count %'] | number:'1.2-2' }}%</td>
-              <td>{{ r['Net Amt'] | number }}</td>
-              <td>{{ r['Net Amt %'] | number:'1.2-2' }}%</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <app-shared-table [data]="branchComposition().display_table" [columns]="branchCols" maxHeight="400px" downloadFilename="tour_branches.csv" [showDownload]="false"></app-shared-table>
     </div>
 
     <div class="section">
@@ -101,28 +80,7 @@
       <div class="section-header">
         <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Operator Breakdown</h4>
       </div>
-      <div class="table-container" style="max-height: 400px;">
-        <table>
-          <thead>
-            <tr>
-              <th>Operator</th>
-              <th>Count</th>
-              <th>Count %</th>
-              <th>Net Amount</th>
-              <th>Net Amount %</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let r of corporateComposition().display_table">
-              <td>{{ r['Operator'] }}</td>
-              <td>{{ r['Count'] | number }}</td>
-              <td>{{ r['Count %'] | number:'1.2-2' }}%</td>
-              <td>{{ r['Net Amount'] | number }}</td>
-              <td>{{ r['Net Amount %'] | number:'1.2-2' }}%</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <app-shared-table [data]="corporateComposition().display_table" [columns]="corpCols" maxHeight="400px" downloadFilename="tour_operators.csv" [showDownload]="false"></app-shared-table>
       <div style="margin-top: 12px; font-size: 13px; font-weight: 600; color: #475569; display: flex; gap: 24px;">
         <span>TOTAL RECORDS: {{ corporateComposition().total_count | number }}</span>
         <span>TOTAL NET AMOUNT: {{ corporateComposition().total_amt | humanReadableAmount }}</span>
@@ -143,5 +101,12 @@
     <div style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; line-height: 1.6;">
       {{ observation() }}
     </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <h3>Detailed Tour Operator Transaction Listing</h3>
+    </div>
+    <app-shared-table [data]="tourOperatorTxns()" [columns]="detailedCols" maxHeight="500px" downloadFilename="tour_operator_transactions.csv" [showDownload]="true"></app-shared-table>
   </div>
 </div>

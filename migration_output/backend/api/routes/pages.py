@@ -10,6 +10,8 @@ def clean_dict_for_json(d):
         return {k: clean_dict_for_json(v) for k, v in d.items()}
     elif isinstance(d, list):
         return [clean_dict_for_json(v) for v in d]
+    elif isinstance(d, tuple):
+        return tuple(clean_dict_for_json(v) for v in d)
     elif isinstance(d, (np.integer, np.int64, np.int32, np.int16, np.int8)):
         return int(d)
     elif isinstance(d, (np.floating, np.float64, np.float32, np.float16)):
@@ -46,8 +48,8 @@ def home_page_data(request: HomeRequestDto = Body(...)):
         
     df = pd.DataFrame(request.filtered_df)
     
-    if 'Date' in df.columns:
-        df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
+    if 'TXNDATE' in df.columns:
+        df['TXNDATE'] = pd.to_datetime(df['TXNDATE'], errors='coerce')
         
     # Validate required columns implicitly by filling missing with defaults or letting service handle it
     
@@ -100,9 +102,9 @@ def transaction_summary_data(request: TransactionSummaryRequestDto = Body(...)):
     
     y_col = 'Count' if request.global_metric == 'Count' else 'Total_Amount'
     
-    branch_comp = get_txn_composition_data(df, 'Branch Name', request.selected_txns, y_col)
-    product_comp = get_txn_composition_data(df, 'Product', request.selected_txns, y_col)
-    segment_comp = get_txn_composition_data(df, 'Segments', request.selected_txns, y_col)
+    branch_comp = get_txn_composition_data(df, 'LOCATION', request.selected_txns, y_col)
+    product_comp = get_txn_composition_data(df, 'PRODUCT', request.selected_txns, y_col)
+    segment_comp = get_txn_composition_data(df, 'Segment', request.selected_txns, y_col)
     
     # Need to convert DataFrames to dicts for JSON
     def _clean_comp(comp):
@@ -159,12 +161,15 @@ def tour_operator_data(request: TourOperatorRequestDto = Body(...)):
     df = pd.DataFrame(request.filtered_df)
     
     kpis = get_tour_operator_kpis(df)
-    intelligence = get_operator_intelligence(df)
-    purpose_mix = get_purpose_mix_data(df)
-    branch_composition = get_branch_composition_data(df)
-    corporate_composition = get_corporate_composition_data(df)
-    country_combo = get_country_combo_data(df)
-    observation = get_tour_operator_observation(df)
+    
+    tour_op_df = df[df['Segment'] == 'TOUR OPERATOR'] if 'Segment' in df.columns else df
+    
+    intelligence = get_operator_intelligence(tour_op_df)
+    purpose_mix = get_purpose_mix_data(tour_op_df)
+    branch_composition = get_branch_composition_data(tour_op_df)
+    corporate_composition = get_corporate_composition_data(tour_op_df)
+    country_combo = get_country_combo_data(tour_op_df)
+    observation = get_tour_operator_observation(tour_op_df)
     
     return TourOperatorResponseDto(
         kpis=kpis,
@@ -176,6 +181,7 @@ def tour_operator_data(request: TourOperatorRequestDto = Body(...)):
         observation=observation
     )
 
+
 from api.services.retail_high_value_service import (
     add_retail_risk_classification,
     identify_high_value_transactions,
@@ -185,9 +191,11 @@ from api.services.retail_high_value_service import (
     customer_concentration,
     product_wise_analysis,
     currency_wise_analysis,
+    country_wise_analysis,
     generate_observations,
     format_transaction_table,
 )
+
 
 class RetailHighValueRequestDto(BaseModel):
     filtered_df: List[Dict[str, Any]]
@@ -199,6 +207,7 @@ class RetailHighValueResponseDto(BaseModel):
     customer_data: List[Dict[str, Any]]
     product_data: List[Dict[str, Any]]
     currency_data: List[Dict[str, Any]]
+    country_data: List[Dict[str, Any]]
     observations: str
     transaction_table: List[Dict[str, Any]]
     trend_data_daily: List[Dict[str, Any]]
@@ -211,13 +220,13 @@ def retail_high_value_data(request: RetailHighValueRequestDto = Body(...)):
     if not request.filtered_df:
         return RetailHighValueResponseDto(
             kpis={}, branch_data=[], corporate_data=[], customer_data=[],
-            product_data=[], currency_data=[], observations="", transaction_table=[],
+            product_data=[], currency_data=[], country_data=[], observations="", transaction_table=[],
             trend_data_daily=[], trend_data_weekly=[], risk_distribution=[], segment_distribution=[]
         )
         
     df = pd.DataFrame(request.filtered_df)
-    if 'Date' in df.columns:
-        df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
+    if 'TXNDATE' in df.columns:
+        df['TXNDATE'] = pd.to_datetime(df['TXNDATE'], errors='coerce')
 
     df = add_retail_risk_classification(df)
     hv_df = identify_high_value_transactions(df)
@@ -228,30 +237,36 @@ def retail_high_value_data(request: RetailHighValueRequestDto = Body(...)):
     customer_data = customer_concentration(hv_df)
     product_data = product_wise_analysis(hv_df)
     currency_data = currency_wise_analysis(hv_df)
+    country_data = country_wise_analysis(hv_df)
     observations = generate_observations(hv_df, kpis)
     transaction_table = format_transaction_table(hv_df)
     
     # Simple risk dist
     risk_dist = []
     if 'Retail_Risk_Level' in hv_df.columns:
-        agg = hv_df.groupby('Retail_Risk_Level').agg(Count=('EQV USD', 'size'), Net_Amount=('EQV USD', 'sum')).reset_index()
+        agg = hv_df.groupby('Retail_Risk_Level').agg(Count=('Equivalent USD Amount', 'size'), Net_Amount=('Equivalent USD Amount', 'sum')).reset_index()
         risk_dist = agg.replace([float('inf'), float('-inf'), float('nan')], None).to_dict('records')
         
     seg_dist = []
-    if 'Segments' in hv_df.columns and 'Retail_Risk_Level' in hv_df.columns:
-        agg = hv_df.groupby(['Segments', 'Retail_Risk_Level']).agg(Count=('EQV USD', 'size'), Net_Amount=('EQV USD', 'sum')).reset_index()
+    if 'Segment' in hv_df.columns and 'Retail_Risk_Level' in hv_df.columns:
+        agg = hv_df.groupby(['Segment', 'Retail_Risk_Level']).agg(Count=('Equivalent USD Amount', 'size'), Net_Amount=('Equivalent USD Amount', 'sum')).reset_index()
         seg_dist = agg.replace([float('inf'), float('-inf'), float('nan')], None).to_dict('records')
     
     trend_daily = []
-    if 'Date' in hv_df.columns:
-        agg = hv_df.groupby(hv_df['Date'].dt.date).agg(Count=('EQV USD', 'size'), Net_Amount=('EQV USD', 'sum')).reset_index()
-        agg['Date'] = agg['Date'].astype(str)
+    trend_weekly = []
+    if 'TXNDATE' in hv_df.columns:
+        hv_df_trend = hv_df.copy()
+        hv_df_trend['TXNDATE'] = pd.to_datetime(hv_df_trend['TXNDATE'], errors='coerce')
+        # Exclude Sundays
+        hv_df_trend = hv_df_trend[hv_df_trend['TXNDATE'].dt.dayofweek != 6]
+        
+        agg = hv_df_trend.groupby(hv_df_trend['TXNDATE'].dt.date).agg(Count=('Equivalent USD Amount', 'size'), Net_Amount=('Equivalent USD Amount', 'sum')).reset_index()
+        agg['TXNDATE'] = agg['TXNDATE'].astype(str)
         trend_daily = agg.replace([float('inf'), float('-inf'), float('nan')], None).to_dict('records')
         
-    trend_weekly = []
-    if 'Week' in hv_df.columns:
-        agg = hv_df.groupby('Week').agg(Count=('EQV USD', 'size'), Net_Amount=('EQV USD', 'sum')).reset_index()
-        trend_weekly = agg.replace([float('inf'), float('-inf'), float('nan')], None).to_dict('records')
+        if 'Week' in hv_df_trend.columns:
+            agg_w = hv_df_trend.groupby('Week').agg(Count=('Equivalent USD Amount', 'size'), Net_Amount=('Equivalent USD Amount', 'sum')).reset_index()
+            trend_weekly = agg_w.replace([float('inf'), float('-inf'), float('nan')], None).to_dict('records')
 
     return RetailHighValueResponseDto(
         kpis=kpis,
@@ -260,6 +275,7 @@ def retail_high_value_data(request: RetailHighValueRequestDto = Body(...)):
         customer_data=customer_data,
         product_data=product_data,
         currency_data=currency_data,
+        country_data=country_data,
         observations=observations,
         transaction_table=transaction_table,
         trend_data_daily=trend_daily,
@@ -267,6 +283,7 @@ def retail_high_value_data(request: RetailHighValueRequestDto = Body(...)):
         risk_distribution=risk_dist,
         segment_distribution=seg_dist
     )
+
 
 from api.services.high_risk_corporate_service import (
     get_corporate_risk_kpis,
@@ -294,16 +311,38 @@ class HighRiskCorporateResponseDto(BaseModel):
     trend_exposure: List[Dict[str, Any]]
     transactions_table: List[Dict[str, Any]]
 
-@router.post("/api/pages/high-risk-corporate", response_model=HighRiskCorporateResponseDto)
+@router.post("/api/pages/high-risk-corporate")
 def high_risk_corporate_data(request: HighRiskCorporateRequestDto = Body(...)):
     if not request.enriched_df:
-        return HighRiskCorporateResponseDto(
-            kpis={}, risk_distribution=[], top_corporates=[], branch_exposure=[],
-            country_exposure=[], product_exposure={'product_data': [], 'display_prod_table': []},
-            trend_exposure=[], transactions_table=[]
-        )
+        return {
+            "kpis": {}, "risk_distribution": [], "top_corporates": [], "branch_exposure": [],
+            "country_exposure": [], "product_exposure": {'product_data': [], 'display_prod_table': []},
+            "trend_exposure": [], "transactions_table": []
+        }
         
     df = pd.DataFrame(request.enriched_df)
+    
+    if 'Corporate_Code' not in df.columns and 'CUSTOMERCODE' in df.columns:
+        df['Corporate_Code'] = df['CUSTOMERCODE'].astype(str).str.strip().str.upper()
+        
+    if 'Risk Classification' not in df.columns:
+        ref_col = None
+        if 'Risk  Category' in df.columns:
+            ref_col = 'Risk  Category'
+        elif 'Risk Category' in df.columns:
+            ref_col = 'Risk Category'
+            
+        if ref_col is not None:
+            def clean_risk_val(val):
+                if pd.isna(val): return 'Unknown Risk'
+                val_str = str(val).strip().upper()
+                if 'HIGH' in val_str: return 'High Risk'
+                if 'MEDIUM' in val_str: return 'Medium Risk'
+                if 'LOW' in val_str: return 'Low Risk'
+                return 'Unknown Risk'
+            df['Risk Classification'] = df[ref_col].apply(clean_risk_val)
+        else:
+            df['Risk Classification'] = 'Unknown Risk'
     
     kpis = get_corporate_risk_kpis(df)
     risk_dist = get_risk_distribution(df)
@@ -314,16 +353,16 @@ def high_risk_corporate_data(request: HighRiskCorporateRequestDto = Body(...)):
     trend_exp = get_trend_exposure(df, request.trend_agg)
     tx_table = get_transactions_table(df)
     
-    return HighRiskCorporateResponseDto(
-        kpis=kpis,
-        risk_distribution=risk_dist,
-        top_corporates=top_corp,
-        branch_exposure=branch_exp,
-        country_exposure=country_exp,
-        product_exposure=product_exp,
-        trend_exposure=trend_exp,
-        transactions_table=tx_table
-    )
+    return clean_dict_for_json({
+        "kpis": kpis,
+        "risk_distribution": risk_dist,
+        "top_corporates": top_corp,
+        "branch_exposure": branch_exp,
+        "country_exposure": country_exp,
+        "product_exposure": product_exp,
+        "trend_exposure": trend_exp,
+        "transactions_table": tx_table
+    })
 
 from api.services.transaction_monitoring_service import (
     detect_high_value_transactions,
@@ -333,12 +372,15 @@ from api.services.transaction_monitoring_service import (
     detect_configurable_load_refund_window,
     detect_multiple_cards_contact,
     detect_multiple_cards_traveller,
-    detect_multiple_cards_multi_operator
+    detect_multiple_cards_multi_operator,
+    build_consolidated_risk_table
 )
 
 class TransactionMonitoringRequestDto(BaseModel):
     filtered_df: List[Dict[str, Any]]
     threshold_days: Optional[int] = 1
+    high_value_threshold: Optional[float] = 25000.0
+    freq_threshold: Optional[int] = 5
 
 @router.post("/api/pages/transaction-monitoring")
 def transaction_monitoring_data(request: TransactionMonitoringRequestDto = Body(...)):
@@ -347,14 +389,16 @@ def transaction_monitoring_data(request: TransactionMonitoringRequestDto = Body(
         
     df = pd.DataFrame(request.filtered_df)
     
-    hv_df, str_df, hv_sum = detect_high_value_transactions(df)
+    hv_df, str_df, hv_sum = detect_high_value_transactions(df, request.high_value_threshold)
     fatf_df, fatf_sum = detect_fatf_ofac(df)
     mult_op_df, mult_op_sum = detect_multiple_operators_same_beneficiary(df)
-    high_freq_df, high_freq_sum = detect_high_frequency_remittances(df)
+    high_freq_df, high_freq_sum = detect_high_frequency_remittances(df, request.freq_threshold)
     freq_reload_df, freq_reload_sum = detect_configurable_load_refund_window(df, request.threshold_days)
     mult_card_contact_df, mult_card_contact_sum = detect_multiple_cards_contact(df)
     mult_card_trav_df, mult_card_trav_sum = detect_multiple_cards_traveller(df)
     mult_card_ops_df, mult_card_ops_sum = detect_multiple_cards_multi_operator(df)
+    
+    detailed_table = build_consolidated_risk_table(df, request.threshold_days, request.high_value_threshold, request.freq_threshold)
     
     return clean_dict_for_json({
         "high_value": {"data": hv_df, "structuring": str_df, "summary": hv_sum},
@@ -364,7 +408,8 @@ def transaction_monitoring_data(request: TransactionMonitoringRequestDto = Body(
         "load_refund_window": {"data": freq_reload_df, "summary": freq_reload_sum},
         "multiple_cards_contact": {"data": mult_card_contact_df, "summary": mult_card_contact_sum},
         "multiple_cards_traveller": {"data": mult_card_trav_df, "summary": mult_card_trav_sum},
-        "multi_card_multi_operator": {"data": mult_card_ops_df, "summary": mult_card_ops_sum}
+        "multi_card_multi_operator": {"data": mult_card_ops_df, "summary": mult_card_ops_sum},
+        "detailed_table": detailed_table
     })
 from api.services.fatf_service import (
     get_fatf_flagged_transactions,
@@ -377,6 +422,7 @@ from api.services.fatf_service import (
 
 class FATFRequestDto(BaseModel):
     filtered_df: List[Dict[str, Any]]
+    trend_agg: Optional[str] = "DAILY"
     
 class FATFResponseDto(BaseModel):
     kpis: Dict[str, Any]
@@ -393,8 +439,8 @@ def fatf_data(request: FATFRequestDto = Body(...)):
     
     df = pd.DataFrame(request.filtered_df)
     
-    if 'Date' in df.columns:
-        df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
+    if 'TXNDATE' in df.columns:
+        df['TXNDATE'] = pd.to_datetime(df['TXNDATE'], errors='coerce')
         
     flagged = get_fatf_flagged_transactions(df)
     kpis = get_fatf_kpis(flagged, df)
@@ -404,9 +450,8 @@ def fatf_data(request: FATFRequestDto = Body(...)):
     purpose_c = get_fatf_purpose_counts(flagged).replace([float('inf'), float('-inf'), float('nan')], None).to_dict('records')
     
     trend = []
-    if not flagged.empty and 'Date' in flagged.columns:
-        trend_df = flagged.groupby(flagged['Date'].dt.date).agg(Total_Amount=('Net Amt', 'sum')).reset_index()
-        trend_df['Date'] = trend_df['Date'].astype(str)
+    if not flagged.empty and 'TXNDATE' in flagged.columns:
+        trend_df = get_fatf_trend(flagged, request.trend_agg)
         trend = trend_df.replace([float('inf'), float('-inf'), float('nan')], None).to_dict('records')
 
     # Dates format in flagged
@@ -436,10 +481,16 @@ from api.services.agent_analysis_service import (
 
 class AgentAnalysisRequestDto(BaseModel):
     filtered_df: List[Dict[str, Any]]
-    agent_col: Optional[str] = "Agent"
-    branch_col: Optional[str] = "Branch Name"
-    beneficiary_col: Optional[str] = "Beneficiary Type Load or Reload"
+    agent_col: Optional[str] = "AGENTCODE"
+    branch_col: Optional[str] = "LOCATION"
+    beneficiary_col: Optional[str] = "BENEFICIARY"
     trend_agg: Optional[str] = "DAILY"
+    chart_metric: Optional[str] = "Count"
+    rule1_many_thresh: Optional[int] = 10
+    rule1_one_thresh: Optional[int] = 10
+    rule2_thresh: Optional[int] = 10
+    rule3_thresh: Optional[int] = 10
+    rule4_thresh: Optional[int] = 10
 
 @router.post("/api/pages/agent-analysis")
 def agent_analysis_data(request: AgentAnalysisRequestDto = Body(...)):
@@ -447,8 +498,8 @@ def agent_analysis_data(request: AgentAnalysisRequestDto = Body(...)):
         return {}
         
     df = pd.DataFrame(request.filtered_df)
-    if 'Date' in df.columns:
-        df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
+    if 'TXNDATE' in df.columns:
+        df['TXNDATE'] = pd.to_datetime(df['TXNDATE'], errors='coerce')
         
     kpis = get_agent_kpis(df, request.agent_col, request.branch_col, request.beneficiary_col)
     
@@ -458,13 +509,30 @@ def agent_analysis_data(request: AgentAnalysisRequestDto = Body(...)):
     agent_df = kpis.pop('agent_df', pd.DataFrame())
     beneficiary_df = kpis.pop('beneficiary_df', pd.DataFrame())
     
-    freq_df, freq_disp = get_agent_frequency_table(agent_df, request.agent_col, "Count")
+    y_col = 'Count' if request.chart_metric == 'Count' else 'Net_Amt'
+    
+    freq_df, freq_disp = get_agent_frequency_table(agent_df, request.agent_col, y_col)
     trend_df, trend_disp = get_agent_trend_table(agent_df, request.trend_agg)
     
+    # Missing tables
+    br_col = request.branch_col if request.branch_col in agent_df.columns else None
+    _, branch_disp = get_agent_frequency_table(agent_df, br_col, y_col)
+    _, country_disp = get_agent_frequency_table(agent_df, 'CountryToTravel', y_col)
+    _, corp_disp = get_agent_frequency_table(agent_df, 'CUSTOMERNAME', y_col)
+    _, benef_disp = get_agent_frequency_table(beneficiary_df, request.beneficiary_col, y_col)
+    _, product_disp = get_agent_frequency_table(agent_df, 'PRODUCT', y_col)
+    _, purpose_disp = get_agent_frequency_table(agent_df, 'TxnPurpose', y_col)
+
     # Suspicious panels
-    susp_complex, _ = get_suspicious_agents_many(agent_df, request.agent_col, 'Party Code', 5)
-    susp_many, _, _ = get_suspicious_agents1_many_relation(beneficiary_df, request.agent_col, request.beneficiary_col, 5)
-    susp_one, _, _ = get_suspicious_agents1_one_relation(beneficiary_df, request.agent_col, request.beneficiary_col, 5)
+    # Rule 2: One Agent for Different Corporates
+    rule2_susp, _ = get_suspicious_agents_many(beneficiary_df, request.agent_col, 'CUSTOMERNAME', request.rule2_thresh)
+    # Rule 3: One Agent for Different Branches
+    rule3_susp, _ = get_suspicious_agents_many(beneficiary_df, request.agent_col, request.branch_col, request.rule3_thresh)
+    # Rule 4: One Agent for Different Visiting Countries
+    rule4_susp, _ = get_suspicious_agents_many(beneficiary_df, request.agent_col, 'CountryToTravel', request.rule4_thresh)
+    
+    susp_many, _, _ = get_suspicious_agents1_many_relation(beneficiary_df, request.agent_col, request.beneficiary_col, request.rule1_many_thresh)
+    susp_one, _, _ = get_suspicious_agents1_one_relation(beneficiary_df, request.agent_col, request.beneficiary_col, request.rule1_one_thresh)
     
     def _clean_df(d):
         for col in d.columns:
@@ -476,9 +544,17 @@ def agent_analysis_data(request: AgentAnalysisRequestDto = Body(...)):
         "kpis": kpis,
         "frequency_table": _clean_df(freq_disp),
         "trend_table": _clean_df(trend_disp),
-        "suspicious_complex": _clean_df(susp_complex),
+        "branch_table": _clean_df(branch_disp),
+        "country_table": _clean_df(country_disp),
+        "corp_table": _clean_df(corp_disp),
+        "benef_table": _clean_df(benef_disp),
+        "product_table": _clean_df(product_disp),
+        "purpose_table": _clean_df(purpose_disp),
         "suspicious_many": _clean_df(susp_many),
-        "suspicious_one": _clean_df(susp_one)
+        "suspicious_one": _clean_df(susp_one),
+        "rule2_susp": _clean_df(rule2_susp),
+        "rule3_susp": _clean_df(rule3_susp),
+        "rule4_susp": _clean_df(rule4_susp)
     })
 
 from api.services.passenger_analysis_service import (
@@ -497,8 +573,8 @@ def passenger_analysis_data(request: PassengerAnalysisRequestDto = Body(...)):
         return {}
         
     df = pd.DataFrame(request.filtered_df)
-    if 'Date' in df.columns:
-        df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
+    if 'TXNDATE' in df.columns:
+        df['TXNDATE'] = pd.to_datetime(df['TXNDATE'], errors='coerce')
         
     prep_df = prepare_passenger_data(df)
     kpis = get_passenger_kpis(prep_df)

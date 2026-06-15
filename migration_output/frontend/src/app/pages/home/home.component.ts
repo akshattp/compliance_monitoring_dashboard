@@ -125,8 +125,8 @@ export default class HomeComponent implements OnInit {
       // Use the raw data from dataService and sort it by Net Amt for the top transactions table
       const rawData = this.dataService.filteredDf();
       const sorted = [...rawData].sort((a: any, b: any) => {
-        const valA = parseFloat(a['Net Amt']) || 0;
-        const valB = parseFloat(b['Net Amt']) || 0;
+        const valA = parseFloat(a['INRAMOUNT']) || 0;
+        const valB = parseFloat(b['INRAMOUNT']) || 0;
         return valB - valA;
       });
       
@@ -188,13 +188,33 @@ export default class HomeComponent implements OnInit {
       const timeLabel = this.trendAgg() === 'DAILY' ? 'Daily' : 'Weekly';
 
       this.trendAmountChart.set({
-        data: [{ x: times, y: amounts, type: 'scatter', mode: 'lines+markers', line: { color: '#111111' } }],
-        layout: { ...theme, title: `${timeLabel} Transaction Amount Trend`, margin: { t: 40, b: 40, l: 40, r: 20 } }
+        data: [{ 
+          x: times, 
+          y: amounts, 
+          type: 'scatter', 
+          mode: 'lines+markers+text', 
+          text: amounts.map(a => this.formatAmt(a)),
+          textposition: 'top center',
+          line: { color: '#111111', shape: 'spline' }, 
+          fill: 'tozeroy', 
+          fillcolor: 'rgba(17, 17, 17, 0.1)' 
+        }],
+        layout: { ...theme, title: `${timeLabel} Transaction Amount Trend`, margin: { t: 40, b: 80, l: 60, r: 20 }, xaxis: { automargin: true, tickangle: -45 } }
       });
 
       this.trendCountChart.set({
-        data: [{ x: times, y: counts, type: 'scatter', mode: 'lines+markers', line: { color: '#111111' } }],
-        layout: { ...theme, title: `${timeLabel} Transaction Count Trend`, margin: { t: 40, b: 40, l: 40, r: 20 } }
+        data: [{ 
+          x: times, 
+          y: counts, 
+          type: 'scatter', 
+          mode: 'lines+markers+text', 
+          text: counts,
+          textposition: 'top center',
+          line: { color: '#111111', shape: 'spline' }, 
+          fill: 'tozeroy', 
+          fillcolor: 'rgba(17, 17, 17, 0.1)' 
+        }],
+        layout: { ...theme, title: `${timeLabel} Transaction Count Trend`, margin: { t: 40, b: 80, l: 60, r: 20 }, xaxis: { automargin: true, tickangle: -45 } }
       });
     }
 
@@ -202,40 +222,40 @@ export default class HomeComponent implements OnInit {
       const isCount = this.breakdownAgg() === 'COUNT';
 
       if (breakdowns.purpose_df && breakdowns.purpose_df.length) {
-        const labels = breakdowns.purpose_df.map(d => d.Purpose);
-        const values = breakdowns.purpose_df.map(d => isCount ? d.Count : d['Net Amt']);
+        const labels = breakdowns.purpose_df.map(d => d.TxnPurpose);
+        const values = breakdowns.purpose_df.map(d => isCount ? d.Count : d['INRAMOUNT']);
         this.purposePieChart.set({
-          data: [{ labels, values, type: 'pie', hole: 0.4, textinfo: 'percent+label', textposition: 'outside' }],
-          layout: { ...theme, title: `Purpose-wise ${isCount ? 'Transaction Count' : 'Amount'} Share`, showlegend: false, margin: { t: 50, b: 20, l: 20, r: 20 } }
+          data: [{ labels, values, type: 'pie', hole: 0.4, textinfo: 'percent', textposition: 'inside' }],
+          layout: { ...theme, showlegend: true, legend: { orientation: 'h', x: 0, y: -0.2, font: { size: 10 } }, margin: { t: 40, b: 80, l: 20, r: 20 } }
         });
       }
 
       if (breakdowns.product_df && breakdowns.product_df.length) {
-        const labels = breakdowns.product_df.map(d => d.Product);
-        const values = breakdowns.product_df.map(d => isCount ? d.Count : d['Net Amt']);
+        const labels = breakdowns.product_df.map(d => d.PRODUCT);
+        const values = breakdowns.product_df.map(d => isCount ? d.Count : d['INRAMOUNT']);
         this.productPieChart.set({
-          data: [{ labels, values, type: 'pie', hole: 0.4, textinfo: 'percent+label', textposition: 'outside' }],
-          layout: { ...theme, title: `Product-wise ${isCount ? 'Transaction Count' : 'Amount'} Summary`, showlegend: false, margin: { t: 50, b: 20, l: 20, r: 20 } }
+          data: [{ labels, values, type: 'pie', hole: 0.4, textinfo: 'percent', textposition: 'inside' }],
+          layout: { ...theme, showlegend: true, legend: { orientation: 'h', x: 0, y: -0.2, font: { size: 10 } }, margin: { t: 40, b: 80, l: 20, r: 20 } }
         });
       }
 
       if (breakdowns.branch_df && breakdowns.branch_df.length) {
         const dfRev = [...breakdowns.branch_df].reverse();
-        const y = dfRev.map(d => d['Branch Name'] || d.Branch);
-        const x = dfRev.map(d => isCount ? d.Count : d['Net Amt']);
+        const y = dfRev.map(d => d['LOCATION'] || d.Branch);
+        const x = dfRev.map(d => isCount ? d.Count : d['INRAMOUNT']);
         this.branchBarChart.set({
-          data: [{ y, x, type: 'bar', orientation: 'h', marker: { color: '#111111' } }],
-          layout: { ...theme, title: `Branch-wise Transaction ${isCount ? 'Count' : 'Amount'}`, margin: { t: 40, l: 150, r: 20, b: 40 } }
+          data: [{ y, x, type: 'bar', orientation: 'h', marker: { color: '#111111' }, text: x.map(v => isCount ? v : this.formatAmt(v)), textposition: 'outside' }],
+          layout: { ...theme, margin: { t: 20, l: 150, r: 80, b: 40 } }
         });
       }
 
       if (breakdowns.country_df && breakdowns.country_df.length) {
         const dfRev = [...breakdowns.country_df].reverse();
-        const y = dfRev.map(d => d['Visiting Country']);
-        const x = dfRev.map(d => isCount ? d.Count : d['Net Amt']);
+        const y = dfRev.map(d => d['CountryToTravel']);
+        const x = dfRev.map(d => isCount ? d.Count : d['INRAMOUNT']);
         this.countryBarChart.set({
-          data: [{ y, x, type: 'bar', orientation: 'h', marker: { color: '#111111' } }],
-          layout: { ...theme, title: `Visiting Country-wise Transaction ${isCount ? 'Count' : 'Amount'}`, margin: { t: 40, l: 150, r: 20, b: 40 } }
+          data: [{ y, x, type: 'bar', orientation: 'h', marker: { color: '#111111' }, text: x.map(v => isCount ? v : this.formatAmt(v)), textposition: 'outside' }],
+          layout: { ...theme, margin: { t: 20, l: 150, r: 80, b: 40 } }
         });
       }
     }

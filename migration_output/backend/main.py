@@ -70,10 +70,10 @@ def standardize_identifier_columns(df: pd.DataFrame) -> pd.DataFrame:
     mobile_cols = ['MOBILENO']
     identifier_cols = [
         'INSTRUMENTNO', 'Instrument Number',
-        'Party Code', 'CUSTOMERCODE', 'PARTYCODE', 
-        'Agent', 'AGENTCODE', 
-        'Passport', 'PASSPORTNO', 
-        'DOCNO'
+        'CUSTOMERCODE', 'PARTYCODE', 
+        'AGENTCODE', 
+        'PAXIDNO', 'PASSPORTNO', 
+        'DOCNO', 'ISSUER'
     ]
 
     for col in df.columns:
@@ -88,47 +88,21 @@ def create_canonical_dataset(txn_df: pd.DataFrame, party_master_path: str, ofac_
     initial_row_count = len(txn_df)
     print(f"Source Row Count: {initial_row_count}")
 
-    column_mapping = {
-        'BRANCHCODE': 'Branch',
-        'LOCATION': 'Branch Name',
-        'TXNTYPE': 'Txn Type',
-        'DOCNO': 'Doc Number',
-        'TXNDATE': 'Date',
-        'CUSTOMERCODE': 'Party Code',
-        'CUSTOMERNAME': 'Corporate',
-        'PAXNAME': 'Passenger Name',
-        'PAXIDNO': 'Passport',
-        'AGENTCODE': 'Agent',
-        'AGENTNAME': 'Agent Name',
-        'TxnPurpose': 'Purpose',
-        'CURRENCY': 'Currency',
-        'PRODUCT': 'Product',
-        'ISSUER': 'Issuer',
-        'SELLRATE': 'Rate',
-        'CountryToTravel': 'Visiting Country',
-        'INSTRUMENTNO': 'INSTRUMENTNO',
-        'LoadReload': 'LoadReload',
-        'Segment': 'Segment',
-        'BENEFICIARY': 'Beneficiary Type Load or Reload',
-        'INRAMOUNT': 'Net Amt',
-        'EMAILID': 'EMAILID',
-        'MOBILENO': 'MOBILENO',
-    }
-
-    df = txn_df[[col for col in column_mapping.keys() if col in txn_df.columns]].copy()
-    df.rename(columns=column_mapping, inplace=True)
-
+    df = txn_df.copy()
     df = standardize_identifier_columns(df)
 
-    df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
-    df['Net Amt'] = pd.to_numeric(df['Net Amt'], errors='coerce').fillna(0)
-    df['Rate'] = pd.to_numeric(df['Rate'], errors='coerce')
+    if 'TXNDATE' in df.columns:
+        df['TXNDATE'] = pd.to_datetime(df['TXNDATE'], errors='coerce')
+        df['Day'] = df['TXNDATE'].dt.day.fillna(0).astype(int)
+        df['Week'] = df['TXNDATE'].dt.isocalendar().week.fillna(0).astype(int)
+        df['Month'] = df['TXNDATE'].dt.to_period('M').astype(str)
+        df['Year'] = df['TXNDATE'].dt.year.fillna(0).astype(int)
+        df['Weekday'] = df['TXNDATE'].dt.day_name().fillna('Unknown')
 
-    df['Day'] = df['Date'].dt.day.fillna(0).astype(int)
-    df['Week'] = df['Date'].dt.isocalendar().week.fillna(0).astype(int)
-    df['Month'] = df['Date'].dt.to_period('M').astype(str)
-    df['Year'] = df['Date'].dt.year.fillna(0).astype(int)
-    df['Weekday'] = df['Date'].dt.day_name().fillna('Unknown')
+    if 'INRAMOUNT' in df.columns:
+        df['INRAMOUNT'] = pd.to_numeric(df['INRAMOUNT'], errors='coerce').fillna(0)
+    if 'SELLRATE' in df.columns:
+        df['SELLRATE'] = pd.to_numeric(df['SELLRATE'], errors='coerce')
 
     pm_start = time.perf_counter()
     if os.path.exists(party_master_path):
@@ -138,24 +112,27 @@ def create_canonical_dataset(txn_df: pd.DataFrame, party_master_path: str, ofac_
         pm_mapping['CUSTOMERCODE'] = pm_mapping['CUSTOMERCODE'].apply(clean_identifier)
         pm_mapping.drop_duplicates(subset=['CUSTOMERCODE'], inplace=True)
 
-        df = pd.merge(df, pm_mapping, left_on='Party Code', right_on='CUSTOMERCODE', how='left', validate="many_to_one")
-        _validate_row_count(df, initial_row_count, "Party Master Lookup")
-        print("Row count validated after Party Master Lookup.")
-        
-        def map_risk_category(risk):
-            if pd.isna(risk):
+        if 'CUSTOMERCODE' in df.columns:
+            df = pd.merge(df, pm_mapping, left_on='CUSTOMERCODE', right_on='CUSTOMERCODE', how='left', validate="many_to_one")
+            _validate_row_count(df, initial_row_count, "Party Master Lookup")
+            print("Row count validated after Party Master Lookup.")
+            
+            def map_risk_category(risk):
+                if pd.isna(risk):
+                    return 'Unknown'
+                risk = str(risk).upper()
+                if 'HIGH' in risk:
+                    return 'High'
+                if 'MEDIUM' in risk:
+                    return 'Medium'
+                if 'LOW' in risk:
+                    return 'Low'
                 return 'Unknown'
-            risk = str(risk).upper()
-            if 'HIGH' in risk:
-                return 'High'
-            if 'MEDIUM' in risk:
-                return 'Medium'
-            if 'LOW' in risk:
-                return 'Low'
-            return 'Unknown'
 
-        df['Risk Category'] = df['RISKCATEGORY_PM'].apply(map_risk_category)
-        df.drop(columns=['CUSTOMERCODE', 'RISKCATEGORY_PM'], inplace=True, errors='ignore')
+            df['Risk Category'] = df['RISKCATEGORY_PM'].apply(map_risk_category)
+            df.drop(columns=['RISKCATEGORY_PM'], inplace=True, errors='ignore')
+        else:
+            df['Risk Category'] = 'Unknown'
     else:
         df['Risk Category'] = 'Unknown'
         print("Party Master file not found, skipping enrichment.")
@@ -170,13 +147,16 @@ def create_canonical_dataset(txn_df: pd.DataFrame, party_master_path: str, ofac_
         ofac_mapping['COUNTRY'] = ofac_mapping['COUNTRY'].astype(str).str.strip().str.upper()
         ofac_mapping.drop_duplicates(subset=['COUNTRY'], inplace=True)
 
-        df['Visiting Country_upper'] = df['Visiting Country'].astype(str).str.strip().str.upper()
-        df = pd.merge(df, ofac_mapping, left_on='Visiting Country_upper', right_on='COUNTRY', how='left', validate="many_to_one")
-        _validate_row_count(df, initial_row_count, "OFAC FATF Lookup")
-        print("Row count validated after OFAC FATF Lookup.")
+        if 'CountryToTravel' in df.columns:
+            df['CountryToTravel_upper'] = df['CountryToTravel'].astype(str).str.strip().str.upper()
+            df = pd.merge(df, ofac_mapping, left_on='CountryToTravel_upper', right_on='COUNTRY', how='left', validate="many_to_one")
+            _validate_row_count(df, initial_row_count, "OFAC FATF Lookup")
+            print("Row count validated after OFAC FATF Lookup.")
 
-        df['OFAC_FATF'] = df['OFAC_FATF_Segment'].fillna('NOT FLAGGED')
-        df.drop(columns=['Visiting Country_upper', 'COUNTRY', 'OFAC_FATF_Segment'], inplace=True, errors='ignore')
+            df['OFAC_FATF'] = df['OFAC_FATF_Segment'].fillna('NOT FLAGGED')
+            df.drop(columns=['CountryToTravel_upper', 'OFAC_FATF_Segment'], inplace=True, errors='ignore')
+        else:
+            df['OFAC_FATF'] = 'NOT FLAGGED'
     else:
         df['OFAC_FATF'] = 'NOT FLAGGED'
         print("OFAC FATF file not found, skipping enrichment.")
@@ -184,28 +164,26 @@ def create_canonical_dataset(txn_df: pd.DataFrame, party_master_path: str, ofac_
     print(f"OFAC Lookup Time: {round(time.perf_counter() - ofac_start, 2)}s")
 
     eqv_start = time.perf_counter()
-    df['DateOnly'] = df['Date'].dt.date
-    usd_rates = df[df['Currency'] == 'USD'].groupby('DateOnly')['Rate'].mean().reset_index()
-    usd_rates.rename(columns={'Rate': 'Daily_USD_Avg_Rate'}, inplace=True)
-    
-    df = pd.merge(df, usd_rates, on='DateOnly', how='left')
-    df['Daily_USD_Avg_Rate'] = df['Daily_USD_Avg_Rate'].ffill().bfill()
+    if 'TXNDATE' in df.columns and 'CURRENCY' in df.columns and 'SELLRATE' in df.columns:
+        df['DateOnly'] = df['TXNDATE'].dt.date
+        usd_rates = df[df['CURRENCY'] == 'USD'].groupby('DateOnly')['SELLRATE'].mean().reset_index()
+        usd_rates.rename(columns={'SELLRATE': 'Daily_USD_Avg_Rate'}, inplace=True)
+        
+        df = pd.merge(df, usd_rates, on='DateOnly', how='left')
+        df['Daily_USD_Avg_Rate'] = df['Daily_USD_Avg_Rate'].ffill().bfill()
 
-    df['Equivalent USD Amount'] = df['Net Amt'] / df['Daily_USD_Avg_Rate']
-    df.drop(columns=['DateOnly', 'Daily_USD_Avg_Rate'], inplace=True)
-    
+        df['Equivalent USD Amount'] = df['INRAMOUNT'] / df['Daily_USD_Avg_Rate']
+        df.drop(columns=['DateOnly', 'Daily_USD_Avg_Rate'], inplace=True)
+        df['High Value Transaction'] = df['Equivalent USD Amount'] > 25000
+    else:
+        df['Equivalent USD Amount'] = 0
+        df['High Value Transaction'] = False
+        
     _validate_row_count(df, initial_row_count, "Equivalent USD Amount Calculation")
     print("Row count validated after Equivalent USD Amount Calculation.")
     print(f"EQV USD Calculation Time: {round(time.perf_counter() - eqv_start, 2)}s")
 
-    df['High Value Transaction'] = df['Equivalent USD Amount'] > 25000
     df['FATF / OFAC Flag'] = df['OFAC_FATF'] != 'NOT FLAGGED'
-    
-    df.rename(columns={
-        'Equivalent USD Amount': 'EQV USD',
-        'OFAC_FATF': 'OFAC _ FATF',
-        'Risk Category': 'Risk  Category' 
-    }, inplace=True)
 
     if 'Segment' in df.columns:
         SEGMENT_STANDARDIZATION_MAP = {
@@ -221,29 +199,26 @@ def create_canonical_dataset(txn_df: pd.DataFrame, party_master_path: str, ofac_
             'Others': 'OTHER'
         }
 
-        df['Grouped Segment'] = (
+        df['Segment'] = (
             df['Segment']
             .astype(str)
             .str.strip()
             .map(SEGMENT_STANDARDIZATION_MAP)
             .fillna('OTHER')
         )
-        
-        df['Segments'] = df['Grouped Segment']
         _validate_row_count(df, initial_row_count, "Segment Standardization")
         print("Row count validated after Segment Standardization.")
-        df.drop(columns=['Grouped Segment'], inplace=True)
 
     TEXT_COLUMNS = [
-        'Passport',
-        'Issuer',
-        'Party Code',
-        'Corporate',
-        'Passenger Name',
+        'PAXIDNO',
+        'ISSUER',
+        'CUSTOMERCODE',
+        'CUSTOMERNAME',
+        'PAXNAME',
         'EMAILID',
         'MOBILENO',
-        'Beneficiary Type Load or Reload',
-        'Instrument Number'
+        'BENEFICIARY',
+        'INSTRUMENTNO'
     ]
     for col in TEXT_COLUMNS:
         if col in df.columns:
@@ -281,6 +256,9 @@ async def upload_party_master(file: UploadFile = File(...), filtered_df: str = F
     else:
         pm_df = pd.read_excel(io.BytesIO(contents))
         
+    pm_df.columns = [str(c).strip().replace('\ufeff', '').upper() for c in pm_df.columns]
+    pm_df.rename(columns={'CUSTOMER CODE': 'CUSTOMERCODE', 'RISK CATEGORY': 'RISKCATEGORY'}, inplace=True)
+    
     data = json.loads(filtered_df)
     df = pd.DataFrame(data)
     
@@ -298,31 +276,34 @@ async def upload_ofac(file: UploadFile = File(...), filtered_df: str = Form(...)
     if file.filename.endswith('.csv'):
         ofac_df = pd.read_csv(io.BytesIO(contents))
     else:
-        ofac_df = pd.read_excel(io.BytesIO(contents), sheet_name=0) # Read first sheet
+        try:
+            ofac_df = pd.read_excel(io.BytesIO(contents), sheet_name='UPDATED FILE')
+        except:
+            ofac_df = pd.read_excel(io.BytesIO(contents), sheet_name=0)
 
     data = json.loads(filtered_df)
     df = pd.DataFrame(data)
     
     try:
-        if 'COUNTRY' not in ofac_df.columns or 'Segment' not in ofac_df.columns:
-            return {"error": "OFAC file must contain 'COUNTRY' and 'Segment' columns."}
+        ofac_df.rename(columns=lambda x: str(x).strip().upper(), inplace=True)
+        if 'COUNTRY' not in ofac_df.columns or 'SEGMENT' not in ofac_df.columns:
+            return {"error": f"OFAC file must contain 'COUNTRY' and 'SEGMENT' columns. Found: {list(ofac_df.columns)}"}
             
-        ofac_mapping = ofac_df[['COUNTRY', 'Segment']].copy()
-        ofac_mapping.rename(columns={'Segment': 'OFAC_FATF_Segment'}, inplace=True)
+        ofac_mapping = ofac_df[['COUNTRY', 'SEGMENT']].copy()
+        ofac_mapping.rename(columns={'SEGMENT': 'OFAC_FATF_Segment'}, inplace=True)
         ofac_mapping['COUNTRY'] = ofac_mapping['COUNTRY'].astype(str).str.strip().str.upper()
         ofac_mapping.drop_duplicates(subset=['COUNTRY'], inplace=True)
 
-        if 'Visiting Country' in df.columns:
-            df['Visiting Country_upper'] = df['Visiting Country'].astype(str).str.strip().str.upper()
+        if 'CountryToTravel' in df.columns:
+            df['CountryToTravel_upper'] = df['CountryToTravel'].astype(str).str.strip().str.upper()
             
-            # If the column already exists, drop it to avoid _x _y suffixes
             if 'OFAC_FATF_Segment' in df.columns:
                 df.drop(columns=['OFAC_FATF_Segment'], inplace=True)
                 
-            df = pd.merge(df, ofac_mapping, left_on='Visiting Country_upper', right_on='COUNTRY', how='left')
+            df = pd.merge(df, ofac_mapping, left_on='CountryToTravel_upper', right_on='COUNTRY', how='left')
             df['FATF / OFAC Flag'] = df['OFAC_FATF_Segment'].notna() & (df['OFAC_FATF_Segment'] != 'NOT FLAGGED')
-            df['OFAC _ FATF'] = df['OFAC_FATF_Segment'].fillna('NOT FLAGGED')
-            df.drop(columns=['Visiting Country_upper', 'COUNTRY', 'OFAC_FATF_Segment'], inplace=True, errors='ignore')
+            df['OFAC_FATF'] = df['OFAC_FATF_Segment'].fillna('NOT FLAGGED')
+            df.drop(columns=['CountryToTravel_upper', 'COUNTRY', 'OFAC_FATF_Segment'], inplace=True, errors='ignore')
 
         parsed_data = json.loads(df.to_json(orient="records", date_format="iso"))
         return {"enriched_data": parsed_data}

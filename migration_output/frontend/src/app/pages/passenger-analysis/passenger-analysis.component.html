@@ -40,28 +40,7 @@
         <h5 style="margin: 0; font-size: 14px; font-weight: 600;">Rule A: Same PAX ID, Different Email ID ({{ paxData().anomalies.rule_a?.length || 0 }} records)</h5>
         <button (click)="downloadCSV(paxData().anomalies.rule_a, 'rule_a.csv')" style="padding: 4px 8px; background: #fff; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; cursor: pointer;">Export</button>
       </div>
-      <div class="table-container" style="max-height: 250px;" *ngIf="paxData().anomalies.rule_a?.length > 0">
-        <table>
-          <thead>
-            <tr>
-              <th>PAX ID</th>
-              <th>Passenger Name</th>
-              <th>Email ID</th>
-              <th>Mobile No</th>
-              <th>Branch</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let r of paxData().anomalies.rule_a">
-              <td>{{ r['PAXIDNO_CLEAN'] }}</td>
-              <td>{{ r['Passenger Name'] }}</td>
-              <td>{{ r['EMAIL_CLEAN'] }}</td>
-              <td>{{ r['MOBILE_CLEAN'] }}</td>
-              <td>{{ r['Branch Name'] }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <app-shared-table [data]="paxData().anomalies.rule_a" [columns]="ruleACols" maxHeight="250px" downloadFilename="rule_a.csv" [showDownload]="false" *ngIf="paxData().anomalies.rule_a?.length > 0"></app-shared-table>
     </div>
 
     <!-- Rule B -->
@@ -70,28 +49,7 @@
         <h5 style="margin: 0; font-size: 14px; font-weight: 600;">Rule B: Same PAX ID, Different Passenger Name ({{ paxData().anomalies.rule_b?.length || 0 }} records)</h5>
         <button (click)="downloadCSV(paxData().anomalies.rule_b, 'rule_b.csv')" style="padding: 4px 8px; background: #fff; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; cursor: pointer;">Export</button>
       </div>
-      <div class="table-container" style="max-height: 250px;" *ngIf="paxData().anomalies.rule_b?.length > 0">
-        <table>
-          <thead>
-            <tr>
-              <th>PAX ID</th>
-              <th>Passenger Name</th>
-              <th>Email ID</th>
-              <th>Mobile No</th>
-              <th>Branch</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let r of paxData().anomalies.rule_b">
-              <td>{{ r['PAXIDNO_CLEAN'] }}</td>
-              <td>{{ r['Passenger Name'] }}</td>
-              <td>{{ r['EMAIL_CLEAN'] }}</td>
-              <td>{{ r['MOBILE_CLEAN'] }}</td>
-              <td>{{ r['Branch Name'] }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <app-shared-table [data]="paxData().anomalies.rule_b" [columns]="ruleBCols" maxHeight="250px" downloadFilename="rule_b.csv" [showDownload]="false" *ngIf="paxData().anomalies.rule_b?.length > 0"></app-shared-table>
     </div>
 
     <!-- Rule C -->
@@ -100,28 +58,7 @@
         <h5 style="margin: 0; font-size: 14px; font-weight: 600;">Rule C: Same PAX ID, Different Mobile Number ({{ paxData().anomalies.rule_c?.length || 0 }} records)</h5>
         <button (click)="downloadCSV(paxData().anomalies.rule_c, 'rule_c.csv')" style="padding: 4px 8px; background: #fff; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; cursor: pointer;">Export</button>
       </div>
-      <div class="table-container" style="max-height: 250px;" *ngIf="paxData().anomalies.rule_c?.length > 0">
-        <table>
-          <thead>
-            <tr>
-              <th>PAX ID</th>
-              <th>Passenger Name</th>
-              <th>Email ID</th>
-              <th>Mobile No</th>
-              <th>Branch</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let r of paxData().anomalies.rule_c">
-              <td>{{ r['PAXIDNO_CLEAN'] }}</td>
-              <td>{{ r['Passenger Name'] }}</td>
-              <td>{{ r['EMAIL_CLEAN'] }}</td>
-              <td>{{ r['MOBILE_CLEAN'] }}</td>
-              <td>{{ r['Branch Name'] }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <app-shared-table [data]="paxData().anomalies.rule_c" [columns]="ruleCCols" maxHeight="250px" downloadFilename="rule_c.csv" [showDownload]="false" *ngIf="paxData().anomalies.rule_c?.length > 0"></app-shared-table>
     </div>
 
     <!-- Missing KYC -->
@@ -130,28 +67,7 @@
         <h5 style="margin: 0; font-size: 14px; font-weight: 600;">Missing KYC Information ({{ paxData().anomalies.rule_j?.length || 0 }} records)</h5>
         <button (click)="downloadCSV(paxData().anomalies.rule_j, 'rule_j.csv')" style="padding: 4px 8px; background: #fff; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; cursor: pointer;">Export</button>
       </div>
-      <div class="table-container" style="max-height: 250px;" *ngIf="paxData().anomalies.rule_j?.length > 0">
-        <table>
-          <thead>
-            <tr>
-              <th>Passenger Name</th>
-              <th>PAX ID (Clean)</th>
-              <th>Email ID (Clean)</th>
-              <th>Mobile No (Clean)</th>
-              <th>Branch</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let r of paxData().anomalies.rule_j">
-              <td>{{ r['Passenger Name'] }}</td>
-              <td>{{ r['PAXIDNO_CLEAN'] }}</td>
-              <td>{{ r['EMAIL_CLEAN'] }}</td>
-              <td>{{ r['MOBILE_CLEAN'] }}</td>
-              <td>{{ r['Branch Name'] }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <app-shared-table [data]="paxData().anomalies.rule_j" [columns]="missingKycCols" maxHeight="250px" downloadFilename="missing_kyc.csv" [showDownload]="false" *ngIf="paxData().anomalies.rule_j?.length > 0"></app-shared-table>
     </div>
 
   </div>
@@ -163,32 +79,16 @@
       <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Branch Quality Overview</h4>
       <button (click)="downloadCSV(paxData().branch_summary, 'branch_quality.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
     </div>
-    <div class="table-container" style="max-height: 400px;">
-      <table>
-        <thead>
-          <tr>
-            <th>Branch Name</th>
-            <th style="text-align: right">Total Records</th>
-            <th style="text-align: right">Invalid ID</th>
-            <th style="text-align: right">Invalid Mobile</th>
-            <th style="text-align: right">Invalid Email</th>
-            <th style="text-align: right">Missing KYC</th>
-            <th style="text-align: right">Total Issues</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let r of paxData().branch_summary">
-            <td style="font-weight: 600">{{ r['Branch Name'] }}</td>
-            <td style="text-align: right">{{ r['Total_Records'] | number }}</td>
-            <td style="text-align: right">{{ r['Invalid_ID'] | number }}</td>
-            <td style="text-align: right">{{ r['Invalid_Mobile'] | number }}</td>
-            <td style="text-align: right">{{ r['Invalid_Email'] | number }}</td>
-            <td style="text-align: right">{{ r['Missing_KYC'] | number }}</td>
-            <td style="text-align: right; color: #b91c1c; font-weight: 600;">{{ r['Total_Issues'] | number }}</td>
-          </tr>
-        </tbody>
-      </table>
+    <app-shared-table [data]="paxData().branch_summary" [columns]="branchQualityCols" maxHeight="400px" downloadFilename="branch_quality.csv" [showDownload]="false"></app-shared-table>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-header">
+      <h3>Detailed Passenger Transaction Listing</h3>
     </div>
+    <app-shared-table [data]="dataService.filteredDf()" [columns]="detailedCols" maxHeight="500px" downloadFilename="passenger_transactions.csv" [showDownload]="true"></app-shared-table>
   </div>
 
 </div>

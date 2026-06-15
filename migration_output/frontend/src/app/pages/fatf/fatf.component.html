@@ -1,4 +1,4 @@
-<div class="page-container" *ngIf="fatfData()">
+<div class="page-container">
   <div class="section-header" style="display: flex; justify-content: space-between; align-items: flex-end;">
     <div>
       <h3>FATF & OFAC EXPOSURE</h3>
@@ -6,11 +6,12 @@
     </div>
     <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
       <label style="font-size: 13px; font-weight: 600; color: #334155; margin-right: 8px; display: block; margin-bottom: 4px;">Upload Master FATF/OFAC List:</label>
-      <input type="file" accept=".xlsx,.xls" (change)="onOfacFileSelected($event)" style="font-size: 13px;">
+      <input type="file" accept=".csv,.xlsx,.xls" (change)="onOfacFileSelected($event)" style="font-size: 13px;">
     </div>
   </div>
 
-  <div class="kpi-row" style="grid-template-columns: repeat(4, 1fr); display: grid; margin-bottom: 24px;">
+  <ng-container *ngIf="fatfData()">
+    <div class="kpi-row" style="grid-template-columns: repeat(4, 1fr); display: grid; margin-bottom: 24px;">
     <div class="kpi-card">
       <div class="kpi-title">Flagged Transaction Count</div>
       <div class="kpi-value">{{ fatfData().kpis.flagged_count | number }}</div>
@@ -29,114 +30,65 @@
     </div>
   </div>
 
-  <div class="section-header">
-    <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Flagged Transactions Detailed</h4>
-    <button (click)="downloadCSV(fatfData().flagged_transactions, 'fatf_transactions.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
-  </div>
-  <div class="table-container" style="max-height: 400px; margin-bottom: 32px;">
-    <table>
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Corporate</th>
-          <th>Visiting Country</th>
-          <th>Segment</th>
-          <th>OFAC / FATF</th>
-          <th style="text-align: right">Net Amt</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let r of fatfData().flagged_transactions">
-          <td>{{ r['Date'] | date:'mediumDate' }}</td>
-          <td>{{ r['Corporate'] }}</td>
-          <td>{{ r['Visiting Country'] }}</td>
-          <td>{{ r['Segments'] }}</td>
-          <td>
-            <span style="background: #fee2e2; color: #b91c1c; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">{{ r['OFAC _ FATF'] }}</span>
-          </td>
-          <td style="text-align: right">{{ formatAmt(r['Net Amt']) }}</td>
-        </tr>
-      </tbody>
-    </table>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; height: 400px;">
+    <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;">
+      <plotly-plot *ngIf="branchSegChart" [data]="branchSegChart.data" [layout]="branchSegChart.layout" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
+    </div>
+    <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;">
+      <plotly-plot *ngIf="countrySegChart" [data]="countrySegChart.data" [layout]="countrySegChart.layout" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
+    </div>
   </div>
 
   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
     <!-- Branch Wise exposure -->
     <div class="section">
-      <div class="section-header">
+      <div class="section-header" style="margin-bottom: 12px;">
         <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Branch Wise Flagged Exposure</h4>
-        <button (click)="downloadCSV(fatfData().branch_seg_summary, 'fatf_branch.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
       </div>
-      <div class="table-container" style="max-height: 300px;">
-        <table>
-          <thead>
-            <tr>
-              <th>Branch Name</th>
-              <th style="text-align: right">Txn Count</th>
-              <th style="text-align: right">Exposure Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let row of fatfData().branch_seg_summary">
-              <td>{{ row['Branch Name'] }}</td>
-              <td style="text-align: right">{{ row['Count'] | number }}</td>
-              <td style="text-align: right">{{ row['Net_Amount'] | humanReadableAmount }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <app-shared-table [data]="fatfData().branch_seg_summary" [columns]="branchCols" maxHeight="300px" downloadFilename="fatf_branch.csv" [showDownload]="true"></app-shared-table>
     </div>
 
     <!-- Country Wise exposure -->
     <div class="section">
-      <div class="section-header">
+      <div class="section-header" style="margin-bottom: 12px;">
         <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Country Wise Flagged Exposure</h4>
-        <button (click)="downloadCSV(fatfData().country_seg_summary, 'fatf_country.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
       </div>
-      <div class="table-container" style="max-height: 300px;">
-        <table>
-          <thead>
-            <tr>
-              <th>Visiting Country</th>
-              <th style="text-align: right">Txn Count</th>
-              <th style="text-align: right">Exposure Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let row of fatfData().country_seg_summary">
-              <td>{{ row['Visiting Country'] }}</td>
-              <td style="text-align: right">{{ row['Count'] | number }}</td>
-              <td style="text-align: right">{{ row['Net_Amount'] | humanReadableAmount }}</td>
-            </tr>
-          </tbody>
-        </table>
+      <app-shared-table [data]="fatfData().country_seg_summary" [columns]="countryCols" maxHeight="300px" downloadFilename="fatf_country.csv" [showDownload]="true"></app-shared-table>
+    </div>
+  </div>
+
+  <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <label style="font-weight: 600; font-size: 14px;">Trend Aggregation:</label>
+      <div class="toggle-group" style="display: flex; background: #f8fafc; border-radius: 8px; padding: 4px; gap: 4px; border: 1px solid #e2e8f0;">
+        <button [class.active]="trendAgg() === 'DAILY'" (click)="trendAgg.set('DAILY'); fetchData()" style="padding: 6px 12px; font-size: 12px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; background: transparent; color: #64748b; transition: all 0.2s;" [ngStyle]="trendAgg() === 'DAILY' ? {'background': '#fff', 'color': '#0f172a', 'box-shadow': '0 1px 2px rgba(0,0,0,0.05)'} : {}">DAILY</button>
+        <button [class.active]="trendAgg() === 'WEEKLY'" (click)="trendAgg.set('WEEKLY'); fetchData()" style="padding: 6px 12px; font-size: 12px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; background: transparent; color: #64748b; transition: all 0.2s;" [ngStyle]="trendAgg() === 'WEEKLY' ? {'background': '#fff', 'color': '#0f172a', 'box-shadow': '0 1px 2px rgba(0,0,0,0.05)'} : {}">WEEKLY</button>
       </div>
+    </div>
+  </div>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; height: 350px;">
+    <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;">
+      <plotly-plot *ngIf="purposeChart" [data]="purposeChart.data" [layout]="purposeChart.layout" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
+    </div>
+    <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;">
+      <plotly-plot *ngIf="trendChart" [data]="trendChart.data" [layout]="trendChart.layout" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-header">
+    <div class="section-header" style="margin-bottom: 12px;">
       <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Purpose Breakdown</h4>
-      <button (click)="downloadCSV(fatfData().purpose_counts, 'fatf_purpose.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
     </div>
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>Purpose</th>
-            <th style="text-align: right">Count</th>
-            <th style="text-align: right">Net Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let row of fatfData().purpose_counts">
-            <td>{{ row['Purpose'] }}</td>
-            <td style="text-align: right">{{ row['Count'] | number }}</td>
-            <td style="text-align: right">{{ row['Net_Amount'] | humanReadableAmount }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <app-shared-table [data]="fatfData().purpose_counts" [columns]="purposeCols" maxHeight="350px" downloadFilename="fatf_purpose.csv" [showDownload]="true"></app-shared-table>
   </div>
 
+  <hr>
+
+  <div class="section">
+    <div class="section-header" style="margin-bottom: 12px;">
+      <h3>Detailed Flagged Transaction Listing</h3>
+    </div>
+    <app-shared-table [data]="fatfData().flagged_transactions" [columns]="flaggedCols" maxHeight="500px" downloadFilename="fatf_transactions.csv" [showDownload]="true"></app-shared-table>
+  </div>
+  </ng-container>
 </div>

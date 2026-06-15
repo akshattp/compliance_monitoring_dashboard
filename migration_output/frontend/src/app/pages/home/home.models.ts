@@ -40,11 +40,13 @@ export interface HomeTrends {
 export interface BreakdownData {
   Purpose?: string;
   Product?: string;
-  'Branch Name'?: string;
+  TxnPurpose?: string;
+  PRODUCT?: string;
+  'LOCATION'?: string;
   Branch?: string;
-  'Visiting Country'?: string;
+  'CountryToTravel'?: string;
   Count: number;
-  'Net Amt': number;
+  'INRAMOUNT': number;
   Percentage?: number;
   '% Count'?: number;
   '% Net Amount'?: number;

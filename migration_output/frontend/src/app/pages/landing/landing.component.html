@@ -1,0 +1,70 @@
+<div class="flex flex-col items-center justify-center min-h-[70vh] px-4">
+  <div class="text-center mb-8">
+    <h1 class="text-3xl font-bold text-primary dark:text-on-primary-fixed mb-2">GlobalPay AML</h1>
+    <p class="text-secondary">Upload the Main TXN Line MIS File to initialize the dashboard.</p>
+  </div>
+
+  <div class="bg-surface-container-low border border-border-base rounded-xl p-8 max-w-md w-full shadow-sm text-center">
+    
+    <div *ngIf="!dataService.currentFile()" class="mb-6">
+      <div class="w-16 h-16 mx-auto bg-primary/10 text-primary rounded-full flex items-center justify-center mb-4">
+        <span class="material-symbols-outlined text-3xl">cloud_upload</span>
+      </div>
+      <h2 class="text-lg font-bold mb-2">Upload Transaction Data</h2>
+      <p class="text-sm text-secondary mb-6">Select a CSV or Excel file containing your main dataset. (Mandatory)</p>
+      
+      <input #fileInput type="file" style="display:none;" (change)="onFileSelected($event)" accept=".csv,.xlsx,.xls">
+      <button (click)="fileInput.click()" class="bg-primary text-on-primary font-bold py-2 px-6 rounded-lg hover:opacity-90 transition-opacity w-full">
+        Browse TXN MIS File
+      </button>
+    </div>
+
+    <!-- Once Main File is uploaded, show the optional ones -->
+    <div *ngIf="dataService.currentFile() && !dataService.isUploading()" class="mb-6 space-y-4">
+      <div class="p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-4 text-left">
+        <span class="material-symbols-outlined text-green-600 text-3xl">check_circle</span>
+        <div>
+          <h3 class="font-bold text-green-800">1. TXN Line MIS (Uploaded)</h3>
+          <p class="text-xs text-green-700">{{ dataService.currentFile()?.name }} - {{ dataService.rowCount() | number }} rows</p>
+        </div>
+      </div>
+
+      <div class="p-4 border border-border-base rounded-lg text-left">
+        <h3 class="font-bold mb-1">2. Party Master (Optional)</h3>
+        <p class="text-xs text-secondary mb-3">Automate corporate risk categorization.</p>
+        <input #partyInput type="file" style="display:none;" (change)="onPartySelected($event)" accept=".csv,.xlsx,.xls">
+        <div class="flex items-center gap-2">
+          <button (click)="partyInput.click()" class="bg-surface-container text-on-surface font-bold py-1.5 px-4 rounded text-sm hover:bg-surface-container-high transition-colors">
+            Upload Party Master
+          </button>
+          <span *ngIf="dataService.partyFile()" class="text-xs font-bold text-green-600 flex items-center gap-1"><span class="material-symbols-outlined text-sm">check_circle</span> Uploaded</span>
+        </div>
+      </div>
+
+      <div class="p-4 border border-border-base rounded-lg text-left">
+        <h3 class="font-bold mb-1">3. OFAC / FATF List (Optional)</h3>
+        <p class="text-xs text-secondary mb-3">Identify high-risk jurisdictions or entities.</p>
+        <input #ofacInput type="file" style="display:none;" (change)="onOfacSelected($event)" accept=".csv,.xlsx,.xls">
+        <div class="flex items-center gap-2">
+          <button (click)="ofacInput.click()" class="bg-surface-container text-on-surface font-bold py-1.5 px-4 rounded text-sm hover:bg-surface-container-high transition-colors">
+            Upload OFAC FATF
+          </button>
+          <span *ngIf="dataService.ofacFile()" class="text-xs font-bold text-green-600 flex items-center gap-1"><span class="material-symbols-outlined text-sm">check_circle</span> Uploaded</span>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="dataService.isUploading()" class="py-8">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+      <p class="text-sm font-bold text-primary animate-pulse">{{ dataService.uploadStatus() }}</p>
+    </div>
+
+    <div *ngIf="!dataService.isUploading() && dataService.currentFile()" class="mt-8 pt-6 border-t border-border-base">
+      <button (click)="goToHome()" class="bg-primary text-on-primary font-bold py-3 px-6 rounded-lg hover:opacity-90 transition-opacity w-full text-lg shadow-md flex items-center justify-center gap-2">
+        Take to Home Page
+        <span class="material-symbols-outlined">arrow_forward</span>
+      </button>
+    </div>
+
+  </div>
+</div>

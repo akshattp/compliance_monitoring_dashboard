@@ -16,7 +16,7 @@
       <div class="kpi-value">{{ agentData().kpis.total_net_amt_agent | humanReadableAmount }}</div>
     </div>
     <div class="kpi-card">
-      <div class="kpi-title">% of Total Remittance</div>
+      <div class="kpi-title">Contribution %</div>
       <div class="kpi-value">{{ agentData().kpis.contrib_pct | number:'1.0-2' }}%</div>
     </div>
   </div>
@@ -54,56 +54,141 @@
     </div>
   </div>
 
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
-    <!-- Frequency -->
-    <div class="section">
-      <div class="section-header">
-        <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Agent Volume Contribution</h4>
-        <button (click)="downloadCSV(agentData().frequency_table, 'agent_frequency.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
-      </div>
-      <div class="table-container" style="max-height: 350px;">
-        <table>
-          <thead>
-            <tr>
-              <th>Agent ID</th>
-              <th style="text-align: right">Txn Count</th>
-              <th style="text-align: right">Net Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let row of agentData().frequency_table">
-              <td style="font-weight: 600">{{ row['Category'] }}</td>
-              <td style="text-align: right">{{ row['Count'] | number }}</td>
-              <td style="text-align: right">{{ row['Net Amount'] | humanReadableAmount }}</td>
-            </tr>
-          </tbody>
-        </table>
+  <hr>
+
+  <div style="display: flex; gap: 24px; margin-bottom: 24px;">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <label style="font-weight: 600; font-size: 14px;">Chart Metric:</label>
+      <div class="toggle-group" style="display: flex; background: #f8fafc; border-radius: 8px; padding: 4px; gap: 4px; border: 1px solid #e2e8f0;">
+        <button [class.active]="chartMetric === 'Count'" (click)="chartMetric = 'Count'; onParamChange()" style="padding: 6px 12px; font-size: 12px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; background: transparent; color: #64748b; transition: all 0.2s;" [ngStyle]="chartMetric === 'Count' ? {'background': '#fff', 'color': '#0f172a', 'box-shadow': '0 1px 2px rgba(0,0,0,0.05)'} : {}">Count</button>
+        <button [class.active]="chartMetric === 'Net Amount'" (click)="chartMetric = 'Net Amount'; onParamChange()" style="padding: 6px 12px; font-size: 12px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; background: transparent; color: #64748b; transition: all 0.2s;" [ngStyle]="chartMetric === 'Net Amount' ? {'background': '#fff', 'color': '#0f172a', 'box-shadow': '0 1px 2px rgba(0,0,0,0.05)'} : {}">Net Amount</button>
       </div>
     </div>
-
-    <!-- Trend -->
-    <div class="section">
-      <div class="section-header">
-        <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Agent Activity Trend</h4>
-        <button (click)="downloadCSV(agentData().trend_table, 'agent_trend.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <label style="font-weight: 600; font-size: 14px;">Trend Aggregation:</label>
+      <div class="toggle-group" style="display: flex; background: #f8fafc; border-radius: 8px; padding: 4px; gap: 4px; border: 1px solid #e2e8f0;">
+        <button [class.active]="trendAgg === 'DAILY'" (click)="trendAgg = 'DAILY'; onParamChange()" style="padding: 6px 12px; font-size: 12px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; background: transparent; color: #64748b; transition: all 0.2s;" [ngStyle]="trendAgg === 'DAILY' ? {'background': '#fff', 'color': '#0f172a', 'box-shadow': '0 1px 2px rgba(0,0,0,0.05)'} : {}">DAILY</button>
+        <button [class.active]="trendAgg === 'WEEKLY'" (click)="trendAgg = 'WEEKLY'; onParamChange()" style="padding: 6px 12px; font-size: 12px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; background: transparent; color: #64748b; transition: all 0.2s;" [ngStyle]="trendAgg === 'WEEKLY' ? {'background': '#fff', 'color': '#0f172a', 'box-shadow': '0 1px 2px rgba(0,0,0,0.05)'} : {}">WEEKLY</button>
       </div>
-      <div class="table-container" style="max-height: 350px;">
-        <table>
-          <thead>
-            <tr>
-              <th>Period</th>
-              <th style="text-align: right">Txn Count</th>
-              <th style="text-align: right">Net Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let row of agentData().trend_table">
-              <td style="font-weight: 600">{{ row['Category'] }}</td>
-              <td style="text-align: right">{{ row['Count'] | number }}</td>
-              <td style="text-align: right">{{ row['Net Amount'] | humanReadableAmount }}</td>
-            </tr>
-          </tbody>
-        </table>
+    </div>
+  </div>
+
+  <!-- Agent Frequency -->
+  <div class="section">
+    <div class="section-header">
+      <h4 style="margin: 0; font-size: 16px; font-weight: 600;">1. Agent Frequency (Top 20)</h4>
+    </div>
+    <div style="display: grid; grid-template-columns: 65% 33%; gap: 2%;">
+      <div>
+        <app-shared-chart [chartData]="freqGraph" height="350px"></app-shared-chart>
+      </div>
+      <div>
+        <app-shared-table [data]="agentData().frequency_table" [columns]="baseCols" maxHeight="350px" downloadFilename="agent_frequency.csv"></app-shared-table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Agent Trend -->
+  <div class="section">
+    <div class="section-header">
+      <h4 style="margin: 0; font-size: 16px; font-weight: 600;">2. Agent Activity Trend</h4>
+    </div>
+    <div style="display: grid; grid-template-columns: 65% 33%; gap: 2%;">
+      <div>
+        <app-shared-chart [chartData]="trendGraph" height="350px"></app-shared-chart>
+      </div>
+      <div>
+        <app-shared-table [data]="agentData().trend_table" [columns]="trendCols" maxHeight="350px" downloadFilename="agent_trend.csv"></app-shared-table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Branch-wise -->
+  <div class="section">
+    <div class="section-header">
+      <h4 style="margin: 0; font-size: 16px; font-weight: 600;">3. Branch-wise Agent Analysis</h4>
+    </div>
+    <div style="display: grid; grid-template-columns: 65% 33%; gap: 2%;">
+      <div>
+        <app-shared-chart [chartData]="branchGraph" height="350px"></app-shared-chart>
+      </div>
+      <div>
+        <app-shared-table [data]="agentData().branch_table" [columns]="baseCols" maxHeight="350px" downloadFilename="agent_branch.csv"></app-shared-table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Country-wise -->
+  <div class="section">
+    <div class="section-header">
+      <h4 style="margin: 0; font-size: 16px; font-weight: 600;">4. Visiting Country-wise Agent Analysis</h4>
+    </div>
+    <div style="display: grid; grid-template-columns: 65% 33%; gap: 2%;">
+      <div>
+        <app-shared-chart [chartData]="countryGraph" height="350px"></app-shared-chart>
+      </div>
+      <div>
+        <app-shared-table [data]="agentData().country_table" [columns]="baseCols" maxHeight="350px" downloadFilename="agent_country.csv"></app-shared-table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Corporate-wise -->
+  <div class="section">
+    <div class="section-header">
+      <h4 style="margin: 0; font-size: 16px; font-weight: 600;">5. Corporate-wise Agent Analysis</h4>
+    </div>
+    <div style="display: grid; grid-template-columns: 65% 33%; gap: 2%;">
+      <div>
+        <app-shared-chart [chartData]="corpGraph" height="350px"></app-shared-chart>
+      </div>
+      <div>
+        <app-shared-table [data]="agentData().corp_table" [columns]="baseCols" maxHeight="350px" downloadFilename="agent_corporate.csv"></app-shared-table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Beneficiary-wise -->
+  <div class="section">
+    <div class="section-header">
+      <h4 style="margin: 0; font-size: 16px; font-weight: 600;">6. Beneficiary-wise Agent Analysis</h4>
+    </div>
+    <div style="display: grid; grid-template-columns: 65% 33%; gap: 2%;">
+      <div>
+        <app-shared-chart [chartData]="benefGraph" height="350px"></app-shared-chart>
+      </div>
+      <div>
+        <app-shared-table [data]="agentData().benef_table" [columns]="baseCols" maxHeight="350px" downloadFilename="agent_beneficiary.csv"></app-shared-table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product-wise -->
+  <div class="section">
+    <div class="section-header">
+      <h4 style="margin: 0; font-size: 16px; font-weight: 600;">7. Product-wise Agent Analysis</h4>
+    </div>
+    <div style="display: grid; grid-template-columns: 65% 33%; gap: 2%;">
+      <div>
+        <app-shared-chart [chartData]="productGraph" height="350px"></app-shared-chart>
+      </div>
+      <div>
+        <app-shared-table [data]="agentData().product_table" [columns]="baseCols" maxHeight="350px" downloadFilename="agent_product.csv"></app-shared-table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Purpose-wise -->
+  <div class="section">
+    <div class="section-header">
+      <h4 style="margin: 0; font-size: 16px; font-weight: 600;">8. Purpose-wise Agent Analysis</h4>
+    </div>
+    <div style="display: grid; grid-template-columns: 65% 33%; gap: 2%;">
+      <div>
+        <app-shared-chart [chartData]="purposeGraph" height="350px"></app-shared-chart>
+      </div>
+      <div>
+        <app-shared-table [data]="agentData().purpose_table" [columns]="baseCols" maxHeight="350px" downloadFilename="agent_purpose.csv"></app-shared-table>
       </div>
     </div>
   </div>
@@ -117,87 +202,121 @@
     </div>
   </div>
 
+  <!-- Rule 1 -->
   <div class="section">
-    <div class="section-header">
-      <h4 style="margin: 0; font-size: 16px; font-weight: 600;">1. Agents linked to >5 Distinct Remitters (Corporates)</h4>
-      <button (click)="downloadCSV(agentData().suspicious_complex, 'suspicious_complex.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
+    <div class="section-header" style="flex-direction: column; align-items: flex-start; gap: 12px;">
+      <h4 style="margin: 0; font-size: 16px; font-weight: 600;">RULE 1: AGENT-BENEFICIARY RELATIONSHIP</h4>
+      <div style="display: flex; gap: 16px; width: 100%; justify-content: space-between;">
+        <div style="display: flex; gap: 16px; align-items: center;">
+          <select [(ngModel)]="rule1Mode" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
+            <option value="1_MANY">1 &rarr; Many</option>
+            <option value="1_1">1 &rarr; 1</option>
+          </select>
+          <div *ngIf="rule1Mode === '1_MANY'">
+            <label>Threshold:</label> <input type="number" [(ngModel)]="rule1ManyThresh" (change)="onParamChange()" style="width: 60px; padding: 4px;">
+          </div>
+          <div *ngIf="rule1Mode === '1_1'">
+            <label>Threshold:</label> <input type="number" [(ngModel)]="rule1OneThresh" (change)="onParamChange()" style="width: 60px; padding: 4px;">
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="table-container" style="max-height: 300px;">
-      <table>
-        <thead>
-          <tr>
-            <th>Agent ID</th>
-            <th style="text-align: right">Distinct Remitters</th>
-            <th style="text-align: right">Transactions</th>
-            <th style="text-align: right">Total Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let row of agentData().suspicious_complex">
-            <td style="font-weight: 600">{{ row['Agent'] }}</td>
-            <td style="text-align: right">{{ row['unique_targets'] | number }}</td>
-            <td style="text-align: right">{{ row['txn_count'] | number }}</td>
-            <td style="text-align: right">{{ row['total_amt'] | humanReadableAmount }}</td>
-          </tr>
-        </tbody>
-      </table>
+    
+    <div *ngIf="rule1Mode === '1_MANY'">
+      <app-shared-table [data]="agentData().suspicious_many" [columns]="rule1Cols" maxHeight="300px" downloadFilename="rule1_many.csv"></app-shared-table>
+    </div>
+
+    <div *ngIf="rule1Mode === '1_1'">
+      <app-shared-table [data]="agentData().suspicious_one" [columns]="rule1Cols" maxHeight="300px" downloadFilename="rule1_one.csv"></app-shared-table>
     </div>
   </div>
 
-  <div class="section">
-    <div class="section-header">
-      <h4 style="margin: 0; font-size: 16px; font-weight: 600;">2. Agents linked to >5 Distinct Beneficiaries</h4>
-      <button (click)="downloadCSV(agentData().suspicious_many, 'suspicious_many.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
+  <!-- Rule 2 -->
+  <div class="section" style="border: none; padding: 0; margin-bottom: 40px; box-shadow: none; background: transparent;">
+    <h4 style="margin: 0 0 16px 0; font-size: 14px; font-weight: 700; text-transform: uppercase; color: #111;">RULE 2: ONE AGENT FOR DIFFERENT CORPORATES</h4>
+    <label style="font-size: 12px; color: #333; margin-bottom: 8px; display: block;">Enter Threshold</label>
+    <div style="display: flex; align-items: center; background: #f0f2f6; border-radius: 4px; padding: 0 12px; margin-bottom: 16px;">
+      <input type="number" [(ngModel)]="rule2Thresh" (change)="onParamChange()" style="border: none; background: transparent; width: 100%; padding: 12px 0; font-size: 14px; outline: none; color: #333;">
     </div>
-    <div class="table-container" style="max-height: 300px;">
-      <table>
-        <thead>
-          <tr>
-            <th>Agent ID</th>
-            <th>Beneficiary</th>
-            <th style="text-align: right">Transactions</th>
-            <th style="text-align: right">Net Amount</th>
-            <th style="text-align: right">Relationship Freq</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let row of agentData().suspicious_many">
-            <td style="font-weight: 600">{{ row['Agent'] }}</td>
-            <td>{{ row['Beneficiary'] }}</td>
-            <td style="text-align: right">{{ row['Transaction Count'] | number }}</td>
-            <td style="text-align: right">{{ row['Net Amount'] | humanReadableAmount }}</td>
-            <td style="text-align: right">{{ row['Relationship Frequency'] }}</td>
-          </tr>
-        </tbody>
-      </table>
+    <div style="background: #ffffe0; padding: 12px 16px; border-radius: 4px; margin-bottom: 16px; font-size: 13px; color: #333;">
+      Found {{agentData().rule2_susp?.length || 0}} suspicious agents.
     </div>
+
+    <app-shared-table [data]="agentData().rule2_susp" [columns]="rule2Cols" downloadFilename="rule2.csv" [showDownload]="false"></app-shared-table>
+
+    <details style="border: 1px solid #ccc; border-radius: 4px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; font-weight: 600; cursor: pointer; color: #333; background: #fff;">
+      <summary style="outline: none;">Show Table</summary>
+      <div style="margin-top: 12px; font-weight: normal; font-size: 13px; color: #555;">
+        (Detailed transactions view is minimized)
+      </div>
+    </details>
+    
+    <!-- We removed the duplicate download button since we can rely on standard or keep the custom black button as user wanted -->
+    <button (click)="$event.preventDefault();" style="background: #111; color: #fff; border: none; border-radius: 4px; padding: 10px 16px; font-size: 12px; font-weight: 600; cursor: pointer;" *ngIf="false">Download suspicious records</button>
   </div>
+
+  <!-- Rule 3 -->
+  <div class="section" style="border: none; padding: 0; margin-bottom: 40px; box-shadow: none; background: transparent;">
+    <h4 style="margin: 0 0 16px 0; font-size: 14px; font-weight: 700; text-transform: uppercase; color: #111;">RULE 3: ONE AGENT FOR DIFFERENT BRANCHES</h4>
+    <label style="font-size: 12px; color: #333; margin-bottom: 8px; display: block;">Enter Threshold</label>
+    <div style="display: flex; align-items: center; background: #f0f2f6; border-radius: 4px; padding: 0 12px; margin-bottom: 16px;">
+      <input type="number" [(ngModel)]="rule3Thresh" (change)="onParamChange()" style="border: none; background: transparent; width: 100%; padding: 12px 0; font-size: 14px; outline: none; color: #333;">
+    </div>
+    <div style="background: #ffffe0; padding: 12px 16px; border-radius: 4px; margin-bottom: 16px; font-size: 13px; color: #333;">
+      Found {{agentData().rule3_susp?.length || 0}} suspicious agents.
+    </div>
+
+    <app-shared-table [data]="agentData().rule3_susp" [columns]="rule3Cols" downloadFilename="rule3.csv" [showDownload]="false"></app-shared-table>
+
+    <details style="border: 1px solid #ccc; border-radius: 4px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; font-weight: 600; cursor: pointer; color: #333; background: #fff;">
+      <summary style="outline: none;">Show Table</summary>
+      <div style="margin-top: 12px; font-weight: normal; font-size: 13px; color: #555;">
+        (Detailed transactions view is minimized)
+      </div>
+    </details>
+  </div>
+
+  <!-- Rule 4 -->
+  <div class="section" style="border: none; padding: 0; margin-bottom: 40px; box-shadow: none; background: transparent;">
+    <h4 style="margin: 0 0 16px 0; font-size: 14px; font-weight: 700; text-transform: uppercase; color: #111;">RULE 4: ONE AGENT FOR DIFFERENT VISITING COUNTRIES</h4>
+    <label style="font-size: 12px; color: #333; margin-bottom: 8px; display: block;">Enter Threshold</label>
+    <div style="display: flex; align-items: center; background: #f0f2f6; border-radius: 4px; padding: 0 12px; margin-bottom: 16px;">
+      <input type="number" [(ngModel)]="rule4Thresh" (change)="onParamChange()" style="border: none; background: transparent; width: 100%; padding: 12px 0; font-size: 14px; outline: none; color: #333;">
+    </div>
+    <div style="background: #ffffe0; padding: 12px 16px; border-radius: 4px; margin-bottom: 16px; font-size: 13px; color: #333;">
+      Found {{agentData().rule4_susp?.length || 0}} suspicious agents.
+    </div>
+
+    <app-shared-table [data]="agentData().rule4_susp" [columns]="rule4Cols" downloadFilename="rule4.csv" [showDownload]="false"></app-shared-table>
+
+    <details style="border: 1px solid #ccc; border-radius: 4px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; font-weight: 600; cursor: pointer; color: #333; background: #fff;">
+      <summary style="outline: none;">Show Table</summary>
+      <div style="margin-top: 12px; font-weight: normal; font-size: 13px; color: #555;">
+        (Detailed transactions view is minimized)
+      </div>
+    </details>
+  <hr>
 
   <div class="section">
     <div class="section-header">
-      <h4 style="margin: 0; font-size: 16px; font-weight: 600;">3. Agents directing >5 Remittances to a Single Beneficiary</h4>
-      <button (click)="downloadCSV(agentData().suspicious_one, 'suspicious_one.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
+      <h3>Detailed Agent Transaction Listing</h3>
     </div>
-    <div class="table-container" style="max-height: 300px;">
-      <table>
-        <thead>
-          <tr>
-            <th>Agent ID</th>
-            <th>Beneficiary</th>
-            <th style="text-align: right">Transactions</th>
-            <th style="text-align: right">Net Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let row of agentData().suspicious_one">
-            <td style="font-weight: 600">{{ row['Agent'] }}</td>
-            <td>{{ row['Beneficiary'] }}</td>
-            <td style="text-align: right">{{ row['Transaction Count'] | number }}</td>
-            <td style="text-align: right">{{ row['Net Amount'] | humanReadableAmount }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <app-shared-table [data]="dataService.filteredDf()" [columns]="detailedCols" maxHeight="500px" downloadFilename="agent_transactions.csv" [showDownload]="true"></app-shared-table>
   </div>
 
 </div>
+<style>
+.btn-download {
+  padding: 6px 12px;
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-download:hover {
+  background: #e2e8f0;
+}
+</style>

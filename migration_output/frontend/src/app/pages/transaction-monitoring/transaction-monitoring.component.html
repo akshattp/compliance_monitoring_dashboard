@@ -10,26 +10,7 @@
     <div class="section-header">
       <h3>Transaction Monitoring Summary</h3>
     </div>
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>Risk Name</th>
-            <th>Description</th>
-            <th style="text-align: right">Flagged Count</th>
-            <th style="text-align: right">Total Exposure</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let row of summaryTable()">
-            <td style="font-weight: 600">{{ row.ruleName }}</td>
-            <td>{{ row.description }}</td>
-            <td style="text-align: right">{{ row.flaggedCount | number }}</td>
-            <td style="text-align: right">{{ row.totalExposure | humanReadableAmount }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <app-shared-table [data]="summaryTable()" [columns]="summaryCols" maxHeight="400px" downloadFilename="tm_summary.csv" [showDownload]="true"></app-shared-table>
   </div>
 
   <hr>
@@ -48,7 +29,13 @@
       <div class="accordion-icon">{{ expandedRule() === 'HV' ? '▲' : '▼' }}</div>
     </div>
     <div class="accordion-body" *ngIf="expandedRule() === 'HV'">
-      <p style="font-size: 14px; margin-top: 0; margin-bottom: 16px; color: #334155;">Detect and monitor transactions exceeding $25,000 USD threshold.</p>
+      <p style="font-size: 14px; margin-top: 0; margin-bottom: 16px; color: #334155;">Detect and monitor transactions exceeding USD threshold.</p>
+      
+      <div style="margin-bottom: 24px; max-width: 320px;">
+        <label style="display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px;">High Value Threshold ($): {{ highValueThreshold() | number }}</label>
+        <input type="range" min="10000" max="100000" step="5000" [ngModel]="highValueThreshold()" (ngModelChange)="highValueThreshold.set($event)" style="width: 100%; cursor: pointer;" />
+      </div>
+
       <div class="kpi-row" style="grid-template-columns: repeat(4, 1fr); display: grid; margin-bottom: 24px;">
         <div class="kpi-card">
           <div class="kpi-title">High Value Count</div>
@@ -68,34 +55,19 @@
         </div>
       </div>
       
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; height: 350px;">
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;">
+          <plotly-plot *ngIf="ruleCharts()?.hvBranch as chart" [data]="chart.data" [layout]="chart.layout" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
+        </div>
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;">
+          <plotly-plot *ngIf="ruleCharts()?.hvRisk as chart" [data]="chart.data" [layout]="chart.layout" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
+        </div>
+      </div>
+
       <div class="section-header">
         <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Suspicious High-Value Transactions</h4>
-        <button (click)="downloadCSV(tmData().high_value.data, 'high_value.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
       </div>
-      <div class="table-container" style="max-height: 400px;">
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Corporate</th>
-              <th>Passenger Name</th>
-              <th>Branch Name</th>
-              <th>Net Amt</th>
-              <th>EQV USD</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let r of tmData().high_value.data">
-              <td>{{ r['Date'] | date:'mediumDate' }}</td>
-              <td>{{ r['Corporate'] }}</td>
-              <td>{{ r['Passenger Name'] }}</td>
-              <td>{{ r['Branch Name'] }}</td>
-              <td>{{ formatAmt(r['Net Amt']) }}</td>
-              <td>{{ formatAmt(r['EQV USD']) }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <app-shared-table [data]="tmData().high_value.data" [columns]="hvCols" maxHeight="400px" downloadFilename="high_value.csv"></app-shared-table>
     </div>
   </div>
 
@@ -128,32 +100,19 @@
         </div>
       </div>
       
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; height: 350px;">
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;">
+          <plotly-plot *ngIf="ruleCharts()?.fatfBranch as chart" [data]="chart.data" [layout]="chart.layout" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
+        </div>
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;">
+          <plotly-plot *ngIf="ruleCharts()?.fatfRisk as chart" [data]="chart.data" [layout]="chart.layout" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
+        </div>
+      </div>
+
       <div class="section-header">
         <h4 style="margin: 0; font-size: 16px; font-weight: 600;">FATF / OFAC Flagged Transactions</h4>
-        <button (click)="downloadCSV(tmData().fatf_ofac.data, 'fatf_ofac.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
       </div>
-      <div class="table-container" style="max-height: 400px;">
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Corporate</th>
-              <th>Visiting Country</th>
-              <th>OFAC / FATF</th>
-              <th>Net Amt</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let r of tmData().fatf_ofac.data">
-              <td>{{ r['Date'] | date:'mediumDate' }}</td>
-              <td>{{ r['Corporate'] }}</td>
-              <td>{{ r['Visiting Country'] }}</td>
-              <td>{{ r['OFAC _ FATF'] }}</td>
-              <td>{{ formatAmt(r['Net Amt']) }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <app-shared-table [data]="tmData().fatf_ofac.data" [columns]="fatfCols" maxHeight="400px" downloadFilename="fatf_ofac.csv"></app-shared-table>
     </div>
   </div>
 
@@ -180,30 +139,19 @@
         </div>
       </div>
       
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; height: 350px;">
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;">
+          <plotly-plot *ngIf="ruleCharts()?.multOpBranch as chart" [data]="chart.data" [layout]="chart.layout" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
+        </div>
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;">
+          <plotly-plot *ngIf="ruleCharts()?.multOpRisk as chart" [data]="chart.data" [layout]="chart.layout" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
+        </div>
+      </div>
+
       <div class="section-header">
         <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Suspicious Transactions</h4>
-        <button (click)="downloadCSV(tmData().multiple_operators.data, 'mult_op.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
       </div>
-      <div class="table-container" style="max-height: 400px;">
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Corporate</th>
-              <th>Beneficiary / Card Number</th>
-              <th>Net Amt</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let r of tmData().multiple_operators.data">
-              <td>{{ r['Date'] | date:'mediumDate' }}</td>
-              <td>{{ r['Corporate'] }}</td>
-              <td>{{ r['Beneficiary Type Load or Reload'] }}</td>
-              <td>{{ formatAmt(r['Net Amt']) }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <app-shared-table [data]="tmData().multiple_operators.data" [columns]="multOpCols" maxHeight="400px" downloadFilename="mult_op.csv"></app-shared-table>
     </div>
   </div>
 
@@ -215,6 +163,12 @@
     </div>
     <div class="accordion-body" *ngIf="expandedRule() === 'HIGH_FREQ'">
       <p style="font-size: 14px; margin-top: 0; margin-bottom: 16px; color: #334155;">Detect single operator sending repeated remittances to same beneficiary.</p>
+      
+      <div style="margin-bottom: 24px; max-width: 320px;">
+        <label style="display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px;">Frequency Threshold (Count): {{ freqThreshold() }}</label>
+        <input type="range" min="2" max="15" step="1" [ngModel]="freqThreshold()" (ngModelChange)="freqThreshold.set($event)" style="width: 100%; cursor: pointer;" />
+      </div>
+
       <div class="kpi-row" style="grid-template-columns: repeat(3, 1fr); display: grid; margin-bottom: 24px;">
         <div class="kpi-card">
           <div class="kpi-title">Repeat Pairs</div>
@@ -230,30 +184,19 @@
         </div>
       </div>
       
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; height: 350px;">
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;">
+          <plotly-plot *ngIf="ruleCharts()?.highFreqBranch as chart" [data]="chart.data" [layout]="chart.layout" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
+        </div>
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;">
+          <plotly-plot *ngIf="ruleCharts()?.highFreqRisk as chart" [data]="chart.data" [layout]="chart.layout" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
+        </div>
+      </div>
+
       <div class="section-header">
         <h4 style="margin: 0; font-size: 16px; font-weight: 600;">High-Frequency Transactions</h4>
-        <button (click)="downloadCSV(tmData().high_frequency.data, 'high_freq.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
       </div>
-      <div class="table-container" style="max-height: 400px;">
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Corporate</th>
-              <th>Beneficiary / Card Number</th>
-              <th>Net Amt</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let r of tmData().high_frequency.data">
-              <td>{{ r['Date'] | date:'mediumDate' }}</td>
-              <td>{{ r['Corporate'] }}</td>
-              <td>{{ r['Beneficiary Type Load or Reload'] }}</td>
-              <td>{{ formatAmt(r['Net Amt']) }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <app-shared-table [data]="tmData().high_frequency.data" [columns]="multOpCols" maxHeight="400px" downloadFilename="high_freq.csv"></app-shared-table>
     </div>
   </div>
 
@@ -290,34 +233,21 @@
         </div>
       </div>
       
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; height: 350px;">
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;">
+          <plotly-plot *ngIf="ruleCharts()?.lrwBranch as chart" [data]="chart.data" [layout]="chart.layout" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
+        </div>
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;">
+          <plotly-plot *ngIf="ruleCharts()?.lrwRisk as chart" [data]="chart.data" [layout]="chart.layout" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
+        </div>
+      </div>
+
       <div class="section-header">
         <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Load/Refund Events</h4>
-        <button (click)="downloadCSV(tmData().load_refund_window.data, 'lrw.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
       </div>
-      <div class="table-container" style="max-height: 400px;">
-        <table>
-          <thead>
-            <tr>
-              <th>Card Number</th>
-              <th>Within Days</th>
-              <th>Load Date</th>
-              <th>Refund Date</th>
-              <th>Load Amount</th>
-              <th>Refund Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let r of tmData().load_refund_window.data">
-              <td>{{ r['INSTRUMENTNO'] }}</td>
-              <td>{{ r['WITHIN_DAYS'] }}</td>
-              <td>{{ r['LOAD_DATE'] | date:'mediumDate' }}</td>
-              <td>{{ r['REFUND_DATE'] | date:'mediumDate' }}</td>
-              <td>{{ formatAmt(r['LOAD_AMOUNT']) }}</td>
-              <td>{{ formatAmt(r['REFUND_AMOUNT']) }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <app-shared-table [data]="tmData().load_refund_window.data" [columns]="lrwCols" maxHeight="400px" downloadFilename="lrw.csv"></app-shared-table>
+    </div>
+  </div>
   <!-- Rule 6: Multiple Cards to Same Contact -->
   <div class="accordion">
     <div class="accordion-header" (click)="toggleRule('MC_CONTACT')">
@@ -340,30 +270,20 @@
           <div class="kpi-value">{{ tmData().multiple_cards_contact.summary.exposure | humanReadableAmount }}</div>
         </div>
       </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; height: 350px;">
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;">
+          <plotly-plot *ngIf="ruleCharts()?.mcContactBranch as chart" [data]="chart.data" [layout]="chart.layout" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
+        </div>
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;">
+          <plotly-plot *ngIf="ruleCharts()?.mcContactRisk as chart" [data]="chart.data" [layout]="chart.layout" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
+        </div>
+      </div>
+
       <div class="section-header">
         <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Flagged Records</h4>
-        <button (click)="downloadCSV(tmData().multiple_cards_contact.data, 'mc_contact.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
       </div>
-      <div class="table-container" style="max-height: 400px;">
-        <table>
-          <thead>
-            <tr>
-              <th>Mobile Number</th>
-              <th>Distinct Cards</th>
-              <th>Transactions</th>
-              <th>Exposure</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let r of tmData().multiple_cards_contact.data">
-              <td>{{ r['MOBILENO'] }}</td>
-              <td>{{ r['Distinct_Cards'] }}</td>
-              <td>{{ r['Transactions'] }}</td>
-              <td>{{ formatAmt(r['Exposure']) }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <app-shared-table [data]="tmData().multiple_cards_contact.data" [columns]="mcContactCols" maxHeight="400px" downloadFilename="mc_contact.csv"></app-shared-table>
     </div>
   </div>
 
@@ -389,32 +309,20 @@
           <div class="kpi-value">{{ tmData().multiple_cards_traveller.summary.exposure | humanReadableAmount }}</div>
         </div>
       </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; height: 350px;">
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;">
+          <plotly-plot *ngIf="ruleCharts()?.mcTravellerBranch as chart" [data]="chart.data" [layout]="chart.layout" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
+        </div>
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;">
+          <plotly-plot *ngIf="ruleCharts()?.mcTravellerRisk as chart" [data]="chart.data" [layout]="chart.layout" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
+        </div>
+      </div>
+
       <div class="section-header">
         <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Flagged Records</h4>
-        <button (click)="downloadCSV(tmData().multiple_cards_traveller.data, 'mc_traveller.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
       </div>
-      <div class="table-container" style="max-height: 400px;">
-        <table>
-          <thead>
-            <tr>
-              <th>Traveller ID</th>
-              <th>Traveller Name</th>
-              <th>Distinct Cards</th>
-              <th>Transactions</th>
-              <th>Exposure</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let r of tmData().multiple_cards_traveller.data">
-              <td>{{ r['PAXIDNO'] }}</td>
-              <td>{{ r['PAXNAME'] }}</td>
-              <td>{{ r['Distinct_Cards'] }}</td>
-              <td>{{ r['Transactions'] }}</td>
-              <td>{{ formatAmt(r['Exposure']) }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <app-shared-table [data]="tmData().multiple_cards_traveller.data" [columns]="mcTravellerCols" maxHeight="400px" downloadFilename="mc_traveller.csv"></app-shared-table>
     </div>
   </div>
 
@@ -440,35 +348,30 @@
           <div class="kpi-value">{{ tmData().multi_card_multi_operator.summary.exposure | humanReadableAmount }}</div>
         </div>
       </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; height: 350px;">
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;">
+          <plotly-plot *ngIf="ruleCharts()?.mcMoBranch as chart" [data]="chart.data" [layout]="chart.layout" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
+        </div>
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;">
+          <plotly-plot *ngIf="ruleCharts()?.mcMoRisk as chart" [data]="chart.data" [layout]="chart.layout" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
+        </div>
+      </div>
+
       <div class="section-header">
         <h4 style="margin: 0; font-size: 16px; font-weight: 600;">Flagged Records</h4>
-        <button (click)="downloadCSV(tmData().multi_card_multi_operator.data, 'mc_mo.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
       </div>
-      <div class="table-container" style="max-height: 400px;">
-        <table>
-          <thead>
-            <tr>
-              <th>Traveller ID</th>
-              <th>Traveller Name</th>
-              <th>Distinct Cards</th>
-              <th>Distinct Operators</th>
-              <th>Transactions</th>
-              <th>Exposure</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let r of tmData().multi_card_multi_operator.data">
-              <td>{{ r['PAXIDNO'] }}</td>
-              <td>{{ r['PAXNAME'] }}</td>
-              <td>{{ r['Distinct_Cards'] }}</td>
-              <td>{{ r['Distinct_Operators'] }}</td>
-              <td>{{ r['Transactions'] }}</td>
-              <td>{{ formatAmt(r['Exposure']) }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <app-shared-table [data]="tmData().multi_card_multi_operator.data" [columns]="mcMoCols" maxHeight="400px" downloadFilename="mc_mo.csv"></app-shared-table>
     </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-header">
+      <h3>Transaction Risk Review Table (Consolidated View)</h3>
+    </div>
+    <app-shared-table [data]="tmData().detailed_table" [columns]="reviewCols" maxHeight="500px" downloadFilename="transaction_risk_review.csv" [showDownload]="true"></app-shared-table>
   </div>
 
 </div>

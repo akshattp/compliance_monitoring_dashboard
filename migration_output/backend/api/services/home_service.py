@@ -3,46 +3,46 @@ import numpy as np
 
 def get_home_kpis(df: pd.DataFrame) -> dict:
     total_transactions = len(df)
-    total_net_amt = df['Net Amt'].sum() if 'Net Amt' in df.columns and not df.empty else 0
+    total_net_amt = df['INRAMOUNT'].sum() if 'INRAMOUNT' in df.columns and not df.empty else 0
     
-    ps_amount = df.loc[df['Txn Type'] == 'PS', 'Net Amt'].sum() if 'Txn Type' in df.columns else 0
-    pb_amount = df.loc[df['Txn Type'] == 'PB', 'Net Amt'].sum() if 'Txn Type' in df.columns else 0
-    ps_count = len(df.loc[df['Txn Type'] == 'PS']) if 'Txn Type' in df.columns else 0
-    pb_count = len(df.loc[df['Txn Type'] == 'PB']) if 'Txn Type' in df.columns else 0
+    ps_amount = df.loc[df['TXNTYPE'] == 'PS', 'INRAMOUNT'].sum() if 'TXNTYPE' in df.columns else 0
+    pb_amount = df.loc[df['TXNTYPE'] == 'PB', 'INRAMOUNT'].sum() if 'TXNTYPE' in df.columns else 0
+    ps_count = len(df.loc[df['TXNTYPE'] == 'PS']) if 'TXNTYPE' in df.columns else 0
+    pb_count = len(df.loc[df['TXNTYPE'] == 'PB']) if 'TXNTYPE' in df.columns else 0
 
     ps_count_pct = (ps_count / total_transactions * 100) if total_transactions > 0 else 0
     ps_amt_pct = (ps_amount / total_net_amt * 100) if total_net_amt > 0 else 0
     pb_count_pct = (pb_count / total_transactions * 100) if total_transactions > 0 else 0
     pb_amt_pct = (pb_amount / total_net_amt * 100) if total_net_amt > 0 else 0
 
-    average_transaction = df['Net Amt'].mean() if 'Net Amt' in df.columns and not df.empty else 0
-    highest_transaction = df['Net Amt'].max() if 'Net Amt' in df.columns and not df.empty else 0
-    lowest_transaction = df['Net Amt'].min() if 'Net Amt' in df.columns and not df.empty else 0
+    average_transaction = df['INRAMOUNT'].mean() if 'INRAMOUNT' in df.columns and not df.empty else 0
+    highest_transaction = df['INRAMOUNT'].max() if 'INRAMOUNT' in df.columns and not df.empty else 0
+    lowest_transaction = df['INRAMOUNT'].min() if 'INRAMOUNT' in df.columns and not df.empty else 0
     
     highest_pct = (highest_transaction / total_net_amt * 100) if total_net_amt > 0 else 0
     lowest_pct = (lowest_transaction / total_net_amt * 100) if total_net_amt > 0 else 0
 
-    if 'Date' in df.columns and not df['Date'].isna().all():
-        date_range = f"{df['Date'].min().date()} → {df['Date'].max().date()}"
+    if 'TXNDATE' in df.columns and not df['TXNDATE'].isna().all():
+        date_range = f"{df['TXNDATE'].min().date()} → {df['TXNDATE'].max().date()}"
     else:
         date_range = 'N/A'
 
     best_segment_name, best_segment_amt, best_segment_pct = 'N/A', 0, 0
-    if 'Segments' in df.columns and not df.empty:
-        segment_summary = df.groupby('Segments')['Net Amt'].sum().reset_index()
+    if 'Segment' in df.columns and not df.empty:
+        segment_summary = df.groupby('Segment')['INRAMOUNT'].sum().reset_index()
         if not segment_summary.empty:
-            best_s = segment_summary.sort_values('Net Amt', ascending=False).iloc[0]
-            best_segment_name = best_s['Segments']
-            best_segment_amt = best_s['Net Amt']
+            best_s = segment_summary.sort_values('INRAMOUNT', ascending=False).iloc[0]
+            best_segment_name = best_s['Segment']
+            best_segment_amt = best_s['INRAMOUNT']
             best_segment_pct = (best_segment_amt / total_net_amt * 100) if total_net_amt > 0 else 0
 
     best_branch_name, best_branch_amt, best_branch_pct = 'N/A', 0, 0
-    if 'Branch Name' in df.columns and not df.empty:
-        branch_summary = df.groupby('Branch Name')['Net Amt'].sum().reset_index()
+    if 'LOCATION' in df.columns and not df.empty:
+        branch_summary = df.groupby('LOCATION')['INRAMOUNT'].sum().reset_index()
         if not branch_summary.empty:
-            best_b = branch_summary.sort_values('Net Amt', ascending=False).iloc[0]
-            best_branch_name = best_b['Branch Name']
-            best_branch_amt = best_b['Net Amt']
+            best_b = branch_summary.sort_values('INRAMOUNT', ascending=False).iloc[0]
+            best_branch_name = best_b['LOCATION']
+            best_branch_amt = best_b['INRAMOUNT']
             best_branch_pct = (best_branch_amt / total_net_amt * 100) if total_net_amt > 0 else 0
 
     # Clean floats for JSON serialization
@@ -72,7 +72,7 @@ def get_home_kpis(df: pd.DataFrame) -> dict:
     }
 
 def get_home_trends(df: pd.DataFrame, trend_agg: str) -> dict:
-    if 'Date' not in df.columns or df['Date'].isna().all():
+    if 'TXNDATE' not in df.columns or df['TXNDATE'].isna().all():
         return {
             'agg_df': [],
             'highest_amount_time': None,
@@ -81,33 +81,35 @@ def get_home_trends(df: pd.DataFrame, trend_agg: str) -> dict:
             'lowest_count_time': None,
         }
 
-    df['Date'] = pd.to_datetime(df['Date'])
+    df['TXNDATE'] = pd.to_datetime(df['TXNDATE'])
+    # Exclude Sundays (dayofweek == 6)
+    df = df[df['TXNDATE'].dt.dayofweek != 6]
 
     if trend_agg == 'DAILY':
         agg_df = (
-            df.groupby(df['Date'].dt.date)
-            .agg(Transaction_Count=('Net Amt', 'size'), Transaction_Amount=('Net Amt', 'sum'))
+            df.groupby(df['TXNDATE'].dt.date)
+            .agg(Transaction_Count=('INRAMOUNT', 'size'), Transaction_Amount=('INRAMOUNT', 'sum'))
             .reset_index()
         )
-        agg_df.rename(columns={'Date': 'Time'}, inplace=True)
+        agg_df.rename(columns={'TXNDATE': 'Time'}, inplace=True)
         agg_df['Time'] = agg_df['Time'].astype(str)
     else:
         if 'Week' in df.columns:
             agg_df = (
                 df.groupby('Week')
-                .agg(Transaction_Count=('Net Amt', 'size'), Transaction_Amount=('Net Amt', 'sum'))
+                .agg(Transaction_Count=('INRAMOUNT', 'size'), Transaction_Amount=('INRAMOUNT', 'sum'))
                 .reset_index()
             )
             agg_df.rename(columns={'Week': 'Time'}, inplace=True)
             agg_df['Time'] = agg_df['Time'].astype(str)
         else:
             agg_df = (
-                df.groupby(pd.Grouper(key='Date', freq='W-MON'))
-                .agg(Transaction_Count=('Net Amt', 'size'), Transaction_Amount=('Net Amt', 'sum'))
+                df.groupby(pd.Grouper(key='TXNDATE', freq='W-MON'))
+                .agg(Transaction_Count=('INRAMOUNT', 'size'), Transaction_Amount=('INRAMOUNT', 'sum'))
                 .reset_index()
             )
-            agg_df['Date'] = agg_df['Date'].dt.date.astype(str)
-            agg_df.rename(columns={'Date': 'Time'}, inplace=True)
+            agg_df['TXNDATE'] = agg_df['TXNDATE'].dt.date.astype(str)
+            agg_df.rename(columns={'TXNDATE': 'Time'}, inplace=True)
 
     time_amount = agg_df.sort_values('Transaction_Amount', ascending=False)
     time_count = agg_df.sort_values('Transaction_Count', ascending=False)
@@ -128,17 +130,17 @@ def get_home_trends(df: pd.DataFrame, trend_agg: str) -> dict:
     }
 
 def get_home_breakdowns(df: pd.DataFrame, is_count: bool, purpose_threshold: float) -> dict:
-    agg_col = 'Count' if is_count else 'Net Amt'
+    agg_col = 'Count' if is_count else 'INRAMOUNT'
     
     # 1. Purpose Breakdown
     purpose_df = pd.DataFrame()
     purpose_summary_table = pd.DataFrame()
-    if 'Purpose' in df.columns:
-        purp_agg = df.groupby('Purpose').agg(
-            Count=('Net Amt', 'size'),
-            Net_Amt=('Net Amt', 'sum')
+    if 'TxnPurpose' in df.columns:
+        purp_agg = df.groupby('TxnPurpose').agg(
+            Count=('INRAMOUNT', 'size'),
+            Net_Amt=('INRAMOUNT', 'sum')
         ).reset_index()
-        purp_agg.rename(columns={'Net_Amt': 'Net Amt'}, inplace=True)
+        purp_agg.rename(columns={'Net_Amt': 'INRAMOUNT'}, inplace=True)
         purp_agg = purp_agg.sort_values(agg_col, ascending=False)
         
         total_val = purp_agg[agg_col].sum()
@@ -150,9 +152,9 @@ def get_home_breakdowns(df: pd.DataFrame, is_count: bool, purpose_threshold: flo
         
         if not others_df.empty:
             others_row = pd.DataFrame([{
-                'Purpose': 'Others',
+                'TxnPurpose': 'Others',
                 'Count': others_df['Count'].sum(),
-                'Net Amt': others_df['Net Amt'].sum(),
+                'INRAMOUNT': others_df['INRAMOUNT'].sum(),
                 'Percentage': others_df['Percentage'].sum()
             }])
             purpose_df = pd.concat([main_df, others_row], ignore_index=True)
@@ -161,39 +163,39 @@ def get_home_breakdowns(df: pd.DataFrame, is_count: bool, purpose_threshold: flo
             
         purp_agg['is_other'] = purp_agg['Percentage'] < purpose_threshold
         total_count = purp_agg['Count'].sum()
-        total_amount = purp_agg['Net Amt'].sum()
+        total_amount = purp_agg['INRAMOUNT'].sum()
         purp_agg['% Count'] = (purp_agg['Count'] / total_count * 100) if total_count > 0 else 0
-        purp_agg['% Net Amount'] = (purp_agg['Net Amt'] / total_amount * 100) if total_amount > 0 else 0
+        purp_agg['% Net Amount'] = (purp_agg['INRAMOUNT'] / total_amount * 100) if total_amount > 0 else 0
         
-        display_df = purp_agg[['Purpose', 'Count', '% Count', 'Net Amt', '% Net Amount', 'is_other']].copy()
+        display_df = purp_agg[['TxnPurpose', 'Count', '% Count', 'INRAMOUNT', '% Net Amount', 'is_other']].copy()
         total_row = pd.DataFrame({
-            'Purpose': ['**TOTAL**'], 'Count': [total_count], '% Count': [100.0],
-            'Net Amt': [total_amount], '% Net Amount': [100.0], 'is_other': [False]
+            'TxnPurpose': ['**TOTAL**'], 'Count': [total_count], '% Count': [100.0],
+            'INRAMOUNT': [total_amount], '% Net Amount': [100.0], 'is_other': [False]
         })
         purpose_summary_table = pd.concat([display_df, total_row], ignore_index=True)
 
     # 2. Product Breakdown
     product_df = pd.DataFrame()
     product_summary_table = pd.DataFrame()
-    if 'Product' in df.columns:
-        product_summary = df.groupby('Product').agg(
-            Count=('Net Amt', 'size'),
-            Net_Amt=('Net Amt', 'sum')
+    if 'PRODUCT' in df.columns:
+        product_summary = df.groupby('PRODUCT').agg(
+            Count=('INRAMOUNT', 'size'),
+            Net_Amt=('INRAMOUNT', 'sum')
         ).reset_index()
-        product_summary.rename(columns={'Net_Amt': 'Net Amt'}, inplace=True)
+        product_summary.rename(columns={'Net_Amt': 'INRAMOUNT'}, inplace=True)
         product_summary = product_summary.sort_values(agg_col, ascending=False)
         
         total_count = product_summary['Count'].sum()
-        total_amount = product_summary['Net Amt'].sum()
+        total_amount = product_summary['INRAMOUNT'].sum()
         prod_breakdown = product_summary.copy()
         prod_breakdown['% Count'] = (prod_breakdown['Count'] / total_count * 100) if total_count > 0 else 0
-        prod_breakdown['% Net Amount'] = (prod_breakdown['Net Amt'] / total_amount * 100) if total_amount > 0 else 0
+        prod_breakdown['% Net Amount'] = (prod_breakdown['INRAMOUNT'] / total_amount * 100) if total_amount > 0 else 0
         
         total_row = pd.DataFrame({
-            'Product': ['**TOTAL**'],
+            'PRODUCT': ['**TOTAL**'],
             'Count': [total_count],
             '% Count': [100.0],
-            'Net Amt': [total_amount],
+            'INRAMOUNT': [total_amount],
             '% Net Amount': [100.0]
         })
         product_df = prod_breakdown.copy()
@@ -201,23 +203,23 @@ def get_home_breakdowns(df: pd.DataFrame, is_count: bool, purpose_threshold: flo
 
     # 3. Branch Breakdown
     branch_df = pd.DataFrame()
-    branch_field = 'Branch Name' if 'Branch Name' in df.columns else 'Branch'
+    branch_field = 'LOCATION' if 'LOCATION' in df.columns else 'Branch'
     if branch_field in df.columns:
         res = df.groupby(branch_field).agg(
-            Count=('Net Amt', 'size'),
-            Net_Amt=('Net Amt', 'sum')
+            Count=('INRAMOUNT', 'size'),
+            Net_Amt=('INRAMOUNT', 'sum')
         ).reset_index()
-        res.rename(columns={'Net_Amt': 'Net Amt'}, inplace=True)
+        res.rename(columns={'Net_Amt': 'INRAMOUNT'}, inplace=True)
         branch_df = res.sort_values(agg_col, ascending=False).head(15)
 
     # 4. Country Breakdown
     country_df = pd.DataFrame()
-    if 'Visiting Country' in df.columns:
-        res = df.groupby('Visiting Country').agg(
-            Count=('Net Amt', 'size'),
-            Net_Amt=('Net Amt', 'sum')
+    if 'CountryToTravel' in df.columns:
+        res = df.groupby('CountryToTravel').agg(
+            Count=('INRAMOUNT', 'size'),
+            Net_Amt=('INRAMOUNT', 'sum')
         ).reset_index()
-        res.rename(columns={'Net_Amt': 'Net Amt'}, inplace=True)
+        res.rename(columns={'Net_Amt': 'INRAMOUNT'}, inplace=True)
         country_df = res.sort_values(agg_col, ascending=False).head(15)
 
     return {

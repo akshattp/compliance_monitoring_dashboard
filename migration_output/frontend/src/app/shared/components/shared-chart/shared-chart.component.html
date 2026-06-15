@@ -1,0 +1,7 @@
+<div [style.height]="height">
+  @defer (on viewport) {
+    <plotly-plot *ngIf="chartData" [data]="chartData.data" [layout]="chartData.layout" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
+  } @placeholder {
+    <div [style.height]="'100%'" style="display: flex; align-items: center; justify-content: center; border: 1px dashed #cbd5e1; border-radius: 8px; color: #94a3b8;">Loading chart...</div>
+  }
+</div>

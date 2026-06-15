@@ -5,16 +5,57 @@ import { PlotlyViaWindowModule } from 'angular-plotly.js';
 
 import { TransactionSummaryService } from './transaction-summary.service';
 import { DataService } from '../../core/services/data.service';
+import { SharedTableComponent, ColumnDef } from '../../shared/components/shared-table/shared-table.component';
 
 @Component({
   selector: 'app-transaction-summary',
   standalone: true,
-  imports: [CommonModule, FormsModule, PlotlyViaWindowModule],
+  imports: [CommonModule, FormsModule, PlotlyViaWindowModule, SharedTableComponent],
   providers: [TransactionSummaryService],
   templateUrl: './transaction-summary.component.html',
   styleUrl: './transaction-summary.component.scss'
 })
 export class TransactionSummaryComponent implements OnInit {
+  typeCols: ColumnDef[] = [
+    { field: 'TXNTYPE', header: 'TXNTYPE' },
+    { field: 'Count', header: 'Count', type: 'number', align: 'right' },
+    { field: 'Count %', header: 'Count %', type: 'number', format: '1.2-2', align: 'right' },
+    { field: 'Amount', header: 'Amount', type: 'amount', align: 'right' },
+    { field: 'Amount %', header: 'Amount %', type: 'number', format: '1.2-2', align: 'right' }
+  ];
+
+  branchCols: ColumnDef[] = [
+    { field: 'LOCATION', header: 'LOCATION' },
+    { field: 'Count', header: 'Count', type: 'number', align: 'right' },
+    { field: 'Count %', header: 'Count %', type: 'number', format: '1.2-2', align: 'right' },
+    { field: 'INRAMOUNT', header: 'INRAMOUNT', type: 'amount', align: 'right' },
+    { field: 'Net Amount %', header: 'Net Amount %', type: 'number', format: '1.2-2', align: 'right' }
+  ];
+
+  productCols: ColumnDef[] = [
+    { field: 'PRODUCT', header: 'PRODUCT' },
+    { field: 'Count', header: 'Count', type: 'number', align: 'right' },
+    { field: 'Count %', header: 'Count %', type: 'number', format: '1.2-2', align: 'right' },
+    { field: 'INRAMOUNT', header: 'INRAMOUNT', type: 'amount', align: 'right' },
+    { field: 'Net Amount %', header: 'Net Amount %', type: 'number', format: '1.2-2', align: 'right' }
+  ];
+
+  segmentCols: ColumnDef[] = [
+    { field: 'Segment', header: 'Segment' },
+    { field: 'Count', header: 'Count', type: 'number', align: 'right' },
+    { field: 'Count %', header: 'Count %', type: 'number', format: '1.2-2', align: 'right' },
+    { field: 'INRAMOUNT', header: 'INRAMOUNT', type: 'amount', align: 'right' },
+    { field: 'Net Amount %', header: 'Net Amount %', type: 'number', format: '1.2-2', align: 'right' }
+  ];
+
+  purposeCols: ColumnDef[] = [
+    { field: 'TxnPurpose', header: 'TxnPurpose' },
+    { field: 'Count', header: 'Count', type: 'number', align: 'right' },
+    { field: '% Count', header: 'Count %', type: 'number', format: '1.2-2', align: 'right' },
+    { field: 'INRAMOUNT', header: 'INRAMOUNT', type: 'amount', align: 'right' },
+    { field: '% Net Amount', header: 'Net Amount %', type: 'number', format: '1.2-2', align: 'right' }
+  ];
+
   private tsService = inject(TransactionSummaryService);
   public dataService = inject(DataService);
 
@@ -68,7 +109,17 @@ export class TransactionSummaryComponent implements OnInit {
 
     this.tsService.getData(req).subscribe(res => {
       this.kpis.set(res.kpis || {});
-      this.breakdown.set(res.breakdown || { txn_by_type: [], display_table: [] });
+      if (res.breakdown) {
+        const cleanTable = (res.breakdown.display_table || []).filter(
+          (row: any) => row['TXNTYPE'] !== '**TOTAL**'
+        );
+        this.breakdown.set({
+          txn_by_type: res.breakdown.txn_by_type || [],
+          display_table: cleanTable
+        });
+      } else {
+        this.breakdown.set({ txn_by_type: [], display_table: [] });
+      }
       this.purposeSummary.set(res.purpose_summary || []);
       
       if (res.branch_composition) this.branchComposition.set(res.branch_composition);
@@ -83,8 +134,8 @@ export class TransactionSummaryComponent implements OnInit {
   updateAvailableTxns(data: any[]) {
     const types = new Set<string>();
     data.forEach(d => {
-      if (d['Txn Type'] && String(d['Txn Type']).trim() !== '') {
-        types.add(String(d['Txn Type']));
+      if (d['TXNTYPE'] && String(d['TXNTYPE']).trim() !== '') {
+        types.add(String(d['TXNTYPE']));
       }
     });
     this.availableTxns.set(Array.from(types).sort());
@@ -109,7 +160,7 @@ export class TransactionSummaryComponent implements OnInit {
 
   buildTypePieChart(txnByType: any[]) {
     if (!txnByType.length) return;
-    const labels = txnByType.map(t => t['Txn Type']);
+    const labels = txnByType.map(t => t['TXNTYPE']);
     const values = txnByType.map(t => t['Amount']);
     
     this.typePieChart.set({
@@ -123,21 +174,21 @@ export class TransactionSummaryComponent implements OnInit {
 
   buildCompositionCharts() {
     const metric = this.globalMetric();
-    this.branchChart.set(this.formatPlotlyBar(this.branchComposition().chart_df, 'Branch Name', 'Branch', metric));
-    this.productChart.set(this.formatPlotlyBar(this.productComposition().chart_df, 'Product', 'Product', metric));
-    this.segmentChart.set(this.formatPlotlyBar(this.segmentComposition().chart_df, 'Segments', 'Segment', metric));
+    this.branchChart.set(this.formatPlotlyBar(this.branchComposition().chart_df, 'LOCATION', 'Branch', metric));
+    this.productChart.set(this.formatPlotlyBar(this.productComposition().chart_df, 'PRODUCT', 'PRODUCT', metric));
+    this.segmentChart.set(this.formatPlotlyBar(this.segmentComposition().chart_df, 'Segment', 'Segment', metric));
   }
 
   formatPlotlyBar(chartDf: any[], groupCol: string, titlePrefix: string, metric: 'Count' | 'Net Amount') {
     if (!chartDf || !chartDf.length) return null;
 
     const uniqueGroups = Array.from(new Set(chartDf.map(r => r[groupCol] || 'Unknown')));
-    const uniqueTxnTypes = Array.from(new Set(chartDf.map(r => r['Txn Type'] || 'Unknown')));
+    const uniqueTxnTypes = Array.from(new Set(chartDf.map(r => r['TXNTYPE'] || 'Unknown')));
 
     const y_col = metric === 'Count' ? 'Count' : 'Total_Amount';
 
     const traces = uniqueTxnTypes.map((txnType, idx) => {
-      const typeData = chartDf.filter(r => r['Txn Type'] === txnType);
+      const typeData = chartDf.filter(r => r['TXNTYPE'] === txnType);
       const y = uniqueGroups;
       const x = uniqueGroups.map(g => {
         const row = typeData.find(r => r[groupCol] === g);

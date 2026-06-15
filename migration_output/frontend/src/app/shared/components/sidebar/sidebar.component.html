@@ -1,43 +1,11 @@
-<aside class="fixed left-0 top-0 h-full w-[280px] bg-surface-container-low dark:bg-surface-container border-r border-border-base dark:border-outline-variant flex flex-col h-full py-xl px-md z-40 mt-16 transition-all duration-300" [class.-translate-x-full]="isCollapsed">
+<aside class="fixed left-0 top-[73px] h-[calc(100vh-73px)] w-[280px] bg-surface-container-low dark:bg-surface-container border-r border-border-base dark:border-outline-variant flex flex-col py-xl px-md z-40 transition-all duration-300" [class.-translate-x-full]="isCollapsed">
   
   <div class="mb-xl px-xs relative">
     <!-- Collapse Toggle -->
     <button (click)="toggleSidebar()" class="absolute -right-4 top-2 bg-white border border-border-base rounded-full p-1 shadow-sm hover:bg-surface-container-low z-50">
       <span class="material-symbols-outlined text-[16px]">chevron_left</span>
     </button>
-    
-    <div class="flex items-center gap-md mb-base">
-      <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary font-bold">
-        <span class="material-symbols-outlined">upload_file</span>
-      </div>
-      <div *ngIf="!dataService.currentFile()">
-        <h2 class="font-section-heading text-[16px] font-bold text-tertiary">Dataset Upload</h2>
-        <p class="text-[11px] text-secondary">Awaiting CSV/Excel</p>
-      </div>
-      <div *ngIf="dataService.currentFile()">
-        <h2 class="font-section-heading text-[16px] font-bold text-tertiary" style="word-break: break-all; max-width: 160px; line-height: 1.2;">
-          {{ dataService.currentFile()?.name }}
-        </h2>
-        <p class="text-[11px] text-risk-low font-bold">✓ {{ dataService.rowCount() | number }} rows</p>
-      </div>
-    </div>
-    
-    <input #fileInput type="file" style="display:none;" (change)="onFileSelected($event)" accept=".csv,.xlsx,.xls">
-    
-    <div class="flex gap-2">
-      <button *ngIf="!dataService.isUploading() && !dataService.currentFile()" (click)="fileInput.click()" class="flex-1 bg-white border border-border-base text-xs font-bold rounded py-1 hover:bg-surface-container transition-colors">
-        Browse File
-      </button>
-      <button *ngIf="!dataService.isUploading() && dataService.currentFile()" (click)="fileInput.click()" class="flex-1 bg-white border border-border-base text-xs font-bold rounded py-1 hover:bg-surface-container transition-colors">
-        Replace
-      </button>
-      <button *ngIf="!dataService.isUploading() && dataService.currentFile()" (click)="clearDataset()" class="flex-1 bg-error-container text-on-error-container border border-[#ffb4ab] text-xs font-bold rounded py-1 hover:opacity-80 transition-opacity">
-        Clear
-      </button>
-      <div *ngIf="dataService.isUploading()" class="text-xs font-bold text-risk-medium">Uploading...</div>
-    </div>
   </div>
-
   <div class="flex-1 overflow-y-auto custom-scrollbar space-y-lg px-xs" *ngIf="dataService.rawDf().length > 0">
     
     <!-- Dataset Status -->
@@ -111,19 +79,9 @@
     </div>
 
   </div>
-
-  <!-- OFAC Upload at bottom -->
-  <div class="pt-xl border-t border-border-base px-xs">
-    <input #ofacInput type="file" style="display:none;" (change)="onOfacSelected($event)" accept=".csv,.xlsx,.xls">
-    <button (click)="ofacInput.click()" class="w-full bg-surface-container border border-border-base text-primary text-xs font-bold py-2 rounded-lg hover:bg-surface-variant transition-all flex items-center justify-center gap-1">
-      <span class="material-symbols-outlined text-[16px]">upload</span>
-      Upload Master List
-    </button>
-    <p class="text-[10px] text-center text-secondary mt-1">{{ dataService.uploadStatus() }}</p>
-  </div>
 </aside>
 
 <!-- Small uncollapse button when collapsed -->
-<button *ngIf="isCollapsed" (click)="toggleSidebar()" class="fixed left-0 top-24 bg-white border border-border-base rounded-r-lg p-1 shadow-sm hover:bg-surface-container-low z-50">
+<button *ngIf="isCollapsed" (click)="toggleSidebar()" class="fixed left-0 top-[73px] bg-white border border-border-base rounded-r-lg p-1 shadow-sm hover:bg-surface-container-low z-50 mt-4">
   <span class="material-symbols-outlined text-[16px]">chevron_right</span>
 </button>

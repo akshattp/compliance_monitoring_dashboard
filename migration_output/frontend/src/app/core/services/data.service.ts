@@ -20,6 +20,9 @@ export class DataService {
   isUploading = signal<boolean>(false);
   uploadStatus = signal<string>('');
 
+  partyFile = signal<File | null>(null);
+  ofacFile = signal<File | null>(null);
+
   // Active filters for current page
   activeFilters = signal<Record<string, string[]>>({});
   
@@ -64,20 +67,20 @@ export class DataService {
     const globals = this.globalFilters();
     if (globals.startDate && globals.endDate) {
       data = data.filter(r => {
-        if (!r['Date']) return true; // keep if no date
-        const rDate = String(r['Date']).split(' ')[0]; // Handle datetime strings
+        if (!r['TXNDATE']) return true; // keep if no date
+        const rDate = String(r['TXNDATE']).split(' ')[0]; // Handle datetime strings
         return rDate >= globals.startDate && rDate <= globals.endDate;
       });
     }
 
     if (globals.ofacStatus === 'Flagged') {
       data = data.filter(r => {
-        const val = String(r['OFAC _ FATF'] || '').toUpperCase();
+        const val = String(r['OFAC_FATF'] || '').toUpperCase();
         return ['YES', 'OFAC', 'FATF', 'FLAG'].includes(val);
       });
     } else if (globals.ofacStatus === 'Not Flagged') {
       data = data.filter(r => {
-        const val = String(r['OFAC _ FATF'] || '').toUpperCase();
+        const val = String(r['OFAC_FATF'] || '').toUpperCase();
         return val === 'NOT FLAGGED' || !val;
       });
     }
@@ -139,6 +142,7 @@ export class DataService {
           this.isUploading.set(false);
           return;
         }
+        this.ofacFile.set(file);
         this.rawDf.set(res.enriched_data);
         this.uploadStatus.set('OFAC List applied successfully.');
         this.isUploading.set(false);
@@ -146,6 +150,38 @@ export class DataService {
       error: (err) => {
         console.error(err);
         this.uploadStatus.set('OFAC Upload failed. Please check console.');
+        this.isUploading.set(false);
+      }
+    });
+  }
+
+  uploadPartyMaster(file: File) {
+    if (this.rawDf().length === 0) {
+      alert("Please upload the main dataset first.");
+      return;
+    }
+    this.isUploading.set(true);
+    this.uploadStatus.set('Uploading and processing Party Master file...');
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('filtered_df', JSON.stringify(this.rawDf()));
+
+    this.http.post<any>(`${environment.apiBaseUrl}/api/upload/party-master`, formData).subscribe({
+      next: (res) => {
+        if (res.error) {
+          this.uploadStatus.set(`Party Master Processing Error: ${res.error}`);
+          this.isUploading.set(false);
+          return;
+        }
+        this.partyFile.set(file);
+        this.rawDf.set(res.enriched_data);
+        this.uploadStatus.set('Party Master applied successfully.');
+        this.isUploading.set(false);
+      },
+      error: (err) => {
+        console.error(err);
+        this.uploadStatus.set('Party Master Upload failed. Please check console.');
         this.isUploading.set(false);
       }
     });

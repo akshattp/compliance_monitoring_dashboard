@@ -17,25 +17,25 @@
       </div>
       <div class="kpi-card">
         <div class="kpi-title">High Risk Exposure</div>
-        <div class="kpi-value">{{ kpis()?.total_high_value_amount | humanReadableAmount }}</div>
+        <div class="kpi-value">{{ formatAmt(kpis()?.total_high_value_amount) }}</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-title">Highest Exposure</div>
-        <div class="kpi-value">{{ kpis()?.highest_usd_txn | humanReadableAmount }}</div>
+        <div class="kpi-value">{{ formatAmt(kpis()?.highest_usd_txn) }}</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-title">Avg Exposure</div>
-        <div class="kpi-value">{{ kpis()?.avg_usd_txn | humanReadableAmount }}</div>
+        <div class="kpi-value">{{ formatAmt(kpis()?.avg_usd_txn) }}</div>
       </div>
     </div>
+
   </div>
   
   <div class="section">
     <div class="section-header">
       <h3>Automated Compliance Observations</h3>
     </div>
-    <div style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; line-height: 1.6; white-space: pre-wrap;">
-      {{ observations() }}
+    <div style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; line-height: 1.6; white-space: pre-wrap;" [innerHTML]="getParsedObservations()">
     </div>
   </div>
 
@@ -66,55 +66,24 @@
         <div class="chart-container mb-4" *ngIf="branchExposureChart()">
           <plotly-plot [data]="branchExposureChart()!.data" [layout]="branchExposureChart()!.layout" [useResizeHandler]="true"></plotly-plot>
         </div>
-        <div class="table-container" style="max-height: 350px;">
-          <table>
-            <thead>
-              <tr>
-                <th>Branch Name</th>
-                <th>Count</th>
-                <th>Count %</th>
-                <th>Net Amount</th>
-                <th>Net Amount %</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let r of branchData() | slice:0:scrollLimitBranch()">
-                <td>{{ r['Branch Name'] }}</td>
-                <td>{{ r['Count'] | number }}</td>
-                <td>{{ r['Count %'] | number:'1.2-2' }}%</td>
-                <td>{{ r['Total_USD'] | number }}</td>
-                <td>{{ r['Net Amount %'] | number:'1.2-2' }}%</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <app-shared-table [data]="branchData()" [columns]="branchCols" maxHeight="350px" downloadFilename="retail_branches.csv" [showDownload]="true"></app-shared-table>
       </div>
       <div>
         <div class="chart-container mb-4" *ngIf="corpExposureChart()">
           <plotly-plot [data]="corpExposureChart()!.data" [layout]="corpExposureChart()!.layout" [useResizeHandler]="true"></plotly-plot>
         </div>
-        <div class="table-container" style="max-height: 350px;">
-          <table>
-            <thead>
-              <tr>
-                <th>Corporate</th>
-                <th>Count</th>
-                <th>Count %</th>
-                <th>Net Amount</th>
-                <th>Net Amount %</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let r of corporateData() | slice:0:scrollLimitCorp()">
-                <td>{{ r['Corporate'] }}</td>
-                <td>{{ r['Count'] | number }}</td>
-                <td>{{ r['Count %'] | number:'1.2-2' }}%</td>
-                <td>{{ r['Total_USD'] | number }}</td>
-                <td>{{ r['Net Amount %'] | number:'1.2-2' }}%</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <app-shared-table [data]="corporateData()" [columns]="corpCols" maxHeight="350px" downloadFilename="retail_corporates.csv" [showDownload]="true"></app-shared-table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <h3>CountryToTravel High Risk Exposure</h3>
+    </div>
+    <div class="grid-row">
+      <div class="chart-container" *ngIf="countryExposureChart()" style="grid-column: 1 / -1; height: 450px;">
+        <plotly-plot [data]="countryExposureChart()!.data" [layout]="countryExposureChart()!.layout" [useResizeHandler]="true" [style]="{width: '100%', height: '100%'}"></plotly-plot>
       </div>
     </div>
   </div>
@@ -126,13 +95,19 @@
       <h3>Transaction Trends</h3>
       
       <div style="display: flex; gap: 24px;">
-        <div class="toggle-group">
-          <button [class.active]="trendTime() === 'DAILY'" (click)="trendTime.set('DAILY')">DAILY</button>
-          <button [class.active]="trendTime() === 'WEEKLY'" (click)="trendTime.set('WEEKLY')">WEEKLY</button>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <label style="font-weight: 600; font-size: 14px;">Trend Time:</label>
+          <div class="toggle-group" style="display: flex; background: #f8fafc; border-radius: 8px; padding: 4px; gap: 4px; border: 1px solid #e2e8f0;">
+            <button [class.active]="trendTime() === 'DAILY'" (click)="trendTime.set('DAILY')" style="padding: 6px 12px; font-size: 12px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; background: transparent; color: #64748b; transition: all 0.2s;" [ngStyle]="trendTime() === 'DAILY' ? {'background': '#fff', 'color': '#0f172a', 'box-shadow': '0 1px 2px rgba(0,0,0,0.05)'} : {}">DAILY</button>
+            <button [class.active]="trendTime() === 'WEEKLY'" (click)="trendTime.set('WEEKLY')" style="padding: 6px 12px; font-size: 12px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; background: transparent; color: #64748b; transition: all 0.2s;" [ngStyle]="trendTime() === 'WEEKLY' ? {'background': '#fff', 'color': '#0f172a', 'box-shadow': '0 1px 2px rgba(0,0,0,0.05)'} : {}">WEEKLY</button>
+          </div>
         </div>
-        <div class="toggle-group">
-          <button [class.active]="trendMetric() === 'COUNT'" (click)="trendMetric.set('COUNT')">COUNT</button>
-          <button [class.active]="trendMetric() === 'NET AMOUNT'" (click)="trendMetric.set('NET AMOUNT')">NET AMOUNT</button>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <label style="font-weight: 600; font-size: 14px;">Trend Metric:</label>
+          <div class="toggle-group" style="display: flex; background: #f8fafc; border-radius: 8px; padding: 4px; gap: 4px; border: 1px solid #e2e8f0;">
+            <button [class.active]="trendMetric() === 'COUNT'" (click)="trendMetric.set('COUNT')" style="padding: 6px 12px; font-size: 12px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; background: transparent; color: #64748b; transition: all 0.2s;" [ngStyle]="trendMetric() === 'COUNT' ? {'background': '#fff', 'color': '#0f172a', 'box-shadow': '0 1px 2px rgba(0,0,0,0.05)'} : {}">COUNT</button>
+            <button [class.active]="trendMetric() === 'NET AMOUNT'" (click)="trendMetric.set('NET AMOUNT')" style="padding: 6px 12px; font-size: 12px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; background: transparent; color: #64748b; transition: all 0.2s;" [ngStyle]="trendMetric() === 'NET AMOUNT' ? {'background': '#fff', 'color': '#0f172a', 'box-shadow': '0 1px 2px rgba(0,0,0,0.05)'} : {}">NET AMOUNT</button>
+          </div>
         </div>
       </div>
     </div>
@@ -146,37 +121,7 @@
   <div class="section">
     <div class="section-header">
       <h3>Detailed High-Value Transaction Listing</h3>
-      <button (click)="downloadCSV(transactionTable(), 'high_value_transactions.csv')" style="padding: 6px 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;">Download CSV</button>
     </div>
-    <div class="table-container" (scroll)="onTableScroll($event, 'tx')" style="max-height: 500px;">
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Passenger Name</th>
-            <th>Passport</th>
-            <th>Corporate</th>
-            <th>Branch Name</th>
-            <th>Currency</th>
-            <th>Net Amt</th>
-            <th>EQV USD</th>
-            <th>Purpose</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let r of transactionTable() | slice:0:scrollLimitTx()">
-            <td>{{ r['Date'] | date:'mediumDate' }}</td>
-            <td>{{ r['Passenger Name'] }}</td>
-            <td>{{ r['Passport'] }}</td>
-            <td>{{ r['Corporate'] }}</td>
-            <td>{{ r['Branch Name'] }}</td>
-            <td>{{ r['Currency'] }}</td>
-            <td>{{ formatAmt(r['Net Amt']) }}</td>
-            <td>{{ formatAmt(r['EQV USD']) }}</td>
-            <td>{{ r['Purpose'] }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <app-shared-table [data]="transactionTable()" [columns]="detailedCols" maxHeight="500px" downloadFilename="retail_transactions.csv" [showDownload]="true"></app-shared-table>
   </div>
 </div>

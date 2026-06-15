@@ -9,6 +9,7 @@ import { KpiCardComponent } from '../../shared/components/kpi-card/kpi-card.comp
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { HumanReadableAmountPipe } from '../../shared/pipes/human-readable-amount.pipe';
 import { ENTERPRISE_THEME } from '../../shared/chart-theme.service';
+import { SharedTableComponent, ColumnDef } from '../../shared/components/shared-table/shared-table.component';
 
 @Component({
   selector: 'app-tour-operator',
@@ -20,12 +21,45 @@ import { ENTERPRISE_THEME } from '../../shared/chart-theme.service';
     KpiCardComponent, 
     PageHeaderComponent,
     HumanReadableAmountPipe,
-    DecimalPipe
+    DecimalPipe,
+    SharedTableComponent
   ],
   templateUrl: './tour-operator.component.html',
   styleUrls: ['./tour-operator.component.scss']
 })
 export class TourOperatorComponent {
+  branchCols: ColumnDef[] = [
+    { field: 'LOCATION', header: 'LOCATION' },
+    { field: 'Count', header: 'Count', type: 'number', align: 'right' },
+    { field: 'Count %', header: 'Count %', type: 'number', format: '1.2-2', align: 'right' },
+    { field: 'INRAMOUNT', header: 'INRAMOUNT', type: 'amount', align: 'right' },
+    { field: 'Net Amt %', header: 'Net Amt %', type: 'number', format: '1.2-2', align: 'right' }
+  ];
+
+  corpCols: ColumnDef[] = [
+    { field: 'Operator', header: 'Operator' },
+    { field: 'Count', header: 'Count', type: 'number', align: 'right' },
+    { field: 'Count %', header: 'Count %', type: 'number', format: '1.2-2', align: 'right' },
+    { field: 'INRAMOUNT', header: 'Net Amount', type: 'amount', align: 'right' },
+    { field: 'Net Amount %', header: 'Net Amount %', type: 'number', format: '1.2-2', align: 'right' }
+  ];
+
+  detailedCols: ColumnDef[] = [
+    { field: 'TXNDATE', header: 'TXNDATE', type: 'date' },
+    { field: 'CUSTOMERNAME', header: 'CUSTOMERNAME' },
+    { field: 'PAXNAME', header: 'PAXNAME' },
+    { field: 'BENEFICIARY', header: 'BENEFICIARY' },
+    { field: 'LOCATION', header: 'LOCATION' },
+    { field: 'PRODUCT', header: 'PRODUCT' },
+    { field: 'INRAMOUNT', header: 'INRAMOUNT', type: 'amount', align: 'right' },
+    { field: 'Equivalent USD Amount', header: 'Equivalent USD Amount ($)', type: 'usd', align: 'right' },
+    { field: 'TxnPurpose', header: 'TxnPurpose' }
+  ];
+
+  tourOperatorTxns = computed(() => {
+    return this.dataService.filteredDf().filter((r: any) => String(r.Segment).toUpperCase() === 'TOUR OPERATOR');
+  });
+
   dataService = inject(DataService);
   private http = inject(HttpClient);
 
@@ -47,18 +81,20 @@ export class TourOperatorComponent {
     return {
       data: [{
         type: 'pie',
-        labels: data.map((d: any) => d.Purpose),
+        labels: data.map((d: any) => d.TxnPurpose),
         values: data.map((d: any) => d.Total_Amount),
         hole: 0,
         textinfo: 'percent+label',
         marker: {
-          colors: data.map((d: any) => d.Purpose.includes('MICE') ? '#888888' : '#111111')
+          colors: data.map((d: any) => d.TxnPurpose.includes('MICE') ? '#888888' : '#111111')
         }
       }],
       layout: {
         ...this.theme,
         title: 'Tour Operator Purpose Mix',
-        margin: { l: 15, r: 15, t: 45, b: 80 }
+        showlegend: true,
+        legend: { orientation: 'h', x: 0, y: -0.2, font: { size: 10 } },
+        margin: { l: 20, r: 20, t: 45, b: 80 }
       }
     };
   });
@@ -77,7 +113,7 @@ export class TourOperatorComponent {
           type: 'bar',
           orientation: 'h',
           name: 'MICE',
-          y: miceData.map((d: any) => d['Branch Name']),
+          y: miceData.map((d: any) => d['LOCATION']),
           x: miceData.map((d: any) => d.Count),
           marker: { color: '#888888' }
         },
@@ -85,7 +121,7 @@ export class TourOperatorComponent {
           type: 'bar',
           orientation: 'h',
           name: 'REMITTANCE',
-          y: remitData.map((d: any) => d['Branch Name']),
+          y: remitData.map((d: any) => d['LOCATION']),
           x: remitData.map((d: any) => d.Count),
           marker: { color: '#111111' }
         }
@@ -94,7 +130,8 @@ export class TourOperatorComponent {
         ...this.theme,
         title: 'Top Tour Operator Branches',
         barmode: 'stack',
-        margin: { l: 150, r: 15, t: 60, b: 15 }
+        margin: { l: 180, r: 20, t: 60, b: 60 },
+        yaxis: { automargin: true }
       }
     };
   });
@@ -112,7 +149,7 @@ export class TourOperatorComponent {
           type: 'bar',
           orientation: 'h',
           name: 'MICE',
-          y: miceData.map((d: any) => d.Corporate),
+          y: miceData.map((d: any) => d.CUSTOMERNAME),
           x: miceData.map((d: any) => d.Count),
           marker: { color: '#888888' }
         },
@@ -120,7 +157,7 @@ export class TourOperatorComponent {
           type: 'bar',
           orientation: 'h',
           name: 'REMITTANCE',
-          y: remitData.map((d: any) => d.Corporate),
+          y: remitData.map((d: any) => d.CUSTOMERNAME),
           x: remitData.map((d: any) => d.Count),
           marker: { color: '#111111' }
         }
@@ -129,10 +166,12 @@ export class TourOperatorComponent {
         ...this.theme,
         title: 'Top Tour Operator Corporates',
         barmode: 'stack',
-        margin: { l: 150, r: 15, t: 60, b: 15 }
+        margin: { l: 180, r: 20, t: 60, b: 60 },
+        yaxis: { automargin: true }
       }
     };
   });
+
 
   countryChart = computed(() => {
     const cd = this.countryCombo();
@@ -144,7 +183,7 @@ export class TourOperatorComponent {
           type: 'scatter',
           mode: 'lines+markers',
           name: 'MICE (Count)',
-          x: cd.map(d => d['Visiting Country']),
+          x: cd.map(d => d['CountryToTravel']),
           y: cd.map(d => d['MICE_Count']),
           line: { color: '#636EFA', width: 3 }
         },
@@ -152,14 +191,14 @@ export class TourOperatorComponent {
           type: 'scatter',
           mode: 'lines+markers',
           name: 'Remittance (Count)',
-          x: cd.map(d => d['Visiting Country']),
+          x: cd.map(d => d['CountryToTravel']),
           y: cd.map(d => d['Remit_Count']),
           line: { color: '#EF553B', width: 3 }
         },
         {
           type: 'bar',
           name: 'Total Amount (USD)',
-          x: cd.map(d => d['Visiting Country']),
+          x: cd.map(d => d['CountryToTravel']),
           y: cd.map(d => d['Total_Amount']),
           yaxis: 'y2',
           marker: { color: '#00CC96', opacity: 0.6 }
@@ -170,7 +209,8 @@ export class TourOperatorComponent {
         title: 'Country Operator: Remittance Count & Amount',
         yaxis: { title: 'Transaction Count' },
         yaxis2: { title: 'Amount (USD)', overlaying: 'y', side: 'right' },
-        margin: { l: 15, r: 60, t: 60, b: 80 }
+        xaxis: { automargin: true, tickangle: -45 },
+        margin: { l: 80, r: 80, t: 60, b: 100 }
       }
     };
   });
@@ -192,7 +232,19 @@ export class TourOperatorComponent {
         this.kpis.set(res.kpis);
         this.intelligence.set(res.intelligence);
         this.purposeMix.set(res.purpose_mix);
-        this.branchComposition.set(res.branch_composition);
+        
+        if (res.branch_composition) {
+          const cleanTable = (res.branch_composition.display_table || []).filter(
+            (row: any) => row['LOCATION'] !== '**TOTAL**'
+          );
+          this.branchComposition.set({
+            branch_data: res.branch_composition.branch_data || [],
+            display_table: cleanTable
+          });
+        } else {
+          this.branchComposition.set({ branch_data: [], display_table: [] });
+        }
+
         this.corporateComposition.set(res.corporate_composition);
         this.countryCombo.set(res.country_combo);
         this.observation.set(res.observation);
